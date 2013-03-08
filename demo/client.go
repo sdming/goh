@@ -1,54 +1,58 @@
 package main
 
 import (
-	"./Hbase"
+	"encoding/json"
 	"fmt"
-	"net"
-	"thrift"
+	"github.com/sdming/goh"
 )
 
 func main() {
 
-	var trans thrift.TTransport
-	addr, err := net.ResolveTCPAddr("tcp", "192.168.17.129:9090")
+	host, port := "192.168.17.129", "9090"
+	fmt.Println(host, ":", port)
+
+	client, err := goh.NewTcpClient(host, port, goh.TBinaryProtocol, false)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	trans, err = thrift.NewTNonblockingSocketAddr(addr)
-	// if framed {
-	// 	trans = thrift.NewTFramedTransport(trans)
-	// }
+	table := "test"
+	fmt.Println("table:", table)
 
-	protocol := ""
+	// fmt.Print("IsTableEnabled:")
+	// fmt.Println(client.IsTableEnabled(table))
 
-	var protocolFactory thrift.TProtocolFactory
-	switch protocol {
-	case "compact":
-		protocolFactory = thrift.NewTCompactProtocolFactory()
-		break
-	case "simplejson":
-		protocolFactory = thrift.NewTSimpleJSONProtocolFactory()
-		break
-	case "json":
-		protocolFactory = thrift.NewTJSONProtocolFactory()
-		break
-	case "binary", "":
-		protocolFactory = thrift.NewTBinaryProtocolFactoryDefault()
-		break
-	default:
-		fmt.Println("Invalid protocol specified: ", protocol)
-		return
+	// fmt.Print("DisableTable:")
+	// fmt.Println(client.DisableTable(table))
+
+	// fmt.Print("IsTableEnabled:")
+	// fmt.Println(client.IsTableEnabled(table))
+
+	// fmt.Print("EnableTable:")
+	// fmt.Println(client.EnableTable(table))
+
+	// fmt.Print("IsTableEnabled:")
+	// fmt.Println(client.IsTableEnabled(table))
+
+	// fmt.Print("Compact:")
+	// fmt.Println(client.Compact(table))
+
+	// fmt.Print("MajorCompact:")
+	// fmt.Println(client.Compact(table))
+
+	// fmt.Print("GetTableNames:")
+	// fmt.Println(client.GetTableNames())
+
+	// fmt.Print("GetColumnDescriptors:")
+	// fmt.Println(client.GetColumnDescriptors(table))
+
+	fmt.Print("GetTableRegions:")
+	regions, err := client.GetTableRegions(table)
+	fmt.Println(err)
+	for _, x := range regions {
+		dump(x)
 	}
-
-	client := Hbase.NewHbaseClientFactory(trans, protocolFactory)
-	if err = trans.Open(); err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	fmt.Println(" trans.Open() ")
 
 	// argvalue0 := "test"
 	// value0 := Hbase.Text(argvalue0)
@@ -128,34 +132,26 @@ func main() {
 	// }
 
 	//===============================
-	argvalue0 := "demo"
-	value0 := Hbase.Text(argvalue0)
+	// argvalue0 := "demo"
+	// value0 := Hbase.Text(argvalue0)
 
-	column := Hbase.NewColumnDescriptor()
-	column.Name = Hbase.Text("col1")
+	// column := Hbase.NewColumnDescriptor()
+	// column.Name = Hbase.Text("col1")
 
-	value1 := thrift.NewTList(thrift.TypeFromValue(column), 1)
-	value1.Set(1, column)
+	// value1 := thrift.NewTList(thrift.TypeFromValue(column), 1)
+	// value1.Set(1, column)
 
-	fmt.Println(client.CreateTable(value0, value1))
+	// fmt.Println(client.CreateTable(value0, value1))
 
 	//===============================
 
 }
 
-func printTmap(t thrift.TMap) {
-
-	l := t.Len()
-	keys := t.Keys()
-	values := t.Values()
-
-	fmt.Println("len", l)
-	fmt.Println("keys", keys)
-	fmt.Println("values", values)
-
-	for i := 0; i < l; i++ {
-		fmt.Println("key ", keys[i])
-		fmt.Println("value ", values[i])
+func dump(data interface{}) {
+	b, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("json.Marshal error:", err)
+		return
 	}
-
+	fmt.Println(string(b))
 }

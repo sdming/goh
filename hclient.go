@@ -2,9 +2,116 @@ package goh
 
 import (
 	"fmt"
+	"github.com/sdming/goh/Hbase"
+	"net"
+	"net/url"
+	"thrift"
 )
 
 type HClient struct {
+	//Scheme string
+	//Host            string
+	//Port            int
+	addr            string
+	Protocol        int
+	Trans           thrift.TTransport
+	ProtocolFactory thrift.TProtocolFactory
+	client          *Hbase.HbaseClient
+	state           int //
+}
+
+/*
+NewHttpClient return a hbase http client instance
+
+*/
+func NewHttpClient(rawurl string, protocol int) (client *HClient, err error) {
+	//var client *HClient
+
+	parsedUrl, err := url.Parse(rawurl)
+	if err != nil {
+		//return client, err
+		return
+	}
+
+	trans, err := thrift.NewTHttpClient(parsedUrl.String())
+	if err != nil {
+		//return client, err
+		return
+	}
+
+	return NewClient(parsedUrl.String(), protocol, trans)
+}
+
+/*
+NewTcpClient return a base tcp client instance
+
+*/
+func NewTcpClient(addr string, port string, protocol int, framed bool) (client *HClient, err error) {
+	//var client *HClient
+
+	tcpAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprint(addr, ":", port))
+	if err != nil {
+		//return client, err
+		return
+	}
+
+	var trans thrift.TTransport
+	trans, err = thrift.NewTNonblockingSocketAddr(tcpAddr)
+	if err != nil {
+		//return client, err
+		return
+	}
+	if framed {
+		trans = thrift.NewTFramedTransport(trans)
+	}
+
+	return NewClient(tcpAddr.String(), protocol, trans)
+}
+
+func NewClient(addr string, protocol int, trans thrift.TTransport) (*HClient, error) {
+	var client *HClient
+
+	protocolFactory, err := newProtocolFactory(protocol)
+	if err != nil {
+		return client, err
+	}
+
+	client = &HClient{
+		addr:            addr,
+		Protocol:        protocol,
+		ProtocolFactory: protocolFactory,
+		Trans:           trans,
+		client:          Hbase.NewHbaseClientFactory(trans, protocolFactory),
+	}
+
+	if err = client.Open(); err != nil {
+		return nil, err
+	}
+
+	return client, nil
+
+}
+
+func (client *HClient) Open() error {
+	if client.state == stateDefault {
+		if err := client.Trans.Open(); err != nil {
+			return err
+		}
+		fmt.Println("open")
+		client.state = stateOpen
+	}
+	return nil
+}
+
+func (client *HClient) Close() error {
+	if client.state == stateOpen {
+		if err := client.Trans.Close(); err != nil {
+			return err
+		}
+		fmt.Println("close")
+		client.state = stateDefault
+	}
+	return nil
 }
 
 /**
@@ -14,8 +121,11 @@ type HClient struct {
  *  - TableName: name of the table
  */
 func (client *HClient) EnableTable(tableName string) error {
-	fmt.Println(tableName)
-	return nil
+	if err := client.Open(); err != nil {
+		return err
+	}
+
+	return checkHbaseError(client.client.EnableTable(Hbase.Bytes(tableName)))
 }
 
 /**
@@ -25,9 +135,12 @@ func (client *HClient) EnableTable(tableName string) error {
  * Parameters:
  *  - TableName: name of the table
  */
-func (client *HClient) DisableTable(tableName string) error {
-	fmt.Println(tableName)
-	return nil
+func (client *HClient) DisableTable(tableName string) (err error) {
+	if err = client.Open(); err != nil {
+		return
+	}
+
+	return checkHbaseError(client.client.DisableTable(Hbase.Bytes(tableName)))
 }
 
 /**
@@ -36,27 +149,38 @@ func (client *HClient) DisableTable(tableName string) error {
  * Parameters:
  *  - TableName: name of the table to check
  */
-func (client *HClient) IsTableEnabled(tableName string) (bool, error) {
-	fmt.Println(tableName)
-	return true, nil
+func (client *HClient) IsTableEnabled(tableName string) (ret bool, err error) {
+	if err = client.Open(); err != nil {
+		return
+	}
+
+	ret, io, e1 := client.client.IsTableEnabled(Hbase.Bytes(tableName))
+	err = checkHbaseError(io, e1)
+	return
 }
 
 /**
  * Parameters:
  *  - TableNameOrRegionName
  */
-func (client *HClient) Compact(tableNameOrRegionName string) error {
-	fmt.Println(tableNameOrRegionName)
-	return nil
+func (client *HClient) Compact(tableNameOrRegionName string) (err error) {
+	if err = client.Open(); err != nil {
+		return
+	}
+
+	return checkHbaseError(client.client.Compact(Hbase.Bytes(tableNameOrRegionName)))
 }
 
 /**
  * Parameters:
  *  - TableNameOrRegionName
  */
-func (client *HClient) MajorCompact(tableNameOrRegionName string) error {
-	fmt.Println(tableNameOrRegionName)
-	return nil
+func (client *HClient) MajorCompact(tableNameOrRegionName string) (err error) {
+	if err = client.Open(); err != nil {
+		return
+	}
+
+	return checkHbaseError(client.client.MajorCompact(Hbase.Bytes(tableNameOrRegionName)))
 }
 
 /**
@@ -67,9 +191,23 @@ func (client *HClient) MajorCompact(tableNameOrRegionName string) error {
  * Parameters:
  *  - TableName: table name
  */
-func (client *HClient) GetTableNames() ([]string, error) {
-	fmt.Println("")
-	return nil, nil
+func (client *HClient) GetTableNames() (tables []string, err error) {
+	if err = client.Open(); err != nil {
+		return
+	}
+
+	ret, io, e1 := client.client.GetTableNames()
+	if err = checkHbaseError(io, e1); err != nil {
+		return
+	}
+
+	l := ret.Len()
+	tables = make([]string, l)
+	for i := 0; i < l; i++ {
+		tables[i] = ret.At(i).(string)
+	}
+
+	return
 }
 
 /**
@@ -80,9 +218,48 @@ func (client *HClient) GetTableNames() ([]string, error) {
  * Parameters:
  *  - TableName: table name
  */
-func (client *HClient) GetColumnDescriptors(tableName string) (map[string]ColumnDescriptor, error) {
-	fmt.Println(tableName)
-	return nil, nil
+func (client *HClient) GetColumnDescriptors(tableName string) (columns map[string]*ColumnDescriptor, err error) {
+	if err = client.Open(); err != nil {
+		return
+	}
+
+	ret, io, e1 := client.client.GetColumnDescriptors(Hbase.Text(tableName))
+	if err = checkHbaseError(io, e1); err != nil {
+		return
+	}
+
+	l := ret.Len()
+	columns = make(map[string]*ColumnDescriptor, l)
+	//fmt.Println("KeyType", ret.KeyType())
+	//fmt.Println("ValueType", ret.ValueType())
+	//fmt.Println("len", l)
+
+	keys := ret.Keys()
+	for i := 0; i < l; i++ {
+		key := keys[i]
+		value, ok := ret.Get(key)
+
+		if !ok {
+			continue
+		}
+
+		hbaseColumn := value.(*Hbase.ColumnDescriptor)
+		column := &ColumnDescriptor{
+			Name:                  string(hbaseColumn.Name),
+			MaxVersions:           hbaseColumn.MaxVersions,
+			Compression:           hbaseColumn.Compression,
+			InMemory:              hbaseColumn.InMemory,
+			BloomFilterType:       hbaseColumn.BloomFilterType,
+			BloomFilterVectorSize: hbaseColumn.BloomFilterVectorSize,
+			BloomFilterNbHashes:   hbaseColumn.BloomFilterNbHashes,
+			BlockCacheEnabled:     hbaseColumn.BlockCacheEnabled,
+			TimeToLive:            hbaseColumn.TimeToLive,
+		}
+
+		columns[column.Name] = column
+	}
+
+	return
 }
 
 /**
@@ -93,9 +270,39 @@ func (client *HClient) GetColumnDescriptors(tableName string) (map[string]Column
  * Parameters:
  *  - TableName: table name
  */
-func (client *HClient) GetTableRegions(tableName string) ([]TRegionInfo, error) {
-	fmt.Println(tableName)
-	return nil, nil
+func (client *HClient) GetTableRegions(tableName string) (regions []*TRegionInfo, err error) {
+	if err = client.Open(); err != nil {
+		return
+	}
+
+	ret, io, e1 := client.client.GetTableRegions(Hbase.Text(tableName))
+	if err = checkHbaseError(io, e1); err != nil {
+		return
+	}
+
+	l := ret.Len()
+	regions = make([]*TRegionInfo, l)
+	//fmt.Println("ElemType", ret.ElemType())
+	//fmt.Println("len", l)
+
+	for i := 0; i < l; i++ {
+		value := ret.At(i)
+		//fmt.Println(value)
+		hbaseRegion := value.(*Hbase.TRegionInfo)
+
+		region := &TRegionInfo{
+			StartKey:   string(hbaseRegion.StartKey),
+			EndKey:     string(hbaseRegion.EndKey),
+			Id:         hbaseRegion.Id,
+			Name:       string(hbaseRegion.Name),
+			Version:    hbaseRegion.Version,
+			ServerName: string(hbaseRegion.ServerName),
+			Port:       hbaseRegion.Port,
+		}
+		regions[i] = region
+	}
+
+	return
 }
 
 /**
@@ -112,9 +319,33 @@ func (client *HClient) GetTableRegions(tableName string) ([]TRegionInfo, error) 
  *  - TableName: name of table to create
  *  - ColumnFamilies: list of column family descriptors
  */
-func (client *HClient) CreateTable(tableName string, columnFamilies []ColumnDescriptor) (bool, error) {
-	fmt.Println(tableName, columnFamilies)
-	return true, nil
+func (client *HClient) CreateTable(tableName string, columnFamilies []*ColumnDescriptor) (err error) {
+	if err = client.Open(); err != nil {
+		return
+	}
+
+	l := len(columnFamilies)
+	columns := thrift.NewTList(thrift.STRUCT, l)
+	for i := 0; i < l; i++ {
+		col := columnFamilies[i]
+		hbaseColumn := &Hbase.ColumnDescriptor{
+			Name:                  Hbase.Text(col.Name),
+			MaxVersions:           col.MaxVersions,
+			Compression:           col.Compression,
+			InMemory:              col.InMemory,
+			BloomFilterType:       col.BloomFilterType,
+			BloomFilterVectorSize: col.BloomFilterVectorSize,
+			BloomFilterNbHashes:   col.BloomFilterNbHashes,
+			BlockCacheEnabled:     col.BlockCacheEnabled,
+			TimeToLive:            col.TimeToLive,
+		}
+		columns.Set(i, hbaseColumn)
+	}
+
+	io, ia, exist, e1 := client.client.CreateTable(Hbase.Text(tableName), columns)
+	err = checkHbaseError(io, e1)
+
+	return
 }
 
 /**
