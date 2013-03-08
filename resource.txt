@@ -1,0 +1,6 @@
+
+\thrift
+https://github.com/pomack/thrift4go/tree/master/lib/go/src/thrift
+
+\Hbase
+thrift --gen [lang] [hbase-root]/src/main/resources/org/apache/hadoop/hbase/thrift/Hbase.thrift
