@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/sdming/goh"
+	_ "github.com/sdming/goh/Hbase"
+	"thrift"
 )
 
 func main() {
@@ -17,133 +19,194 @@ func main() {
 		return
 	}
 
-	table := "test"
-	fmt.Println("table:", table)
-
-	// fmt.Print("IsTableEnabled:")
-	// fmt.Println(client.IsTableEnabled(table))
-
-	// fmt.Print("DisableTable:")
-	// fmt.Println(client.DisableTable(table))
-
-	// fmt.Print("IsTableEnabled:")
-	// fmt.Println(client.IsTableEnabled(table))
-
-	// fmt.Print("EnableTable:")
-	// fmt.Println(client.EnableTable(table))
-
-	// fmt.Print("IsTableEnabled:")
-	// fmt.Println(client.IsTableEnabled(table))
-
-	// fmt.Print("Compact:")
-	// fmt.Println(client.Compact(table))
-
-	// fmt.Print("MajorCompact:")
-	// fmt.Println(client.Compact(table))
-
-	// fmt.Print("GetTableNames:")
-	// fmt.Println(client.GetTableNames())
-
-	// fmt.Print("GetColumnDescriptors:")
-	// fmt.Println(client.GetColumnDescriptors(table))
-
-	fmt.Print("GetTableRegions:")
-	regions, err := client.GetTableRegions(table)
-	fmt.Println(err)
-	for _, x := range regions {
-		dump(x)
+	if err = client.Open(); err != nil {
+		fmt.Println(err)
+		return
 	}
 
-	// argvalue0 := "test"
-	// value0 := Hbase.Text(argvalue0)
-	// argvalue1 := "row1"
-	// value1 := Hbase.Text(argvalue1)
-	// value2 := thrift.NewTMapDefault()
+	defer client.Close()
 
-	// ret, e1, e2 := client.GetRow(value0, value1, value2)
-	// fmt.Println(e1)
-	// fmt.Println(e2)
+	table := "test"
 
-	// fmt.Println("ElemType", ret.ElemType())
-	// fmt.Println("Len", ret.Len())
+	attributes := make(map[string]string)
+	attributes["attr"] = "attr-val"
 
-	// for i := 0; i < ret.Len(); i++ {
-	// 	item := ret.At(i).(*Hbase.TRowResult)
-	// 	fmt.Printf("row %s \n ", item.Row)
+	columns := make([]string, 2)
+	columns[0] = "cf:a"
+	columns[1] = "cf:b"
 
-	// 	printTmap(item.Columns)
+	var timestamp int64
+	timestamp = 1362555589004
 
-	// }
+	rows := make([]string, 2)
+	rows[0] = "row1"
+	rows[1] = "row2"
 
-	// argvalue0 := "test"
-	// value0 := Hbase.Text(argvalue0)
-	// argvalue1 := ""
-	// value1 := Hbase.Text(argvalue1)
-	// argvalue2 := "cf"
-	// value2 := Hbase.Text(argvalue2)
-	// ret, e1, e2 := client.GetRowOrBefore(value0, value1, value2)
+	if "test" == "" {
 
-	// fmt.Println(e1)
-	// fmt.Println(e2)
+		fmt.Print("IsTableEnabled:")
+		fmt.Println(client.IsTableEnabled(table))
 
-	// fmt.Println("ElemType", ret.ElemType())
-	// fmt.Println("Len", ret.Len())
+		fmt.Print("DisableTable:")
+		fmt.Println(client.DisableTable(table))
 
-	// for i := 0; i < ret.Len(); i++ {
-	// 	item := ret.At(i)
-	// 	fmt.Printf("row %#v \n ", item)
-	// }
+		fmt.Print("IsTableEnabled:")
+		fmt.Println(client.IsTableEnabled(table))
 
-	// fmt.Print("\n")
+		fmt.Print("EnableTable:")
+		fmt.Println(client.EnableTable(table))
 
-	// argvalue0 := "test"
-	// value0 := Hbase.Bytes(argvalue0)
-	// fmt.Print(client.IsTableEnabled(value0))
-	// fmt.Print("\n")
+		fmt.Print("IsTableEnabled:")
+		fmt.Println(client.IsTableEnabled(table))
 
-	// argvalue0 := "test"
-	// value0 := Hbase.Text(argvalue0)
-	// ret, e1, e2 := client.GetColumnDescriptors(value0)
-	// fmt.Println(e1)
-	// fmt.Println(e2)
-	// printTmap(ret)
+		fmt.Print("Compact:")
+		fmt.Println(client.Compact(table))
 
-	// ret, e1, e2 := client.GetTableNames()
-	// fmt.Println("e1", e1)
-	// fmt.Println("e2", e2)
-	// fmt.Println("ret")
+		fmt.Print("MajorCompact:")
+		fmt.Println(client.MajorCompact(table))
 
-	// fmt.Println("ElemType", ret.ElemType())
-	// fmt.Println("Len", ret.Len())
+		fmt.Print("GetTableNames:")
+		if data, err := client.GetTableNames(); err != nil {
+			fmt.Println(err)
+		} else {
+			dump(data)
+		}
 
-	// for i := 0; i < ret.Len(); i++ {
-	// 	item := ret.At(i)
-	// 	fmt.Println(item)
-	// }
+		fmt.Print("GetColumnDescriptors:")
+		if data, err := client.GetColumnDescriptors(table); err != nil {
+			fmt.Println(err)
+		} else {
+			dump(data)
+		}
 
-	// argvalue0 := "test"
-	// value0 := Hbase.Text(argvalue0)
-	// regions, _, _ := client.GetTableRegions(value0)
-	// for i := 0; i < regions.Len(); i++ {
-	// 	item := regions.At(i).(*Hbase.TRegionInfo)
-	// 	fmt.Println(item)
+		fmt.Print("GetTableRegions:")
+		if data, err := client.GetTableRegions(table); err != nil {
+			fmt.Println(err)
+		} else {
+			dump(data)
+		}
 
-	// 	fmt.Printf(" item.Name = %s \n", item.Name)
-	// }
+		fmt.Print("CreateTable:")
+		cols := make([]*goh.ColumnDescriptor, 2)
+		cols[0] = goh.NewColumnDescriptorDefault("cfa")
+		cols[1] = goh.NewColumnDescriptorDefault("cfb")
+		if exist, err := client.CreateTable("test_create", cols); err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println(exist)
+		}
 
-	//===============================
-	// argvalue0 := "demo"
-	// value0 := Hbase.Text(argvalue0)
+		fmt.Print("DeleteTable:")
+		fmt.Println(client.DeleteTable("test_create"))
 
-	// column := Hbase.NewColumnDescriptor()
-	// column.Name = Hbase.Text("col1")
+		fmt.Print("Get:")
+		if data, err := client.Get(table, "row1", "cf:a", attributes); err != nil {
+			fmt.Println(err)
+		} else {
+			printCells(data)
+		}
 
-	// value1 := thrift.NewTList(thrift.TypeFromValue(column), 1)
-	// value1.Set(1, column)
+		fmt.Print("GetVer:")
+		if data, err := client.GetVer(table, "row1", "cf:a", 10, attributes); err != nil {
+			fmt.Println(err)
+		} else {
+			printCells(data)
 
-	// fmt.Println(client.CreateTable(value0, value1))
+			//0 : value1 ; 1362555589004
+			//1 : value1 ; 1362463859431
+		}
 
-	//===============================
+		fmt.Print("GetVerTs:")
+		if data, err := client.GetVerTs(table, "row1", "cf:a", timestamp, 10, attributes); err != nil {
+			fmt.Println(err)
+		} else {
+			printCells(data)
+		}
+
+		fmt.Print("GetRow:")
+		if data, err := client.GetRow(table, "row1", nil); err != nil {
+			fmt.Println(err)
+		} else {
+			printRows(data)
+		}
+
+		fmt.Print("GetRowWithColumns:")
+		if data, err := client.GetRowWithColumns(table, "row1", columns, nil); err != nil {
+			fmt.Println(err)
+		} else {
+			printRows(data)
+		}
+
+		fmt.Print("GetRowTs:")
+		if data, err := client.GetRowTs(table, "row1", timestamp, nil); err != nil {
+			fmt.Println(err)
+		} else {
+			printRows(data)
+		}
+
+		fmt.Print("GetRowWithColumnsTs:")
+		if data, err := client.GetRowWithColumnsTs(table, "row1", columns, timestamp, nil); err != nil {
+			fmt.Println(err)
+		} else {
+			printRows(data)
+		}
+
+		fmt.Print("GetRows:")
+		if data, err := client.GetRows(table, rows, nil); err != nil {
+			fmt.Println(err)
+		} else {
+			printRows(data)
+		}
+
+		fmt.Print("GetRowsWithColumns:")
+		if data, err := client.GetRowsWithColumns(table, rows, columns, nil); err != nil {
+			fmt.Println(err)
+		} else {
+			printRows(data)
+		}
+
+		fmt.Print("GetRowsTs:")
+		if data, err := client.GetRowsTs(table, rows, timestamp, nil); err != nil {
+			fmt.Println(err)
+		} else {
+			printRows(data)
+		}
+
+		fmt.Print("GetRowsWithColumnsTs:")
+		if data, err := client.GetRowsWithColumnsTs(table, rows, columns, timestamp, nil); err != nil {
+			fmt.Println(err)
+		} else {
+			printRows(data)
+		}
+
+		fmt.Print("GetRowOrBefore:")
+		if data, err := client.GetRowOrBefore(table, "row1", "cf"); err != nil {
+			fmt.Println(err)
+		} else {
+			printCells(data)
+		}
+
+		fmt.Print("GetRegionInfo:")
+		if data, err := client.GetRegionInfo(""); err != nil {
+			fmt.Println(err)
+		} else {
+			dump(data)
+		}
+	}
+
+}
+
+func printTList(list thrift.TList) {
+
+	fmt.Println("printTList")
+	fmt.Println("Len()", list.Len())
+
+	l := list.Len()
+	fmt.Println("[")
+	for i := 0; i < l; i++ {
+		fmt.Println(i, ":", list.At(i))
+	}
+	fmt.Println("]")
 
 }
 
@@ -154,4 +217,34 @@ func dump(data interface{}) {
 		return
 	}
 	fmt.Println(string(b))
+}
+
+func printCells(data []*goh.TCell) {
+	if data == nil {
+		fmt.Println("<nil>")
+	}
+
+	l := len(data)
+	fmt.Println("len:", l)
+	for i, x := range data {
+		fmt.Println(i, ":", string(x.Value), ";", x.Timestamp)
+	}
+
+}
+
+func printRows(data []*goh.TRowResult) {
+	if data == nil {
+		fmt.Println("<nil>")
+	}
+
+	l := len(data)
+	fmt.Println("rows len:", l)
+	for i, x := range data {
+		fmt.Println(i, string(x.Row), "[")
+		for k, v := range x.Columns {
+			fmt.Println(k, v.Value, v.Timestamp)
+		}
+		fmt.Println("]")
+	}
+
 }
