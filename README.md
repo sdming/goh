@@ -78,7 +78,6 @@ Changes
 * 1 kick off  
 * 2 change thrift package from pomack/thrift4go to apesternikov/thrift4go  
 
-golang client of hbase (via thrift)
 
 Links
 ===
