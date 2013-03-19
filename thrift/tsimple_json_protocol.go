@@ -175,7 +175,7 @@ func (p *TSimpleJSONProtocol) WriteMessageBegin(name string, typeId TMessageType
 	if e := p.WriteString(name); e != nil {
 		return e
 	}
-	if e := p.WriteByte(byte(typeId)); e != nil {
+	if e := p.WriteByte(int8(typeId)); e != nil {
 		return e
 	}
 	if e := p.WriteI32(seqId); e != nil {
@@ -217,10 +217,10 @@ func (p *TSimpleJSONProtocol) WriteMapBegin(keyType TType, valueType TType, size
 	if e := p.OutputListBegin(); e != nil {
 		return e
 	}
-	if e := p.WriteByte(byte(keyType)); e != nil {
+	if e := p.WriteByte(int8(keyType)); e != nil {
 		return e
 	}
-	if e := p.WriteByte(byte(valueType)); e != nil {
+	if e := p.WriteByte(int8(valueType)); e != nil {
 		return e
 	}
 	return p.WriteI32(int32(size))
@@ -250,7 +250,7 @@ func (p *TSimpleJSONProtocol) WriteBool(b bool) TProtocolException {
 	return p.OutputBool(b)
 }
 
-func (p *TSimpleJSONProtocol) WriteByte(b byte) TProtocolException {
+func (p *TSimpleJSONProtocol) WriteByte(b int8) TProtocolException {
 	return p.WriteI32(int32(b))
 }
 
@@ -351,7 +351,7 @@ func (p *TSimpleJSONProtocol) ReadFieldBegin() (string, TType, int16, TProtocolE
 			if err != nil {
 				return name, STOP, 0, err
 			}
-			return name, GENERIC, -1, p.ParsePostValue()
+			return name, STOP, -1, p.ParsePostValue()
 			/*
 			   if err = p.ParsePostValue(); err != nil {
 			     return name, STOP, 0, err
@@ -461,9 +461,9 @@ func (p *TSimpleJSONProtocol) ReadBool() (bool, TProtocolException) {
 	return value, p.ParsePostValue()
 }
 
-func (p *TSimpleJSONProtocol) ReadByte() (byte, TProtocolException) {
+func (p *TSimpleJSONProtocol) ReadByte() (int8, TProtocolException) {
 	v, err := p.ReadI64()
-	return byte(v), err
+	return int8(v), err
 }
 
 func (p *TSimpleJSONProtocol) ReadI16() (int16, TProtocolException) {
@@ -721,7 +721,7 @@ func (p *TSimpleJSONProtocol) OutputElemListBegin(elemType TType, size int) TPro
 	if e := p.OutputListBegin(); e != nil {
 		return e
 	}
-	if e := p.WriteByte(byte(elemType)); e != nil {
+	if e := p.WriteByte(int8(elemType)); e != nil {
 		return e
 	}
 	if e := p.WriteI64(int64(size)); e != nil {
@@ -1059,7 +1059,7 @@ func (p *TSimpleJSONProtocol) readSingleValue() (interface{}, TType, TProtocolEx
 			p.reader.ReadByte()
 			v, e := p.ParseStringBody()
 			if e != nil {
-				return v, UTF8, NewTProtocolExceptionFromOsError(e)
+				return v, STRING, NewTProtocolExceptionFromOsError(e)
 			}
 			if v == JSON_INFINITY {
 				return INFINITY, DOUBLE, nil
@@ -1068,7 +1068,7 @@ func (p *TSimpleJSONProtocol) readSingleValue() (interface{}, TType, TProtocolEx
 			} else if v == JSON_NAN {
 				return NAN, DOUBLE, nil
 			}
-			return v, UTF8, nil
+			return v, STRING, nil
 		case JSON_TRUE[0]:
 			buf := make([]byte, len(JSON_TRUE))
 			_, e := p.reader.Read(buf)

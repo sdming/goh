@@ -6,8 +6,8 @@ package Hbase
 
 import (
 	"fmt"
+	"github.com/sdming/goh/thrift"
 	"math"
-	"thrift"
 )
 
 // This is a temporary safety measure to ensure that the `math'
@@ -15,10 +15,8 @@ import (
 // happen to use the math import due to not having emited enums.
 //
 // Future clean-ups will deprecate the need for this.
-func init() {
-	var temporaryAndUnused int32 = math.MinInt32
-	temporaryAndUnused++
-}
+var _ = fmt.Print
+var _ = math.MinInt32
 
 type IHbase interface {
 	/**
@@ -42,7 +40,7 @@ type IHbase interface {
 	 * Parameters:
 	 *  - TableName: name of the table to check
 	 */
-	IsTableEnabled(tableName Bytes) (retval116 bool, io *IOError, err error)
+	IsTableEnabled(tableName Bytes) (retval113 bool, io *IOError, err error)
 	/**
 	 * Parameters:
 	 *  - TableNameOrRegionName
@@ -58,7 +56,7 @@ type IHbase interface {
 	 * 
 	 * @return returns a list of names
 	 */
-	GetTableNames() (retval119 thrift.TList, io *IOError, err error)
+	GetTableNames() (retval116 []Text, io *IOError, err error)
 	/**
 	 * List all the column families assoicated with a table.
 	 * 
@@ -67,7 +65,7 @@ type IHbase interface {
 	 * Parameters:
 	 *  - TableName: table name
 	 */
-	GetColumnDescriptors(tableName Text) (retval120 thrift.TMap, io *IOError, err error)
+	GetColumnDescriptors(tableName Text) (retval117 map[string]*ColumnDescriptor, io *IOError, err error)
 	/**
 	 * List the regions associated with a table.
 	 * 
@@ -76,7 +74,7 @@ type IHbase interface {
 	 * Parameters:
 	 *  - TableName: table name
 	 */
-	GetTableRegions(tableName Text) (retval121 thrift.TList, io *IOError, err error)
+	GetTableRegions(tableName Text) (retval118 []*TRegionInfo, io *IOError, err error)
 	/**
 	 * Create a table with the specified column families.  The name
 	 * field for each ColumnDescriptor must be set and must end in a
@@ -91,7 +89,7 @@ type IHbase interface {
 	 *  - TableName: name of table to create
 	 *  - ColumnFamilies: list of column family descriptors
 	 */
-	CreateTable(tableName Text, columnFamilies thrift.TList) (io *IOError, ia *IllegalArgument, exist *AlreadyExists, err error)
+	CreateTable(tableName Text, columnFamilies []*ColumnDescriptor) (io *IOError, ia *IllegalArgument, exist *AlreadyExists, err error)
 	/**
 	 * Deletes a table
 	 * 
@@ -114,7 +112,7 @@ type IHbase interface {
 	 *  - Column: column name
 	 *  - Attributes: Get attributes
 	 */
-	Get(tableName Text, row Text, column Text, attributes thrift.TMap) (retval124 thrift.TList, io *IOError, err error)
+	Get(tableName Text, row Text, column Text, attributes map[string]Text) (retval121 []*TCell, io *IOError, err error)
 	/**
 	 * Get the specified number of versions for the specified table,
 	 * row, and column.
@@ -128,7 +126,7 @@ type IHbase interface {
 	 *  - NumVersions: number of versions to retrieve
 	 *  - Attributes: Get attributes
 	 */
-	GetVer(tableName Text, row Text, column Text, numVersions int32, attributes thrift.TMap) (retval125 thrift.TList, io *IOError, err error)
+	GetVer(tableName Text, row Text, column Text, numVersions int32, attributes map[string]Text) (retval122 []*TCell, io *IOError, err error)
 	/**
 	 * Get the specified number of versions for the specified table,
 	 * row, and column.  Only versions less than or equal to the specified
@@ -144,7 +142,7 @@ type IHbase interface {
 	 *  - NumVersions: number of versions to retrieve
 	 *  - Attributes: Get attributes
 	 */
-	GetVerTs(tableName Text, row Text, column Text, timestamp int64, numVersions int32, attributes thrift.TMap) (retval126 thrift.TList, io *IOError, err error)
+	GetVerTs(tableName Text, row Text, column Text, timestamp int64, numVersions int32, attributes map[string]Text) (retval123 []*TCell, io *IOError, err error)
 	/**
 	 * Get all the data for the specified table and row at the latest
 	 * timestamp. Returns an empty list if the row does not exist.
@@ -156,7 +154,7 @@ type IHbase interface {
 	 *  - Row: row key
 	 *  - Attributes: Get attributes
 	 */
-	GetRow(tableName Text, row Text, attributes thrift.TMap) (retval127 thrift.TList, io *IOError, err error)
+	GetRow(tableName Text, row Text, attributes map[string]Text) (retval124 []*TRowResult, io *IOError, err error)
 	/**
 	 * Get the specified columns for the specified table and row at the latest
 	 * timestamp. Returns an empty list if the row does not exist.
@@ -169,7 +167,7 @@ type IHbase interface {
 	 *  - Columns: List of columns to return, null for all columns
 	 *  - Attributes: Get attributes
 	 */
-	GetRowWithColumns(tableName Text, row Text, columns thrift.TList, attributes thrift.TMap) (retval128 thrift.TList, io *IOError, err error)
+	GetRowWithColumns(tableName Text, row Text, columns []Text, attributes map[string]Text) (retval125 []*TRowResult, io *IOError, err error)
 	/**
 	 * Get all the data for the specified table and row at the specified
 	 * timestamp. Returns an empty list if the row does not exist.
@@ -182,7 +180,7 @@ type IHbase interface {
 	 *  - Timestamp: timestamp
 	 *  - Attributes: Get attributes
 	 */
-	GetRowTs(tableName Text, row Text, timestamp int64, attributes thrift.TMap) (retval129 thrift.TList, io *IOError, err error)
+	GetRowTs(tableName Text, row Text, timestamp int64, attributes map[string]Text) (retval126 []*TRowResult, io *IOError, err error)
 	/**
 	 * Get the specified columns for the specified table and row at the specified
 	 * timestamp. Returns an empty list if the row does not exist.
@@ -196,7 +194,7 @@ type IHbase interface {
 	 *  - Timestamp
 	 *  - Attributes: Get attributes
 	 */
-	GetRowWithColumnsTs(tableName Text, row Text, columns thrift.TList, timestamp int64, attributes thrift.TMap) (retval130 thrift.TList, io *IOError, err error)
+	GetRowWithColumnsTs(tableName Text, row Text, columns []Text, timestamp int64, attributes map[string]Text) (retval127 []*TRowResult, io *IOError, err error)
 	/**
 	 * Get all the data for the specified table and rows at the latest
 	 * timestamp. Returns an empty list if no rows exist.
@@ -208,7 +206,7 @@ type IHbase interface {
 	 *  - Rows: row keys
 	 *  - Attributes: Get attributes
 	 */
-	GetRows(tableName Text, rows thrift.TList, attributes thrift.TMap) (retval131 thrift.TList, io *IOError, err error)
+	GetRows(tableName Text, rows []Text, attributes map[string]Text) (retval128 []*TRowResult, io *IOError, err error)
 	/**
 	 * Get the specified columns for the specified table and rows at the latest
 	 * timestamp. Returns an empty list if no rows exist.
@@ -221,7 +219,7 @@ type IHbase interface {
 	 *  - Columns: List of columns to return, null for all columns
 	 *  - Attributes: Get attributes
 	 */
-	GetRowsWithColumns(tableName Text, rows thrift.TList, columns thrift.TList, attributes thrift.TMap) (retval132 thrift.TList, io *IOError, err error)
+	GetRowsWithColumns(tableName Text, rows []Text, columns []Text, attributes map[string]Text) (retval129 []*TRowResult, io *IOError, err error)
 	/**
 	 * Get all the data for the specified table and rows at the specified
 	 * timestamp. Returns an empty list if no rows exist.
@@ -234,7 +232,7 @@ type IHbase interface {
 	 *  - Timestamp: timestamp
 	 *  - Attributes: Get attributes
 	 */
-	GetRowsTs(tableName Text, rows thrift.TList, timestamp int64, attributes thrift.TMap) (retval133 thrift.TList, io *IOError, err error)
+	GetRowsTs(tableName Text, rows []Text, timestamp int64, attributes map[string]Text) (retval130 []*TRowResult, io *IOError, err error)
 	/**
 	 * Get the specified columns for the specified table and rows at the specified
 	 * timestamp. Returns an empty list if no rows exist.
@@ -248,7 +246,7 @@ type IHbase interface {
 	 *  - Timestamp
 	 *  - Attributes: Get attributes
 	 */
-	GetRowsWithColumnsTs(tableName Text, rows thrift.TList, columns thrift.TList, timestamp int64, attributes thrift.TMap) (retval134 thrift.TList, io *IOError, err error)
+	GetRowsWithColumnsTs(tableName Text, rows []Text, columns []Text, timestamp int64, attributes map[string]Text) (retval131 []*TRowResult, io *IOError, err error)
 	/**
 	 * Apply a series of mutations (updates/deletes) to a row in a
 	 * single transaction.  If an exception is thrown, then the
@@ -261,7 +259,7 @@ type IHbase interface {
 	 *  - Mutations: list of mutation commands
 	 *  - Attributes: Mutation attributes
 	 */
-	MutateRow(tableName Text, row Text, mutations thrift.TList, attributes thrift.TMap) (io *IOError, ia *IllegalArgument, err error)
+	MutateRow(tableName Text, row Text, mutations []*Mutation, attributes map[string]Text) (io *IOError, ia *IllegalArgument, err error)
 	/**
 	 * Apply a series of mutations (updates/deletes) to a row in a
 	 * single transaction.  If an exception is thrown, then the
@@ -275,7 +273,7 @@ type IHbase interface {
 	 *  - Timestamp: timestamp
 	 *  - Attributes: Mutation attributes
 	 */
-	MutateRowTs(tableName Text, row Text, mutations thrift.TList, timestamp int64, attributes thrift.TMap) (io *IOError, ia *IllegalArgument, err error)
+	MutateRowTs(tableName Text, row Text, mutations []*Mutation, timestamp int64, attributes map[string]Text) (io *IOError, ia *IllegalArgument, err error)
 	/**
 	 * Apply a series of batches (each a series of mutations on a single row)
 	 * in a single transaction.  If an exception is thrown, then the
@@ -287,7 +285,7 @@ type IHbase interface {
 	 *  - RowBatches: list of row batches
 	 *  - Attributes: Mutation attributes
 	 */
-	MutateRows(tableName Text, rowBatches thrift.TList, attributes thrift.TMap) (io *IOError, ia *IllegalArgument, err error)
+	MutateRows(tableName Text, rowBatches []*BatchMutation, attributes map[string]Text) (io *IOError, ia *IllegalArgument, err error)
 	/**
 	 * Apply a series of batches (each a series of mutations on a single row)
 	 * in a single transaction.  If an exception is thrown, then the
@@ -300,7 +298,7 @@ type IHbase interface {
 	 *  - Timestamp: timestamp
 	 *  - Attributes: Mutation attributes
 	 */
-	MutateRowsTs(tableName Text, rowBatches thrift.TList, timestamp int64, attributes thrift.TMap) (io *IOError, ia *IllegalArgument, err error)
+	MutateRowsTs(tableName Text, rowBatches []*BatchMutation, timestamp int64, attributes map[string]Text) (io *IOError, ia *IllegalArgument, err error)
 	/**
 	 * Atomically increment the column value specified.  Returns the next value post increment.
 	 * 
@@ -310,7 +308,7 @@ type IHbase interface {
 	 *  - Column: name of column
 	 *  - Value: amount to increment by
 	 */
-	AtomicIncrement(tableName Text, row Text, column Text, value int64) (retval139 int64, io *IOError, ia *IllegalArgument, err error)
+	AtomicIncrement(tableName Text, row Text, column Text, value int64) (retval136 int64, io *IOError, ia *IllegalArgument, err error)
 	/**
 	 * Delete all cells that match the passed row and column.
 	 * 
@@ -320,7 +318,7 @@ type IHbase interface {
 	 *  - Column: name of column whose value is to be deleted
 	 *  - Attributes: Delete attributes
 	 */
-	DeleteAll(tableName Text, row Text, column Text, attributes thrift.TMap) (io *IOError, err error)
+	DeleteAll(tableName Text, row Text, column Text, attributes map[string]Text) (io *IOError, err error)
 	/**
 	 * Delete all cells that match the passed row and column and whose
 	 * timestamp is equal-to or older than the passed timestamp.
@@ -332,7 +330,7 @@ type IHbase interface {
 	 *  - Timestamp: timestamp
 	 *  - Attributes: Delete attributes
 	 */
-	DeleteAllTs(tableName Text, row Text, column Text, timestamp int64, attributes thrift.TMap) (io *IOError, err error)
+	DeleteAllTs(tableName Text, row Text, column Text, timestamp int64, attributes map[string]Text) (io *IOError, err error)
 	/**
 	 * Completely delete the row's cells.
 	 * 
@@ -341,7 +339,7 @@ type IHbase interface {
 	 *  - Row: key of the row to be completely deleted.
 	 *  - Attributes: Delete attributes
 	 */
-	DeleteAllRow(tableName Text, row Text, attributes thrift.TMap) (io *IOError, err error)
+	DeleteAllRow(tableName Text, row Text, attributes map[string]Text) (io *IOError, err error)
 	/**
 	 * Increment a cell by the ammount.
 	 * Increments can be applied async if hbase.regionserver.thrift.coalesceIncrement is set to true.
@@ -356,7 +354,7 @@ type IHbase interface {
 	 * Parameters:
 	 *  - Increments: The list of increments
 	 */
-	IncrementRows(increments thrift.TList) (io *IOError, err error)
+	IncrementRows(increments []*TIncrement) (io *IOError, err error)
 	/**
 	 * Completely delete the row's cells marked with a timestamp
 	 * equal-to or older than the passed timestamp.
@@ -367,7 +365,7 @@ type IHbase interface {
 	 *  - Timestamp: timestamp
 	 *  - Attributes: Delete attributes
 	 */
-	DeleteAllRowTs(tableName Text, row Text, timestamp int64, attributes thrift.TMap) (io *IOError, err error)
+	DeleteAllRowTs(tableName Text, row Text, timestamp int64, attributes map[string]Text) (io *IOError, err error)
 	/**
 	 * Get a scanner on the current table, using the Scan instance
 	 * for the scan parameters.
@@ -377,7 +375,7 @@ type IHbase interface {
 	 *  - Scan: Scan instance
 	 *  - Attributes: Scan attributes
 	 */
-	ScannerOpenWithScan(tableName Text, scan *TScan, attributes thrift.TMap) (retval146 ScannerID, io *IOError, err error)
+	ScannerOpenWithScan(tableName Text, scan *TScan, attributes map[string]Text) (retval143 ScannerID, io *IOError, err error)
 	/**
 	 * Get a scanner on the current table starting at the specified row and
 	 * ending at the last row in the table.  Return the specified columns.
@@ -393,7 +391,7 @@ type IHbase interface {
 	 * to pass a regex in the column qualifier.
 	 *  - Attributes: Scan attributes
 	 */
-	ScannerOpen(tableName Text, startRow Text, columns thrift.TList, attributes thrift.TMap) (retval147 ScannerID, io *IOError, err error)
+	ScannerOpen(tableName Text, startRow Text, columns []Text, attributes map[string]Text) (retval144 ScannerID, io *IOError, err error)
 	/**
 	 * Get a scanner on the current table starting and stopping at the
 	 * specified rows.  ending at the last row in the table.  Return the
@@ -412,7 +410,7 @@ type IHbase interface {
 	 * to pass a regex in the column qualifier.
 	 *  - Attributes: Scan attributes
 	 */
-	ScannerOpenWithStop(tableName Text, startRow Text, stopRow Text, columns thrift.TList, attributes thrift.TMap) (retval148 ScannerID, io *IOError, err error)
+	ScannerOpenWithStop(tableName Text, startRow Text, stopRow Text, columns []Text, attributes map[string]Text) (retval145 ScannerID, io *IOError, err error)
 	/**
 	 * Open a scanner for a given prefix.  That is all rows will have the specified
 	 * prefix. No other rows will be returned.
@@ -425,7 +423,7 @@ type IHbase interface {
 	 *  - Columns: the columns you want returned
 	 *  - Attributes: Scan attributes
 	 */
-	ScannerOpenWithPrefix(tableName Text, startAndPrefix Text, columns thrift.TList, attributes thrift.TMap) (retval149 ScannerID, io *IOError, err error)
+	ScannerOpenWithPrefix(tableName Text, startAndPrefix Text, columns []Text, attributes map[string]Text) (retval146 ScannerID, io *IOError, err error)
 	/**
 	 * Get a scanner on the current table starting at the specified row and
 	 * ending at the last row in the table.  Return the specified columns.
@@ -443,7 +441,7 @@ type IHbase interface {
 	 *  - Timestamp: timestamp
 	 *  - Attributes: Scan attributes
 	 */
-	ScannerOpenTs(tableName Text, startRow Text, columns thrift.TList, timestamp int64, attributes thrift.TMap) (retval150 ScannerID, io *IOError, err error)
+	ScannerOpenTs(tableName Text, startRow Text, columns []Text, timestamp int64, attributes map[string]Text) (retval147 ScannerID, io *IOError, err error)
 	/**
 	 * Get a scanner on the current table starting and stopping at the
 	 * specified rows.  ending at the last row in the table.  Return the
@@ -464,7 +462,7 @@ type IHbase interface {
 	 *  - Timestamp: timestamp
 	 *  - Attributes: Scan attributes
 	 */
-	ScannerOpenWithStopTs(tableName Text, startRow Text, stopRow Text, columns thrift.TList, timestamp int64, attributes thrift.TMap) (retval151 ScannerID, io *IOError, err error)
+	ScannerOpenWithStopTs(tableName Text, startRow Text, stopRow Text, columns []Text, timestamp int64, attributes map[string]Text) (retval148 ScannerID, io *IOError, err error)
 	/**
 	 * Returns the scanner's current row value and advances to the next
 	 * row in the table.  When there are no more rows in the table, or a key
@@ -480,7 +478,7 @@ type IHbase interface {
 	 * Parameters:
 	 *  - Id: id of a scanner returned by scannerOpen
 	 */
-	ScannerGet(id ScannerID) (retval152 thrift.TList, io *IOError, ia *IllegalArgument, err error)
+	ScannerGet(id ScannerID) (retval149 []*TRowResult, io *IOError, ia *IllegalArgument, err error)
 	/**
 	 * Returns, starting at the scanner's current row value nbRows worth of
 	 * rows and advances to the next row in the table.  When there are no more
@@ -497,7 +495,7 @@ type IHbase interface {
 	 *  - Id: id of a scanner returned by scannerOpen
 	 *  - NbRows: number of results to return
 	 */
-	ScannerGetList(id ScannerID, nbRows int32) (retval153 thrift.TList, io *IOError, ia *IllegalArgument, err error)
+	ScannerGetList(id ScannerID, nbRows int32) (retval150 []*TRowResult, io *IOError, ia *IllegalArgument, err error)
 	/**
 	 * Closes the server-state associated with an open scanner.
 	 * 
@@ -517,7 +515,7 @@ type IHbase interface {
 	 *  - Row: row key
 	 *  - Family: column name
 	 */
-	GetRowOrBefore(tableName Text, row Text, family Text) (retval155 thrift.TList, io *IOError, err error)
+	GetRowOrBefore(tableName Text, row Text, family Text) (retval152 []*TCell, io *IOError, err error)
 	/**
 	 * Get the regininfo for the specified row. It scans
 	 * the metatable to find region's start and end keys.
@@ -527,7 +525,7 @@ type IHbase interface {
 	 * Parameters:
 	 *  - Row: row key
 	 */
-	GetRegionInfo(row Text) (retval156 *TRegionInfo, io *IOError, err error)
+	GetRegionInfo(row Text) (retval153 *TRegionInfo, io *IOError, err error)
 }
 
 type HbaseClient struct {
@@ -578,9 +576,9 @@ func (p *HbaseClient) SendEnableTable(tableName Bytes) (err error) {
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("enableTable", thrift.CALL, p.SeqId)
-	args158 := NewEnableTableArgs()
-	args158.TableName = tableName
-	err = args158.Write(oprot)
+	args155 := NewEnableTableArgs()
+	args155.TableName = tableName
+	err = args155.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -597,27 +595,27 @@ func (p *HbaseClient) RecvEnableTable() (io *IOError, err error) {
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error160 := thrift.NewTApplicationExceptionDefault()
-		var error161 error
-		error161, err = error160.Read(iprot)
+		error157 := thrift.NewTApplicationExceptionDefault()
+		var error158 error
+		error158, err = error157.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error161
+		err = error158
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result159 := NewEnableTableResult()
-	err = result159.Read(iprot)
+	result156 := NewEnableTableResult()
+	err = result156.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result159.Io != nil {
-		io = result159.Io
+	if result156.Io != nil {
+		io = result156.Io
 	}
 	return
 }
@@ -645,9 +643,9 @@ func (p *HbaseClient) SendDisableTable(tableName Bytes) (err error) {
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("disableTable", thrift.CALL, p.SeqId)
-	args163 := NewDisableTableArgs()
-	args163.TableName = tableName
-	err = args163.Write(oprot)
+	args160 := NewDisableTableArgs()
+	args160.TableName = tableName
+	err = args160.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -664,27 +662,27 @@ func (p *HbaseClient) RecvDisableTable() (io *IOError, err error) {
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error165 := thrift.NewTApplicationExceptionDefault()
-		var error166 error
-		error166, err = error165.Read(iprot)
+		error162 := thrift.NewTApplicationExceptionDefault()
+		var error163 error
+		error163, err = error162.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error166
+		err = error163
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result164 := NewDisableTableResult()
-	err = result164.Read(iprot)
+	result161 := NewDisableTableResult()
+	err = result161.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result164.Io != nil {
-		io = result164.Io
+	if result161.Io != nil {
+		io = result161.Io
 	}
 	return
 }
@@ -695,7 +693,7 @@ func (p *HbaseClient) RecvDisableTable() (io *IOError, err error) {
  * Parameters:
  *  - TableName: name of the table to check
  */
-func (p *HbaseClient) IsTableEnabled(tableName Bytes) (retval167 bool, io *IOError, err error) {
+func (p *HbaseClient) IsTableEnabled(tableName Bytes) (retval164 bool, io *IOError, err error) {
 	err = p.SendIsTableEnabled(tableName)
 	if err != nil {
 		return
@@ -711,9 +709,9 @@ func (p *HbaseClient) SendIsTableEnabled(tableName Bytes) (err error) {
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("isTableEnabled", thrift.CALL, p.SeqId)
-	args168 := NewIsTableEnabledArgs()
-	args168.TableName = tableName
-	err = args168.Write(oprot)
+	args165 := NewIsTableEnabledArgs()
+	args165.TableName = tableName
+	err = args165.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -730,28 +728,28 @@ func (p *HbaseClient) RecvIsTableEnabled() (value bool, io *IOError, err error) 
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error170 := thrift.NewTApplicationExceptionDefault()
-		var error171 error
-		error171, err = error170.Read(iprot)
+		error167 := thrift.NewTApplicationExceptionDefault()
+		var error168 error
+		error168, err = error167.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error171
+		err = error168
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result169 := NewIsTableEnabledResult()
-	err = result169.Read(iprot)
+	result166 := NewIsTableEnabledResult()
+	err = result166.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result169.Success
-	if result169.Io != nil {
-		io = result169.Io
+	value = result166.Success
+	if result166.Io != nil {
+		io = result166.Io
 	}
 	return
 }
@@ -776,9 +774,9 @@ func (p *HbaseClient) SendCompact(tableNameOrRegionName Bytes) (err error) {
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("compact", thrift.CALL, p.SeqId)
-	args173 := NewCompactArgs()
-	args173.TableNameOrRegionName = tableNameOrRegionName
-	err = args173.Write(oprot)
+	args170 := NewCompactArgs()
+	args170.TableNameOrRegionName = tableNameOrRegionName
+	err = args170.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -795,27 +793,27 @@ func (p *HbaseClient) RecvCompact() (io *IOError, err error) {
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error175 := thrift.NewTApplicationExceptionDefault()
-		var error176 error
-		error176, err = error175.Read(iprot)
+		error172 := thrift.NewTApplicationExceptionDefault()
+		var error173 error
+		error173, err = error172.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error176
+		err = error173
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result174 := NewCompactResult()
-	err = result174.Read(iprot)
+	result171 := NewCompactResult()
+	err = result171.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result174.Io != nil {
-		io = result174.Io
+	if result171.Io != nil {
+		io = result171.Io
 	}
 	return
 }
@@ -840,9 +838,9 @@ func (p *HbaseClient) SendMajorCompact(tableNameOrRegionName Bytes) (err error) 
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("majorCompact", thrift.CALL, p.SeqId)
-	args178 := NewMajorCompactArgs()
-	args178.TableNameOrRegionName = tableNameOrRegionName
-	err = args178.Write(oprot)
+	args175 := NewMajorCompactArgs()
+	args175.TableNameOrRegionName = tableNameOrRegionName
+	err = args175.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -859,27 +857,27 @@ func (p *HbaseClient) RecvMajorCompact() (io *IOError, err error) {
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error180 := thrift.NewTApplicationExceptionDefault()
-		var error181 error
-		error181, err = error180.Read(iprot)
+		error177 := thrift.NewTApplicationExceptionDefault()
+		var error178 error
+		error178, err = error177.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error181
+		err = error178
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result179 := NewMajorCompactResult()
-	err = result179.Read(iprot)
+	result176 := NewMajorCompactResult()
+	err = result176.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result179.Io != nil {
-		io = result179.Io
+	if result176.Io != nil {
+		io = result176.Io
 	}
 	return
 }
@@ -889,7 +887,7 @@ func (p *HbaseClient) RecvMajorCompact() (io *IOError, err error) {
  * 
  * @return returns a list of names
  */
-func (p *HbaseClient) GetTableNames() (retval182 thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) GetTableNames() (retval179 []Text, io *IOError, err error) {
 	err = p.SendGetTableNames()
 	if err != nil {
 		return
@@ -905,14 +903,14 @@ func (p *HbaseClient) SendGetTableNames() (err error) {
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("getTableNames", thrift.CALL, p.SeqId)
-	args183 := NewGetTableNamesArgs()
-	err = args183.Write(oprot)
+	args180 := NewGetTableNamesArgs()
+	err = args180.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvGetTableNames() (value thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) RecvGetTableNames() (value []Text, io *IOError, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -923,28 +921,28 @@ func (p *HbaseClient) RecvGetTableNames() (value thrift.TList, io *IOError, err 
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error185 := thrift.NewTApplicationExceptionDefault()
-		var error186 error
-		error186, err = error185.Read(iprot)
+		error182 := thrift.NewTApplicationExceptionDefault()
+		var error183 error
+		error183, err = error182.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error186
+		err = error183
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result184 := NewGetTableNamesResult()
-	err = result184.Read(iprot)
+	result181 := NewGetTableNamesResult()
+	err = result181.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result184.Success
-	if result184.Io != nil {
-		io = result184.Io
+	value = result181.Success
+	if result181.Io != nil {
+		io = result181.Io
 	}
 	return
 }
@@ -957,7 +955,7 @@ func (p *HbaseClient) RecvGetTableNames() (value thrift.TList, io *IOError, err 
  * Parameters:
  *  - TableName: table name
  */
-func (p *HbaseClient) GetColumnDescriptors(tableName Text) (retval187 thrift.TMap, io *IOError, err error) {
+func (p *HbaseClient) GetColumnDescriptors(tableName Text) (retval184 map[string]*ColumnDescriptor, io *IOError, err error) {
 	err = p.SendGetColumnDescriptors(tableName)
 	if err != nil {
 		return
@@ -973,15 +971,15 @@ func (p *HbaseClient) SendGetColumnDescriptors(tableName Text) (err error) {
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("getColumnDescriptors", thrift.CALL, p.SeqId)
-	args188 := NewGetColumnDescriptorsArgs()
-	args188.TableName = tableName
-	err = args188.Write(oprot)
+	args185 := NewGetColumnDescriptorsArgs()
+	args185.TableName = tableName
+	err = args185.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvGetColumnDescriptors() (value thrift.TMap, io *IOError, err error) {
+func (p *HbaseClient) RecvGetColumnDescriptors() (value map[string]*ColumnDescriptor, io *IOError, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -992,28 +990,28 @@ func (p *HbaseClient) RecvGetColumnDescriptors() (value thrift.TMap, io *IOError
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error190 := thrift.NewTApplicationExceptionDefault()
-		var error191 error
-		error191, err = error190.Read(iprot)
+		error187 := thrift.NewTApplicationExceptionDefault()
+		var error188 error
+		error188, err = error187.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error191
+		err = error188
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result189 := NewGetColumnDescriptorsResult()
-	err = result189.Read(iprot)
+	result186 := NewGetColumnDescriptorsResult()
+	err = result186.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result189.Success
-	if result189.Io != nil {
-		io = result189.Io
+	value = result186.Success
+	if result186.Io != nil {
+		io = result186.Io
 	}
 	return
 }
@@ -1026,7 +1024,7 @@ func (p *HbaseClient) RecvGetColumnDescriptors() (value thrift.TMap, io *IOError
  * Parameters:
  *  - TableName: table name
  */
-func (p *HbaseClient) GetTableRegions(tableName Text) (retval192 thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) GetTableRegions(tableName Text) (retval189 []*TRegionInfo, io *IOError, err error) {
 	err = p.SendGetTableRegions(tableName)
 	if err != nil {
 		return
@@ -1042,15 +1040,15 @@ func (p *HbaseClient) SendGetTableRegions(tableName Text) (err error) {
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("getTableRegions", thrift.CALL, p.SeqId)
-	args193 := NewGetTableRegionsArgs()
-	args193.TableName = tableName
-	err = args193.Write(oprot)
+	args190 := NewGetTableRegionsArgs()
+	args190.TableName = tableName
+	err = args190.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvGetTableRegions() (value thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) RecvGetTableRegions() (value []*TRegionInfo, io *IOError, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1061,28 +1059,28 @@ func (p *HbaseClient) RecvGetTableRegions() (value thrift.TList, io *IOError, er
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error195 := thrift.NewTApplicationExceptionDefault()
-		var error196 error
-		error196, err = error195.Read(iprot)
+		error192 := thrift.NewTApplicationExceptionDefault()
+		var error193 error
+		error193, err = error192.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error196
+		err = error193
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result194 := NewGetTableRegionsResult()
-	err = result194.Read(iprot)
+	result191 := NewGetTableRegionsResult()
+	err = result191.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result194.Success
-	if result194.Io != nil {
-		io = result194.Io
+	value = result191.Success
+	if result191.Io != nil {
+		io = result191.Io
 	}
 	return
 }
@@ -1101,7 +1099,7 @@ func (p *HbaseClient) RecvGetTableRegions() (value thrift.TList, io *IOError, er
  *  - TableName: name of table to create
  *  - ColumnFamilies: list of column family descriptors
  */
-func (p *HbaseClient) CreateTable(tableName Text, columnFamilies thrift.TList) (io *IOError, ia *IllegalArgument, exist *AlreadyExists, err error) {
+func (p *HbaseClient) CreateTable(tableName Text, columnFamilies []*ColumnDescriptor) (io *IOError, ia *IllegalArgument, exist *AlreadyExists, err error) {
 	err = p.SendCreateTable(tableName, columnFamilies)
 	if err != nil {
 		return
@@ -1109,7 +1107,7 @@ func (p *HbaseClient) CreateTable(tableName Text, columnFamilies thrift.TList) (
 	return p.RecvCreateTable()
 }
 
-func (p *HbaseClient) SendCreateTable(tableName Text, columnFamilies thrift.TList) (err error) {
+func (p *HbaseClient) SendCreateTable(tableName Text, columnFamilies []*ColumnDescriptor) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1117,10 +1115,10 @@ func (p *HbaseClient) SendCreateTable(tableName Text, columnFamilies thrift.TLis
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("createTable", thrift.CALL, p.SeqId)
-	args198 := NewCreateTableArgs()
-	args198.TableName = tableName
-	args198.ColumnFamilies = columnFamilies
-	err = args198.Write(oprot)
+	args195 := NewCreateTableArgs()
+	args195.TableName = tableName
+	args195.ColumnFamilies = columnFamilies
+	err = args195.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -1137,33 +1135,33 @@ func (p *HbaseClient) RecvCreateTable() (io *IOError, ia *IllegalArgument, exist
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error200 := thrift.NewTApplicationExceptionDefault()
-		var error201 error
-		error201, err = error200.Read(iprot)
+		error197 := thrift.NewTApplicationExceptionDefault()
+		var error198 error
+		error198, err = error197.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error201
+		err = error198
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result199 := NewCreateTableResult()
-	err = result199.Read(iprot)
+	result196 := NewCreateTableResult()
+	err = result196.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result199.Io != nil {
-		io = result199.Io
+	if result196.Io != nil {
+		io = result196.Io
 	}
-	if result199.Ia != nil {
-		ia = result199.Ia
+	if result196.Ia != nil {
+		ia = result196.Ia
 	}
-	if result199.Exist != nil {
-		exist = result199.Exist
+	if result196.Exist != nil {
+		exist = result196.Exist
 	}
 	return
 }
@@ -1193,9 +1191,9 @@ func (p *HbaseClient) SendDeleteTable(tableName Text) (err error) {
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("deleteTable", thrift.CALL, p.SeqId)
-	args203 := NewDeleteTableArgs()
-	args203.TableName = tableName
-	err = args203.Write(oprot)
+	args200 := NewDeleteTableArgs()
+	args200.TableName = tableName
+	err = args200.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -1212,27 +1210,27 @@ func (p *HbaseClient) RecvDeleteTable() (io *IOError, err error) {
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error205 := thrift.NewTApplicationExceptionDefault()
-		var error206 error
-		error206, err = error205.Read(iprot)
+		error202 := thrift.NewTApplicationExceptionDefault()
+		var error203 error
+		error203, err = error202.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error206
+		err = error203
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result204 := NewDeleteTableResult()
-	err = result204.Read(iprot)
+	result201 := NewDeleteTableResult()
+	err = result201.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result204.Io != nil {
-		io = result204.Io
+	if result201.Io != nil {
+		io = result201.Io
 	}
 	return
 }
@@ -1249,7 +1247,7 @@ func (p *HbaseClient) RecvDeleteTable() (io *IOError, err error) {
  *  - Column: column name
  *  - Attributes: Get attributes
  */
-func (p *HbaseClient) Get(tableName Text, row Text, column Text, attributes thrift.TMap) (retval207 thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) Get(tableName Text, row Text, column Text, attributes map[string]Text) (retval204 []*TCell, io *IOError, err error) {
 	err = p.SendGet(tableName, row, column, attributes)
 	if err != nil {
 		return
@@ -1257,7 +1255,7 @@ func (p *HbaseClient) Get(tableName Text, row Text, column Text, attributes thri
 	return p.RecvGet()
 }
 
-func (p *HbaseClient) SendGet(tableName Text, row Text, column Text, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendGet(tableName Text, row Text, column Text, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1265,18 +1263,18 @@ func (p *HbaseClient) SendGet(tableName Text, row Text, column Text, attributes 
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("get", thrift.CALL, p.SeqId)
-	args208 := NewGetArgs()
-	args208.TableName = tableName
-	args208.Row = row
-	args208.Column = column
-	args208.Attributes = attributes
-	err = args208.Write(oprot)
+	args205 := NewGetArgs()
+	args205.TableName = tableName
+	args205.Row = row
+	args205.Column = column
+	args205.Attributes = attributes
+	err = args205.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvGet() (value thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) RecvGet() (value []*TCell, io *IOError, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1287,28 +1285,28 @@ func (p *HbaseClient) RecvGet() (value thrift.TList, io *IOError, err error) {
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error210 := thrift.NewTApplicationExceptionDefault()
-		var error211 error
-		error211, err = error210.Read(iprot)
+		error207 := thrift.NewTApplicationExceptionDefault()
+		var error208 error
+		error208, err = error207.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error211
+		err = error208
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result209 := NewGetResult()
-	err = result209.Read(iprot)
+	result206 := NewGetResult()
+	err = result206.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result209.Success
-	if result209.Io != nil {
-		io = result209.Io
+	value = result206.Success
+	if result206.Io != nil {
+		io = result206.Io
 	}
 	return
 }
@@ -1326,7 +1324,7 @@ func (p *HbaseClient) RecvGet() (value thrift.TList, io *IOError, err error) {
  *  - NumVersions: number of versions to retrieve
  *  - Attributes: Get attributes
  */
-func (p *HbaseClient) GetVer(tableName Text, row Text, column Text, numVersions int32, attributes thrift.TMap) (retval212 thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) GetVer(tableName Text, row Text, column Text, numVersions int32, attributes map[string]Text) (retval209 []*TCell, io *IOError, err error) {
 	err = p.SendGetVer(tableName, row, column, numVersions, attributes)
 	if err != nil {
 		return
@@ -1334,7 +1332,7 @@ func (p *HbaseClient) GetVer(tableName Text, row Text, column Text, numVersions 
 	return p.RecvGetVer()
 }
 
-func (p *HbaseClient) SendGetVer(tableName Text, row Text, column Text, numVersions int32, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendGetVer(tableName Text, row Text, column Text, numVersions int32, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1342,19 +1340,19 @@ func (p *HbaseClient) SendGetVer(tableName Text, row Text, column Text, numVersi
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("getVer", thrift.CALL, p.SeqId)
-	args213 := NewGetVerArgs()
-	args213.TableName = tableName
-	args213.Row = row
-	args213.Column = column
-	args213.NumVersions = numVersions
-	args213.Attributes = attributes
-	err = args213.Write(oprot)
+	args210 := NewGetVerArgs()
+	args210.TableName = tableName
+	args210.Row = row
+	args210.Column = column
+	args210.NumVersions = numVersions
+	args210.Attributes = attributes
+	err = args210.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvGetVer() (value thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) RecvGetVer() (value []*TCell, io *IOError, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1365,28 +1363,28 @@ func (p *HbaseClient) RecvGetVer() (value thrift.TList, io *IOError, err error) 
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error215 := thrift.NewTApplicationExceptionDefault()
-		var error216 error
-		error216, err = error215.Read(iprot)
+		error212 := thrift.NewTApplicationExceptionDefault()
+		var error213 error
+		error213, err = error212.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error216
+		err = error213
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result214 := NewGetVerResult()
-	err = result214.Read(iprot)
+	result211 := NewGetVerResult()
+	err = result211.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result214.Success
-	if result214.Io != nil {
-		io = result214.Io
+	value = result211.Success
+	if result211.Io != nil {
+		io = result211.Io
 	}
 	return
 }
@@ -1406,7 +1404,7 @@ func (p *HbaseClient) RecvGetVer() (value thrift.TList, io *IOError, err error) 
  *  - NumVersions: number of versions to retrieve
  *  - Attributes: Get attributes
  */
-func (p *HbaseClient) GetVerTs(tableName Text, row Text, column Text, timestamp int64, numVersions int32, attributes thrift.TMap) (retval217 thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) GetVerTs(tableName Text, row Text, column Text, timestamp int64, numVersions int32, attributes map[string]Text) (retval214 []*TCell, io *IOError, err error) {
 	err = p.SendGetVerTs(tableName, row, column, timestamp, numVersions, attributes)
 	if err != nil {
 		return
@@ -1414,7 +1412,7 @@ func (p *HbaseClient) GetVerTs(tableName Text, row Text, column Text, timestamp 
 	return p.RecvGetVerTs()
 }
 
-func (p *HbaseClient) SendGetVerTs(tableName Text, row Text, column Text, timestamp int64, numVersions int32, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendGetVerTs(tableName Text, row Text, column Text, timestamp int64, numVersions int32, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1422,20 +1420,20 @@ func (p *HbaseClient) SendGetVerTs(tableName Text, row Text, column Text, timest
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("getVerTs", thrift.CALL, p.SeqId)
-	args218 := NewGetVerTsArgs()
-	args218.TableName = tableName
-	args218.Row = row
-	args218.Column = column
-	args218.Timestamp = timestamp
-	args218.NumVersions = numVersions
-	args218.Attributes = attributes
-	err = args218.Write(oprot)
+	args215 := NewGetVerTsArgs()
+	args215.TableName = tableName
+	args215.Row = row
+	args215.Column = column
+	args215.Timestamp = timestamp
+	args215.NumVersions = numVersions
+	args215.Attributes = attributes
+	err = args215.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvGetVerTs() (value thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) RecvGetVerTs() (value []*TCell, io *IOError, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1446,28 +1444,28 @@ func (p *HbaseClient) RecvGetVerTs() (value thrift.TList, io *IOError, err error
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error220 := thrift.NewTApplicationExceptionDefault()
-		var error221 error
-		error221, err = error220.Read(iprot)
+		error217 := thrift.NewTApplicationExceptionDefault()
+		var error218 error
+		error218, err = error217.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error221
+		err = error218
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result219 := NewGetVerTsResult()
-	err = result219.Read(iprot)
+	result216 := NewGetVerTsResult()
+	err = result216.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result219.Success
-	if result219.Io != nil {
-		io = result219.Io
+	value = result216.Success
+	if result216.Io != nil {
+		io = result216.Io
 	}
 	return
 }
@@ -1483,7 +1481,7 @@ func (p *HbaseClient) RecvGetVerTs() (value thrift.TList, io *IOError, err error
  *  - Row: row key
  *  - Attributes: Get attributes
  */
-func (p *HbaseClient) GetRow(tableName Text, row Text, attributes thrift.TMap) (retval222 thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) GetRow(tableName Text, row Text, attributes map[string]Text) (retval219 []*TRowResult, io *IOError, err error) {
 	err = p.SendGetRow(tableName, row, attributes)
 	if err != nil {
 		return
@@ -1491,7 +1489,7 @@ func (p *HbaseClient) GetRow(tableName Text, row Text, attributes thrift.TMap) (
 	return p.RecvGetRow()
 }
 
-func (p *HbaseClient) SendGetRow(tableName Text, row Text, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendGetRow(tableName Text, row Text, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1499,17 +1497,17 @@ func (p *HbaseClient) SendGetRow(tableName Text, row Text, attributes thrift.TMa
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("getRow", thrift.CALL, p.SeqId)
-	args223 := NewGetRowArgs()
-	args223.TableName = tableName
-	args223.Row = row
-	args223.Attributes = attributes
-	err = args223.Write(oprot)
+	args220 := NewGetRowArgs()
+	args220.TableName = tableName
+	args220.Row = row
+	args220.Attributes = attributes
+	err = args220.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvGetRow() (value thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) RecvGetRow() (value []*TRowResult, io *IOError, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1520,28 +1518,28 @@ func (p *HbaseClient) RecvGetRow() (value thrift.TList, io *IOError, err error) 
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error225 := thrift.NewTApplicationExceptionDefault()
-		var error226 error
-		error226, err = error225.Read(iprot)
+		error222 := thrift.NewTApplicationExceptionDefault()
+		var error223 error
+		error223, err = error222.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error226
+		err = error223
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result224 := NewGetRowResult()
-	err = result224.Read(iprot)
+	result221 := NewGetRowResult()
+	err = result221.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result224.Success
-	if result224.Io != nil {
-		io = result224.Io
+	value = result221.Success
+	if result221.Io != nil {
+		io = result221.Io
 	}
 	return
 }
@@ -1558,7 +1556,7 @@ func (p *HbaseClient) RecvGetRow() (value thrift.TList, io *IOError, err error) 
  *  - Columns: List of columns to return, null for all columns
  *  - Attributes: Get attributes
  */
-func (p *HbaseClient) GetRowWithColumns(tableName Text, row Text, columns thrift.TList, attributes thrift.TMap) (retval227 thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) GetRowWithColumns(tableName Text, row Text, columns []Text, attributes map[string]Text) (retval224 []*TRowResult, io *IOError, err error) {
 	err = p.SendGetRowWithColumns(tableName, row, columns, attributes)
 	if err != nil {
 		return
@@ -1566,7 +1564,7 @@ func (p *HbaseClient) GetRowWithColumns(tableName Text, row Text, columns thrift
 	return p.RecvGetRowWithColumns()
 }
 
-func (p *HbaseClient) SendGetRowWithColumns(tableName Text, row Text, columns thrift.TList, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendGetRowWithColumns(tableName Text, row Text, columns []Text, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1574,18 +1572,18 @@ func (p *HbaseClient) SendGetRowWithColumns(tableName Text, row Text, columns th
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("getRowWithColumns", thrift.CALL, p.SeqId)
-	args228 := NewGetRowWithColumnsArgs()
-	args228.TableName = tableName
-	args228.Row = row
-	args228.Columns = columns
-	args228.Attributes = attributes
-	err = args228.Write(oprot)
+	args225 := NewGetRowWithColumnsArgs()
+	args225.TableName = tableName
+	args225.Row = row
+	args225.Columns = columns
+	args225.Attributes = attributes
+	err = args225.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvGetRowWithColumns() (value thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) RecvGetRowWithColumns() (value []*TRowResult, io *IOError, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1596,28 +1594,28 @@ func (p *HbaseClient) RecvGetRowWithColumns() (value thrift.TList, io *IOError, 
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error230 := thrift.NewTApplicationExceptionDefault()
-		var error231 error
-		error231, err = error230.Read(iprot)
+		error227 := thrift.NewTApplicationExceptionDefault()
+		var error228 error
+		error228, err = error227.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error231
+		err = error228
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result229 := NewGetRowWithColumnsResult()
-	err = result229.Read(iprot)
+	result226 := NewGetRowWithColumnsResult()
+	err = result226.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result229.Success
-	if result229.Io != nil {
-		io = result229.Io
+	value = result226.Success
+	if result226.Io != nil {
+		io = result226.Io
 	}
 	return
 }
@@ -1634,7 +1632,7 @@ func (p *HbaseClient) RecvGetRowWithColumns() (value thrift.TList, io *IOError, 
  *  - Timestamp: timestamp
  *  - Attributes: Get attributes
  */
-func (p *HbaseClient) GetRowTs(tableName Text, row Text, timestamp int64, attributes thrift.TMap) (retval232 thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) GetRowTs(tableName Text, row Text, timestamp int64, attributes map[string]Text) (retval229 []*TRowResult, io *IOError, err error) {
 	err = p.SendGetRowTs(tableName, row, timestamp, attributes)
 	if err != nil {
 		return
@@ -1642,7 +1640,7 @@ func (p *HbaseClient) GetRowTs(tableName Text, row Text, timestamp int64, attrib
 	return p.RecvGetRowTs()
 }
 
-func (p *HbaseClient) SendGetRowTs(tableName Text, row Text, timestamp int64, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendGetRowTs(tableName Text, row Text, timestamp int64, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1650,18 +1648,18 @@ func (p *HbaseClient) SendGetRowTs(tableName Text, row Text, timestamp int64, at
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("getRowTs", thrift.CALL, p.SeqId)
-	args233 := NewGetRowTsArgs()
-	args233.TableName = tableName
-	args233.Row = row
-	args233.Timestamp = timestamp
-	args233.Attributes = attributes
-	err = args233.Write(oprot)
+	args230 := NewGetRowTsArgs()
+	args230.TableName = tableName
+	args230.Row = row
+	args230.Timestamp = timestamp
+	args230.Attributes = attributes
+	err = args230.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvGetRowTs() (value thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) RecvGetRowTs() (value []*TRowResult, io *IOError, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1672,28 +1670,28 @@ func (p *HbaseClient) RecvGetRowTs() (value thrift.TList, io *IOError, err error
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error235 := thrift.NewTApplicationExceptionDefault()
-		var error236 error
-		error236, err = error235.Read(iprot)
+		error232 := thrift.NewTApplicationExceptionDefault()
+		var error233 error
+		error233, err = error232.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error236
+		err = error233
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result234 := NewGetRowTsResult()
-	err = result234.Read(iprot)
+	result231 := NewGetRowTsResult()
+	err = result231.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result234.Success
-	if result234.Io != nil {
-		io = result234.Io
+	value = result231.Success
+	if result231.Io != nil {
+		io = result231.Io
 	}
 	return
 }
@@ -1711,7 +1709,7 @@ func (p *HbaseClient) RecvGetRowTs() (value thrift.TList, io *IOError, err error
  *  - Timestamp
  *  - Attributes: Get attributes
  */
-func (p *HbaseClient) GetRowWithColumnsTs(tableName Text, row Text, columns thrift.TList, timestamp int64, attributes thrift.TMap) (retval237 thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) GetRowWithColumnsTs(tableName Text, row Text, columns []Text, timestamp int64, attributes map[string]Text) (retval234 []*TRowResult, io *IOError, err error) {
 	err = p.SendGetRowWithColumnsTs(tableName, row, columns, timestamp, attributes)
 	if err != nil {
 		return
@@ -1719,7 +1717,7 @@ func (p *HbaseClient) GetRowWithColumnsTs(tableName Text, row Text, columns thri
 	return p.RecvGetRowWithColumnsTs()
 }
 
-func (p *HbaseClient) SendGetRowWithColumnsTs(tableName Text, row Text, columns thrift.TList, timestamp int64, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendGetRowWithColumnsTs(tableName Text, row Text, columns []Text, timestamp int64, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1727,19 +1725,19 @@ func (p *HbaseClient) SendGetRowWithColumnsTs(tableName Text, row Text, columns 
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("getRowWithColumnsTs", thrift.CALL, p.SeqId)
-	args238 := NewGetRowWithColumnsTsArgs()
-	args238.TableName = tableName
-	args238.Row = row
-	args238.Columns = columns
-	args238.Timestamp = timestamp
-	args238.Attributes = attributes
-	err = args238.Write(oprot)
+	args235 := NewGetRowWithColumnsTsArgs()
+	args235.TableName = tableName
+	args235.Row = row
+	args235.Columns = columns
+	args235.Timestamp = timestamp
+	args235.Attributes = attributes
+	err = args235.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvGetRowWithColumnsTs() (value thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) RecvGetRowWithColumnsTs() (value []*TRowResult, io *IOError, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1750,28 +1748,28 @@ func (p *HbaseClient) RecvGetRowWithColumnsTs() (value thrift.TList, io *IOError
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error240 := thrift.NewTApplicationExceptionDefault()
-		var error241 error
-		error241, err = error240.Read(iprot)
+		error237 := thrift.NewTApplicationExceptionDefault()
+		var error238 error
+		error238, err = error237.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error241
+		err = error238
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result239 := NewGetRowWithColumnsTsResult()
-	err = result239.Read(iprot)
+	result236 := NewGetRowWithColumnsTsResult()
+	err = result236.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result239.Success
-	if result239.Io != nil {
-		io = result239.Io
+	value = result236.Success
+	if result236.Io != nil {
+		io = result236.Io
 	}
 	return
 }
@@ -1787,7 +1785,7 @@ func (p *HbaseClient) RecvGetRowWithColumnsTs() (value thrift.TList, io *IOError
  *  - Rows: row keys
  *  - Attributes: Get attributes
  */
-func (p *HbaseClient) GetRows(tableName Text, rows thrift.TList, attributes thrift.TMap) (retval242 thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) GetRows(tableName Text, rows []Text, attributes map[string]Text) (retval239 []*TRowResult, io *IOError, err error) {
 	err = p.SendGetRows(tableName, rows, attributes)
 	if err != nil {
 		return
@@ -1795,7 +1793,7 @@ func (p *HbaseClient) GetRows(tableName Text, rows thrift.TList, attributes thri
 	return p.RecvGetRows()
 }
 
-func (p *HbaseClient) SendGetRows(tableName Text, rows thrift.TList, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendGetRows(tableName Text, rows []Text, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1803,17 +1801,17 @@ func (p *HbaseClient) SendGetRows(tableName Text, rows thrift.TList, attributes 
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("getRows", thrift.CALL, p.SeqId)
-	args243 := NewGetRowsArgs()
-	args243.TableName = tableName
-	args243.Rows = rows
-	args243.Attributes = attributes
-	err = args243.Write(oprot)
+	args240 := NewGetRowsArgs()
+	args240.TableName = tableName
+	args240.Rows = rows
+	args240.Attributes = attributes
+	err = args240.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvGetRows() (value thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) RecvGetRows() (value []*TRowResult, io *IOError, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1824,28 +1822,28 @@ func (p *HbaseClient) RecvGetRows() (value thrift.TList, io *IOError, err error)
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error245 := thrift.NewTApplicationExceptionDefault()
-		var error246 error
-		error246, err = error245.Read(iprot)
+		error242 := thrift.NewTApplicationExceptionDefault()
+		var error243 error
+		error243, err = error242.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error246
+		err = error243
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result244 := NewGetRowsResult()
-	err = result244.Read(iprot)
+	result241 := NewGetRowsResult()
+	err = result241.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result244.Success
-	if result244.Io != nil {
-		io = result244.Io
+	value = result241.Success
+	if result241.Io != nil {
+		io = result241.Io
 	}
 	return
 }
@@ -1862,7 +1860,7 @@ func (p *HbaseClient) RecvGetRows() (value thrift.TList, io *IOError, err error)
  *  - Columns: List of columns to return, null for all columns
  *  - Attributes: Get attributes
  */
-func (p *HbaseClient) GetRowsWithColumns(tableName Text, rows thrift.TList, columns thrift.TList, attributes thrift.TMap) (retval247 thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) GetRowsWithColumns(tableName Text, rows []Text, columns []Text, attributes map[string]Text) (retval244 []*TRowResult, io *IOError, err error) {
 	err = p.SendGetRowsWithColumns(tableName, rows, columns, attributes)
 	if err != nil {
 		return
@@ -1870,7 +1868,7 @@ func (p *HbaseClient) GetRowsWithColumns(tableName Text, rows thrift.TList, colu
 	return p.RecvGetRowsWithColumns()
 }
 
-func (p *HbaseClient) SendGetRowsWithColumns(tableName Text, rows thrift.TList, columns thrift.TList, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendGetRowsWithColumns(tableName Text, rows []Text, columns []Text, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1878,18 +1876,18 @@ func (p *HbaseClient) SendGetRowsWithColumns(tableName Text, rows thrift.TList, 
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("getRowsWithColumns", thrift.CALL, p.SeqId)
-	args248 := NewGetRowsWithColumnsArgs()
-	args248.TableName = tableName
-	args248.Rows = rows
-	args248.Columns = columns
-	args248.Attributes = attributes
-	err = args248.Write(oprot)
+	args245 := NewGetRowsWithColumnsArgs()
+	args245.TableName = tableName
+	args245.Rows = rows
+	args245.Columns = columns
+	args245.Attributes = attributes
+	err = args245.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvGetRowsWithColumns() (value thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) RecvGetRowsWithColumns() (value []*TRowResult, io *IOError, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1900,28 +1898,28 @@ func (p *HbaseClient) RecvGetRowsWithColumns() (value thrift.TList, io *IOError,
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error250 := thrift.NewTApplicationExceptionDefault()
-		var error251 error
-		error251, err = error250.Read(iprot)
+		error247 := thrift.NewTApplicationExceptionDefault()
+		var error248 error
+		error248, err = error247.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error251
+		err = error248
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result249 := NewGetRowsWithColumnsResult()
-	err = result249.Read(iprot)
+	result246 := NewGetRowsWithColumnsResult()
+	err = result246.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result249.Success
-	if result249.Io != nil {
-		io = result249.Io
+	value = result246.Success
+	if result246.Io != nil {
+		io = result246.Io
 	}
 	return
 }
@@ -1938,7 +1936,7 @@ func (p *HbaseClient) RecvGetRowsWithColumns() (value thrift.TList, io *IOError,
  *  - Timestamp: timestamp
  *  - Attributes: Get attributes
  */
-func (p *HbaseClient) GetRowsTs(tableName Text, rows thrift.TList, timestamp int64, attributes thrift.TMap) (retval252 thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) GetRowsTs(tableName Text, rows []Text, timestamp int64, attributes map[string]Text) (retval249 []*TRowResult, io *IOError, err error) {
 	err = p.SendGetRowsTs(tableName, rows, timestamp, attributes)
 	if err != nil {
 		return
@@ -1946,7 +1944,7 @@ func (p *HbaseClient) GetRowsTs(tableName Text, rows thrift.TList, timestamp int
 	return p.RecvGetRowsTs()
 }
 
-func (p *HbaseClient) SendGetRowsTs(tableName Text, rows thrift.TList, timestamp int64, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendGetRowsTs(tableName Text, rows []Text, timestamp int64, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1954,18 +1952,18 @@ func (p *HbaseClient) SendGetRowsTs(tableName Text, rows thrift.TList, timestamp
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("getRowsTs", thrift.CALL, p.SeqId)
-	args253 := NewGetRowsTsArgs()
-	args253.TableName = tableName
-	args253.Rows = rows
-	args253.Timestamp = timestamp
-	args253.Attributes = attributes
-	err = args253.Write(oprot)
+	args250 := NewGetRowsTsArgs()
+	args250.TableName = tableName
+	args250.Rows = rows
+	args250.Timestamp = timestamp
+	args250.Attributes = attributes
+	err = args250.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvGetRowsTs() (value thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) RecvGetRowsTs() (value []*TRowResult, io *IOError, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -1976,28 +1974,28 @@ func (p *HbaseClient) RecvGetRowsTs() (value thrift.TList, io *IOError, err erro
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error255 := thrift.NewTApplicationExceptionDefault()
-		var error256 error
-		error256, err = error255.Read(iprot)
+		error252 := thrift.NewTApplicationExceptionDefault()
+		var error253 error
+		error253, err = error252.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error256
+		err = error253
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result254 := NewGetRowsTsResult()
-	err = result254.Read(iprot)
+	result251 := NewGetRowsTsResult()
+	err = result251.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result254.Success
-	if result254.Io != nil {
-		io = result254.Io
+	value = result251.Success
+	if result251.Io != nil {
+		io = result251.Io
 	}
 	return
 }
@@ -2015,7 +2013,7 @@ func (p *HbaseClient) RecvGetRowsTs() (value thrift.TList, io *IOError, err erro
  *  - Timestamp
  *  - Attributes: Get attributes
  */
-func (p *HbaseClient) GetRowsWithColumnsTs(tableName Text, rows thrift.TList, columns thrift.TList, timestamp int64, attributes thrift.TMap) (retval257 thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) GetRowsWithColumnsTs(tableName Text, rows []Text, columns []Text, timestamp int64, attributes map[string]Text) (retval254 []*TRowResult, io *IOError, err error) {
 	err = p.SendGetRowsWithColumnsTs(tableName, rows, columns, timestamp, attributes)
 	if err != nil {
 		return
@@ -2023,7 +2021,7 @@ func (p *HbaseClient) GetRowsWithColumnsTs(tableName Text, rows thrift.TList, co
 	return p.RecvGetRowsWithColumnsTs()
 }
 
-func (p *HbaseClient) SendGetRowsWithColumnsTs(tableName Text, rows thrift.TList, columns thrift.TList, timestamp int64, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendGetRowsWithColumnsTs(tableName Text, rows []Text, columns []Text, timestamp int64, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -2031,19 +2029,19 @@ func (p *HbaseClient) SendGetRowsWithColumnsTs(tableName Text, rows thrift.TList
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("getRowsWithColumnsTs", thrift.CALL, p.SeqId)
-	args258 := NewGetRowsWithColumnsTsArgs()
-	args258.TableName = tableName
-	args258.Rows = rows
-	args258.Columns = columns
-	args258.Timestamp = timestamp
-	args258.Attributes = attributes
-	err = args258.Write(oprot)
+	args255 := NewGetRowsWithColumnsTsArgs()
+	args255.TableName = tableName
+	args255.Rows = rows
+	args255.Columns = columns
+	args255.Timestamp = timestamp
+	args255.Attributes = attributes
+	err = args255.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvGetRowsWithColumnsTs() (value thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) RecvGetRowsWithColumnsTs() (value []*TRowResult, io *IOError, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -2054,28 +2052,28 @@ func (p *HbaseClient) RecvGetRowsWithColumnsTs() (value thrift.TList, io *IOErro
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error260 := thrift.NewTApplicationExceptionDefault()
-		var error261 error
-		error261, err = error260.Read(iprot)
+		error257 := thrift.NewTApplicationExceptionDefault()
+		var error258 error
+		error258, err = error257.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error261
+		err = error258
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result259 := NewGetRowsWithColumnsTsResult()
-	err = result259.Read(iprot)
+	result256 := NewGetRowsWithColumnsTsResult()
+	err = result256.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result259.Success
-	if result259.Io != nil {
-		io = result259.Io
+	value = result256.Success
+	if result256.Io != nil {
+		io = result256.Io
 	}
 	return
 }
@@ -2092,7 +2090,7 @@ func (p *HbaseClient) RecvGetRowsWithColumnsTs() (value thrift.TList, io *IOErro
  *  - Mutations: list of mutation commands
  *  - Attributes: Mutation attributes
  */
-func (p *HbaseClient) MutateRow(tableName Text, row Text, mutations thrift.TList, attributes thrift.TMap) (io *IOError, ia *IllegalArgument, err error) {
+func (p *HbaseClient) MutateRow(tableName Text, row Text, mutations []*Mutation, attributes map[string]Text) (io *IOError, ia *IllegalArgument, err error) {
 	err = p.SendMutateRow(tableName, row, mutations, attributes)
 	if err != nil {
 		return
@@ -2100,7 +2098,7 @@ func (p *HbaseClient) MutateRow(tableName Text, row Text, mutations thrift.TList
 	return p.RecvMutateRow()
 }
 
-func (p *HbaseClient) SendMutateRow(tableName Text, row Text, mutations thrift.TList, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendMutateRow(tableName Text, row Text, mutations []*Mutation, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -2108,12 +2106,12 @@ func (p *HbaseClient) SendMutateRow(tableName Text, row Text, mutations thrift.T
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("mutateRow", thrift.CALL, p.SeqId)
-	args263 := NewMutateRowArgs()
-	args263.TableName = tableName
-	args263.Row = row
-	args263.Mutations = mutations
-	args263.Attributes = attributes
-	err = args263.Write(oprot)
+	args260 := NewMutateRowArgs()
+	args260.TableName = tableName
+	args260.Row = row
+	args260.Mutations = mutations
+	args260.Attributes = attributes
+	err = args260.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -2130,30 +2128,30 @@ func (p *HbaseClient) RecvMutateRow() (io *IOError, ia *IllegalArgument, err err
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error265 := thrift.NewTApplicationExceptionDefault()
-		var error266 error
-		error266, err = error265.Read(iprot)
+		error262 := thrift.NewTApplicationExceptionDefault()
+		var error263 error
+		error263, err = error262.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error266
+		err = error263
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result264 := NewMutateRowResult()
-	err = result264.Read(iprot)
+	result261 := NewMutateRowResult()
+	err = result261.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result264.Io != nil {
-		io = result264.Io
+	if result261.Io != nil {
+		io = result261.Io
 	}
-	if result264.Ia != nil {
-		ia = result264.Ia
+	if result261.Ia != nil {
+		ia = result261.Ia
 	}
 	return
 }
@@ -2171,7 +2169,7 @@ func (p *HbaseClient) RecvMutateRow() (io *IOError, ia *IllegalArgument, err err
  *  - Timestamp: timestamp
  *  - Attributes: Mutation attributes
  */
-func (p *HbaseClient) MutateRowTs(tableName Text, row Text, mutations thrift.TList, timestamp int64, attributes thrift.TMap) (io *IOError, ia *IllegalArgument, err error) {
+func (p *HbaseClient) MutateRowTs(tableName Text, row Text, mutations []*Mutation, timestamp int64, attributes map[string]Text) (io *IOError, ia *IllegalArgument, err error) {
 	err = p.SendMutateRowTs(tableName, row, mutations, timestamp, attributes)
 	if err != nil {
 		return
@@ -2179,7 +2177,7 @@ func (p *HbaseClient) MutateRowTs(tableName Text, row Text, mutations thrift.TLi
 	return p.RecvMutateRowTs()
 }
 
-func (p *HbaseClient) SendMutateRowTs(tableName Text, row Text, mutations thrift.TList, timestamp int64, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendMutateRowTs(tableName Text, row Text, mutations []*Mutation, timestamp int64, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -2187,13 +2185,13 @@ func (p *HbaseClient) SendMutateRowTs(tableName Text, row Text, mutations thrift
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("mutateRowTs", thrift.CALL, p.SeqId)
-	args268 := NewMutateRowTsArgs()
-	args268.TableName = tableName
-	args268.Row = row
-	args268.Mutations = mutations
-	args268.Timestamp = timestamp
-	args268.Attributes = attributes
-	err = args268.Write(oprot)
+	args265 := NewMutateRowTsArgs()
+	args265.TableName = tableName
+	args265.Row = row
+	args265.Mutations = mutations
+	args265.Timestamp = timestamp
+	args265.Attributes = attributes
+	err = args265.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -2210,30 +2208,30 @@ func (p *HbaseClient) RecvMutateRowTs() (io *IOError, ia *IllegalArgument, err e
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error270 := thrift.NewTApplicationExceptionDefault()
-		var error271 error
-		error271, err = error270.Read(iprot)
+		error267 := thrift.NewTApplicationExceptionDefault()
+		var error268 error
+		error268, err = error267.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error271
+		err = error268
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result269 := NewMutateRowTsResult()
-	err = result269.Read(iprot)
+	result266 := NewMutateRowTsResult()
+	err = result266.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result269.Io != nil {
-		io = result269.Io
+	if result266.Io != nil {
+		io = result266.Io
 	}
-	if result269.Ia != nil {
-		ia = result269.Ia
+	if result266.Ia != nil {
+		ia = result266.Ia
 	}
 	return
 }
@@ -2249,7 +2247,7 @@ func (p *HbaseClient) RecvMutateRowTs() (io *IOError, ia *IllegalArgument, err e
  *  - RowBatches: list of row batches
  *  - Attributes: Mutation attributes
  */
-func (p *HbaseClient) MutateRows(tableName Text, rowBatches thrift.TList, attributes thrift.TMap) (io *IOError, ia *IllegalArgument, err error) {
+func (p *HbaseClient) MutateRows(tableName Text, rowBatches []*BatchMutation, attributes map[string]Text) (io *IOError, ia *IllegalArgument, err error) {
 	err = p.SendMutateRows(tableName, rowBatches, attributes)
 	if err != nil {
 		return
@@ -2257,7 +2255,7 @@ func (p *HbaseClient) MutateRows(tableName Text, rowBatches thrift.TList, attrib
 	return p.RecvMutateRows()
 }
 
-func (p *HbaseClient) SendMutateRows(tableName Text, rowBatches thrift.TList, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendMutateRows(tableName Text, rowBatches []*BatchMutation, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -2265,11 +2263,11 @@ func (p *HbaseClient) SendMutateRows(tableName Text, rowBatches thrift.TList, at
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("mutateRows", thrift.CALL, p.SeqId)
-	args273 := NewMutateRowsArgs()
-	args273.TableName = tableName
-	args273.RowBatches = rowBatches
-	args273.Attributes = attributes
-	err = args273.Write(oprot)
+	args270 := NewMutateRowsArgs()
+	args270.TableName = tableName
+	args270.RowBatches = rowBatches
+	args270.Attributes = attributes
+	err = args270.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -2286,30 +2284,30 @@ func (p *HbaseClient) RecvMutateRows() (io *IOError, ia *IllegalArgument, err er
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error275 := thrift.NewTApplicationExceptionDefault()
-		var error276 error
-		error276, err = error275.Read(iprot)
+		error272 := thrift.NewTApplicationExceptionDefault()
+		var error273 error
+		error273, err = error272.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error276
+		err = error273
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result274 := NewMutateRowsResult()
-	err = result274.Read(iprot)
+	result271 := NewMutateRowsResult()
+	err = result271.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result274.Io != nil {
-		io = result274.Io
+	if result271.Io != nil {
+		io = result271.Io
 	}
-	if result274.Ia != nil {
-		ia = result274.Ia
+	if result271.Ia != nil {
+		ia = result271.Ia
 	}
 	return
 }
@@ -2326,7 +2324,7 @@ func (p *HbaseClient) RecvMutateRows() (io *IOError, ia *IllegalArgument, err er
  *  - Timestamp: timestamp
  *  - Attributes: Mutation attributes
  */
-func (p *HbaseClient) MutateRowsTs(tableName Text, rowBatches thrift.TList, timestamp int64, attributes thrift.TMap) (io *IOError, ia *IllegalArgument, err error) {
+func (p *HbaseClient) MutateRowsTs(tableName Text, rowBatches []*BatchMutation, timestamp int64, attributes map[string]Text) (io *IOError, ia *IllegalArgument, err error) {
 	err = p.SendMutateRowsTs(tableName, rowBatches, timestamp, attributes)
 	if err != nil {
 		return
@@ -2334,7 +2332,7 @@ func (p *HbaseClient) MutateRowsTs(tableName Text, rowBatches thrift.TList, time
 	return p.RecvMutateRowsTs()
 }
 
-func (p *HbaseClient) SendMutateRowsTs(tableName Text, rowBatches thrift.TList, timestamp int64, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendMutateRowsTs(tableName Text, rowBatches []*BatchMutation, timestamp int64, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -2342,12 +2340,12 @@ func (p *HbaseClient) SendMutateRowsTs(tableName Text, rowBatches thrift.TList, 
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("mutateRowsTs", thrift.CALL, p.SeqId)
-	args278 := NewMutateRowsTsArgs()
-	args278.TableName = tableName
-	args278.RowBatches = rowBatches
-	args278.Timestamp = timestamp
-	args278.Attributes = attributes
-	err = args278.Write(oprot)
+	args275 := NewMutateRowsTsArgs()
+	args275.TableName = tableName
+	args275.RowBatches = rowBatches
+	args275.Timestamp = timestamp
+	args275.Attributes = attributes
+	err = args275.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -2364,30 +2362,30 @@ func (p *HbaseClient) RecvMutateRowsTs() (io *IOError, ia *IllegalArgument, err 
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error280 := thrift.NewTApplicationExceptionDefault()
-		var error281 error
-		error281, err = error280.Read(iprot)
+		error277 := thrift.NewTApplicationExceptionDefault()
+		var error278 error
+		error278, err = error277.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error281
+		err = error278
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result279 := NewMutateRowsTsResult()
-	err = result279.Read(iprot)
+	result276 := NewMutateRowsTsResult()
+	err = result276.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result279.Io != nil {
-		io = result279.Io
+	if result276.Io != nil {
+		io = result276.Io
 	}
-	if result279.Ia != nil {
-		ia = result279.Ia
+	if result276.Ia != nil {
+		ia = result276.Ia
 	}
 	return
 }
@@ -2401,7 +2399,7 @@ func (p *HbaseClient) RecvMutateRowsTs() (io *IOError, ia *IllegalArgument, err 
  *  - Column: name of column
  *  - Value: amount to increment by
  */
-func (p *HbaseClient) AtomicIncrement(tableName Text, row Text, column Text, value int64) (retval282 int64, io *IOError, ia *IllegalArgument, err error) {
+func (p *HbaseClient) AtomicIncrement(tableName Text, row Text, column Text, value int64) (retval279 int64, io *IOError, ia *IllegalArgument, err error) {
 	err = p.SendAtomicIncrement(tableName, row, column, value)
 	if err != nil {
 		return
@@ -2417,12 +2415,12 @@ func (p *HbaseClient) SendAtomicIncrement(tableName Text, row Text, column Text,
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("atomicIncrement", thrift.CALL, p.SeqId)
-	args283 := NewAtomicIncrementArgs()
-	args283.TableName = tableName
-	args283.Row = row
-	args283.Column = column
-	args283.Value = value
-	err = args283.Write(oprot)
+	args280 := NewAtomicIncrementArgs()
+	args280.TableName = tableName
+	args280.Row = row
+	args280.Column = column
+	args280.Value = value
+	err = args280.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -2439,31 +2437,31 @@ func (p *HbaseClient) RecvAtomicIncrement() (value int64, io *IOError, ia *Illeg
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error285 := thrift.NewTApplicationExceptionDefault()
-		var error286 error
-		error286, err = error285.Read(iprot)
+		error282 := thrift.NewTApplicationExceptionDefault()
+		var error283 error
+		error283, err = error282.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error286
+		err = error283
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result284 := NewAtomicIncrementResult()
-	err = result284.Read(iprot)
+	result281 := NewAtomicIncrementResult()
+	err = result281.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result284.Success
-	if result284.Io != nil {
-		io = result284.Io
+	value = result281.Success
+	if result281.Io != nil {
+		io = result281.Io
 	}
-	if result284.Ia != nil {
-		ia = result284.Ia
+	if result281.Ia != nil {
+		ia = result281.Ia
 	}
 	return
 }
@@ -2477,7 +2475,7 @@ func (p *HbaseClient) RecvAtomicIncrement() (value int64, io *IOError, ia *Illeg
  *  - Column: name of column whose value is to be deleted
  *  - Attributes: Delete attributes
  */
-func (p *HbaseClient) DeleteAll(tableName Text, row Text, column Text, attributes thrift.TMap) (io *IOError, err error) {
+func (p *HbaseClient) DeleteAll(tableName Text, row Text, column Text, attributes map[string]Text) (io *IOError, err error) {
 	err = p.SendDeleteAll(tableName, row, column, attributes)
 	if err != nil {
 		return
@@ -2485,7 +2483,7 @@ func (p *HbaseClient) DeleteAll(tableName Text, row Text, column Text, attribute
 	return p.RecvDeleteAll()
 }
 
-func (p *HbaseClient) SendDeleteAll(tableName Text, row Text, column Text, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendDeleteAll(tableName Text, row Text, column Text, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -2493,12 +2491,12 @@ func (p *HbaseClient) SendDeleteAll(tableName Text, row Text, column Text, attri
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("deleteAll", thrift.CALL, p.SeqId)
-	args288 := NewDeleteAllArgs()
-	args288.TableName = tableName
-	args288.Row = row
-	args288.Column = column
-	args288.Attributes = attributes
-	err = args288.Write(oprot)
+	args285 := NewDeleteAllArgs()
+	args285.TableName = tableName
+	args285.Row = row
+	args285.Column = column
+	args285.Attributes = attributes
+	err = args285.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -2515,27 +2513,27 @@ func (p *HbaseClient) RecvDeleteAll() (io *IOError, err error) {
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error290 := thrift.NewTApplicationExceptionDefault()
-		var error291 error
-		error291, err = error290.Read(iprot)
+		error287 := thrift.NewTApplicationExceptionDefault()
+		var error288 error
+		error288, err = error287.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error291
+		err = error288
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result289 := NewDeleteAllResult()
-	err = result289.Read(iprot)
+	result286 := NewDeleteAllResult()
+	err = result286.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result289.Io != nil {
-		io = result289.Io
+	if result286.Io != nil {
+		io = result286.Io
 	}
 	return
 }
@@ -2551,7 +2549,7 @@ func (p *HbaseClient) RecvDeleteAll() (io *IOError, err error) {
  *  - Timestamp: timestamp
  *  - Attributes: Delete attributes
  */
-func (p *HbaseClient) DeleteAllTs(tableName Text, row Text, column Text, timestamp int64, attributes thrift.TMap) (io *IOError, err error) {
+func (p *HbaseClient) DeleteAllTs(tableName Text, row Text, column Text, timestamp int64, attributes map[string]Text) (io *IOError, err error) {
 	err = p.SendDeleteAllTs(tableName, row, column, timestamp, attributes)
 	if err != nil {
 		return
@@ -2559,7 +2557,7 @@ func (p *HbaseClient) DeleteAllTs(tableName Text, row Text, column Text, timesta
 	return p.RecvDeleteAllTs()
 }
 
-func (p *HbaseClient) SendDeleteAllTs(tableName Text, row Text, column Text, timestamp int64, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendDeleteAllTs(tableName Text, row Text, column Text, timestamp int64, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -2567,13 +2565,13 @@ func (p *HbaseClient) SendDeleteAllTs(tableName Text, row Text, column Text, tim
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("deleteAllTs", thrift.CALL, p.SeqId)
-	args293 := NewDeleteAllTsArgs()
-	args293.TableName = tableName
-	args293.Row = row
-	args293.Column = column
-	args293.Timestamp = timestamp
-	args293.Attributes = attributes
-	err = args293.Write(oprot)
+	args290 := NewDeleteAllTsArgs()
+	args290.TableName = tableName
+	args290.Row = row
+	args290.Column = column
+	args290.Timestamp = timestamp
+	args290.Attributes = attributes
+	err = args290.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -2590,27 +2588,27 @@ func (p *HbaseClient) RecvDeleteAllTs() (io *IOError, err error) {
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error295 := thrift.NewTApplicationExceptionDefault()
-		var error296 error
-		error296, err = error295.Read(iprot)
+		error292 := thrift.NewTApplicationExceptionDefault()
+		var error293 error
+		error293, err = error292.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error296
+		err = error293
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result294 := NewDeleteAllTsResult()
-	err = result294.Read(iprot)
+	result291 := NewDeleteAllTsResult()
+	err = result291.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result294.Io != nil {
-		io = result294.Io
+	if result291.Io != nil {
+		io = result291.Io
 	}
 	return
 }
@@ -2623,7 +2621,7 @@ func (p *HbaseClient) RecvDeleteAllTs() (io *IOError, err error) {
  *  - Row: key of the row to be completely deleted.
  *  - Attributes: Delete attributes
  */
-func (p *HbaseClient) DeleteAllRow(tableName Text, row Text, attributes thrift.TMap) (io *IOError, err error) {
+func (p *HbaseClient) DeleteAllRow(tableName Text, row Text, attributes map[string]Text) (io *IOError, err error) {
 	err = p.SendDeleteAllRow(tableName, row, attributes)
 	if err != nil {
 		return
@@ -2631,7 +2629,7 @@ func (p *HbaseClient) DeleteAllRow(tableName Text, row Text, attributes thrift.T
 	return p.RecvDeleteAllRow()
 }
 
-func (p *HbaseClient) SendDeleteAllRow(tableName Text, row Text, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendDeleteAllRow(tableName Text, row Text, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -2639,11 +2637,11 @@ func (p *HbaseClient) SendDeleteAllRow(tableName Text, row Text, attributes thri
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("deleteAllRow", thrift.CALL, p.SeqId)
-	args298 := NewDeleteAllRowArgs()
-	args298.TableName = tableName
-	args298.Row = row
-	args298.Attributes = attributes
-	err = args298.Write(oprot)
+	args295 := NewDeleteAllRowArgs()
+	args295.TableName = tableName
+	args295.Row = row
+	args295.Attributes = attributes
+	err = args295.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -2660,27 +2658,27 @@ func (p *HbaseClient) RecvDeleteAllRow() (io *IOError, err error) {
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error300 := thrift.NewTApplicationExceptionDefault()
-		var error301 error
-		error301, err = error300.Read(iprot)
+		error297 := thrift.NewTApplicationExceptionDefault()
+		var error298 error
+		error298, err = error297.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error301
+		err = error298
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result299 := NewDeleteAllRowResult()
-	err = result299.Read(iprot)
+	result296 := NewDeleteAllRowResult()
+	err = result296.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result299.Io != nil {
-		io = result299.Io
+	if result296.Io != nil {
+		io = result296.Io
 	}
 	return
 }
@@ -2710,9 +2708,9 @@ func (p *HbaseClient) SendIncrement(increment *TIncrement) (err error) {
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("increment", thrift.CALL, p.SeqId)
-	args303 := NewIncrementArgs()
-	args303.Increment = increment
-	err = args303.Write(oprot)
+	args300 := NewIncrementArgs()
+	args300.Increment = increment
+	err = args300.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -2729,27 +2727,27 @@ func (p *HbaseClient) RecvIncrement() (io *IOError, err error) {
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error305 := thrift.NewTApplicationExceptionDefault()
-		var error306 error
-		error306, err = error305.Read(iprot)
+		error302 := thrift.NewTApplicationExceptionDefault()
+		var error303 error
+		error303, err = error302.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error306
+		err = error303
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result304 := NewIncrementResult()
-	err = result304.Read(iprot)
+	result301 := NewIncrementResult()
+	err = result301.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result304.Io != nil {
-		io = result304.Io
+	if result301.Io != nil {
+		io = result301.Io
 	}
 	return
 }
@@ -2758,7 +2756,7 @@ func (p *HbaseClient) RecvIncrement() (io *IOError, err error) {
  * Parameters:
  *  - Increments: The list of increments
  */
-func (p *HbaseClient) IncrementRows(increments thrift.TList) (io *IOError, err error) {
+func (p *HbaseClient) IncrementRows(increments []*TIncrement) (io *IOError, err error) {
 	err = p.SendIncrementRows(increments)
 	if err != nil {
 		return
@@ -2766,7 +2764,7 @@ func (p *HbaseClient) IncrementRows(increments thrift.TList) (io *IOError, err e
 	return p.RecvIncrementRows()
 }
 
-func (p *HbaseClient) SendIncrementRows(increments thrift.TList) (err error) {
+func (p *HbaseClient) SendIncrementRows(increments []*TIncrement) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -2774,9 +2772,9 @@ func (p *HbaseClient) SendIncrementRows(increments thrift.TList) (err error) {
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("incrementRows", thrift.CALL, p.SeqId)
-	args308 := NewIncrementRowsArgs()
-	args308.Increments = increments
-	err = args308.Write(oprot)
+	args305 := NewIncrementRowsArgs()
+	args305.Increments = increments
+	err = args305.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -2793,27 +2791,27 @@ func (p *HbaseClient) RecvIncrementRows() (io *IOError, err error) {
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error310 := thrift.NewTApplicationExceptionDefault()
-		var error311 error
-		error311, err = error310.Read(iprot)
+		error307 := thrift.NewTApplicationExceptionDefault()
+		var error308 error
+		error308, err = error307.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error311
+		err = error308
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result309 := NewIncrementRowsResult()
-	err = result309.Read(iprot)
+	result306 := NewIncrementRowsResult()
+	err = result306.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result309.Io != nil {
-		io = result309.Io
+	if result306.Io != nil {
+		io = result306.Io
 	}
 	return
 }
@@ -2828,7 +2826,7 @@ func (p *HbaseClient) RecvIncrementRows() (io *IOError, err error) {
  *  - Timestamp: timestamp
  *  - Attributes: Delete attributes
  */
-func (p *HbaseClient) DeleteAllRowTs(tableName Text, row Text, timestamp int64, attributes thrift.TMap) (io *IOError, err error) {
+func (p *HbaseClient) DeleteAllRowTs(tableName Text, row Text, timestamp int64, attributes map[string]Text) (io *IOError, err error) {
 	err = p.SendDeleteAllRowTs(tableName, row, timestamp, attributes)
 	if err != nil {
 		return
@@ -2836,7 +2834,7 @@ func (p *HbaseClient) DeleteAllRowTs(tableName Text, row Text, timestamp int64, 
 	return p.RecvDeleteAllRowTs()
 }
 
-func (p *HbaseClient) SendDeleteAllRowTs(tableName Text, row Text, timestamp int64, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendDeleteAllRowTs(tableName Text, row Text, timestamp int64, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -2844,12 +2842,12 @@ func (p *HbaseClient) SendDeleteAllRowTs(tableName Text, row Text, timestamp int
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("deleteAllRowTs", thrift.CALL, p.SeqId)
-	args313 := NewDeleteAllRowTsArgs()
-	args313.TableName = tableName
-	args313.Row = row
-	args313.Timestamp = timestamp
-	args313.Attributes = attributes
-	err = args313.Write(oprot)
+	args310 := NewDeleteAllRowTsArgs()
+	args310.TableName = tableName
+	args310.Row = row
+	args310.Timestamp = timestamp
+	args310.Attributes = attributes
+	err = args310.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -2866,27 +2864,27 @@ func (p *HbaseClient) RecvDeleteAllRowTs() (io *IOError, err error) {
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error315 := thrift.NewTApplicationExceptionDefault()
-		var error316 error
-		error316, err = error315.Read(iprot)
+		error312 := thrift.NewTApplicationExceptionDefault()
+		var error313 error
+		error313, err = error312.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error316
+		err = error313
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result314 := NewDeleteAllRowTsResult()
-	err = result314.Read(iprot)
+	result311 := NewDeleteAllRowTsResult()
+	err = result311.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result314.Io != nil {
-		io = result314.Io
+	if result311.Io != nil {
+		io = result311.Io
 	}
 	return
 }
@@ -2900,7 +2898,7 @@ func (p *HbaseClient) RecvDeleteAllRowTs() (io *IOError, err error) {
  *  - Scan: Scan instance
  *  - Attributes: Scan attributes
  */
-func (p *HbaseClient) ScannerOpenWithScan(tableName Text, scan *TScan, attributes thrift.TMap) (retval317 ScannerID, io *IOError, err error) {
+func (p *HbaseClient) ScannerOpenWithScan(tableName Text, scan *TScan, attributes map[string]Text) (retval314 ScannerID, io *IOError, err error) {
 	err = p.SendScannerOpenWithScan(tableName, scan, attributes)
 	if err != nil {
 		return
@@ -2908,7 +2906,7 @@ func (p *HbaseClient) ScannerOpenWithScan(tableName Text, scan *TScan, attribute
 	return p.RecvScannerOpenWithScan()
 }
 
-func (p *HbaseClient) SendScannerOpenWithScan(tableName Text, scan *TScan, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendScannerOpenWithScan(tableName Text, scan *TScan, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -2916,11 +2914,11 @@ func (p *HbaseClient) SendScannerOpenWithScan(tableName Text, scan *TScan, attri
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("scannerOpenWithScan", thrift.CALL, p.SeqId)
-	args318 := NewScannerOpenWithScanArgs()
-	args318.TableName = tableName
-	args318.Scan = scan
-	args318.Attributes = attributes
-	err = args318.Write(oprot)
+	args315 := NewScannerOpenWithScanArgs()
+	args315.TableName = tableName
+	args315.Scan = scan
+	args315.Attributes = attributes
+	err = args315.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -2937,28 +2935,28 @@ func (p *HbaseClient) RecvScannerOpenWithScan() (value ScannerID, io *IOError, e
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error320 := thrift.NewTApplicationExceptionDefault()
-		var error321 error
-		error321, err = error320.Read(iprot)
+		error317 := thrift.NewTApplicationExceptionDefault()
+		var error318 error
+		error318, err = error317.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error321
+		err = error318
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result319 := NewScannerOpenWithScanResult()
-	err = result319.Read(iprot)
+	result316 := NewScannerOpenWithScanResult()
+	err = result316.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result319.Success
-	if result319.Io != nil {
-		io = result319.Io
+	value = result316.Success
+	if result316.Io != nil {
+		io = result316.Io
 	}
 	return
 }
@@ -2978,7 +2976,7 @@ func (p *HbaseClient) RecvScannerOpenWithScan() (value ScannerID, io *IOError, e
  * to pass a regex in the column qualifier.
  *  - Attributes: Scan attributes
  */
-func (p *HbaseClient) ScannerOpen(tableName Text, startRow Text, columns thrift.TList, attributes thrift.TMap) (retval322 ScannerID, io *IOError, err error) {
+func (p *HbaseClient) ScannerOpen(tableName Text, startRow Text, columns []Text, attributes map[string]Text) (retval319 ScannerID, io *IOError, err error) {
 	err = p.SendScannerOpen(tableName, startRow, columns, attributes)
 	if err != nil {
 		return
@@ -2986,7 +2984,7 @@ func (p *HbaseClient) ScannerOpen(tableName Text, startRow Text, columns thrift.
 	return p.RecvScannerOpen()
 }
 
-func (p *HbaseClient) SendScannerOpen(tableName Text, startRow Text, columns thrift.TList, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendScannerOpen(tableName Text, startRow Text, columns []Text, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -2994,12 +2992,12 @@ func (p *HbaseClient) SendScannerOpen(tableName Text, startRow Text, columns thr
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("scannerOpen", thrift.CALL, p.SeqId)
-	args323 := NewScannerOpenArgs()
-	args323.TableName = tableName
-	args323.StartRow = startRow
-	args323.Columns = columns
-	args323.Attributes = attributes
-	err = args323.Write(oprot)
+	args320 := NewScannerOpenArgs()
+	args320.TableName = tableName
+	args320.StartRow = startRow
+	args320.Columns = columns
+	args320.Attributes = attributes
+	err = args320.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -3016,28 +3014,28 @@ func (p *HbaseClient) RecvScannerOpen() (value ScannerID, io *IOError, err error
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error325 := thrift.NewTApplicationExceptionDefault()
-		var error326 error
-		error326, err = error325.Read(iprot)
+		error322 := thrift.NewTApplicationExceptionDefault()
+		var error323 error
+		error323, err = error322.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error326
+		err = error323
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result324 := NewScannerOpenResult()
-	err = result324.Read(iprot)
+	result321 := NewScannerOpenResult()
+	err = result321.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result324.Success
-	if result324.Io != nil {
-		io = result324.Io
+	value = result321.Success
+	if result321.Io != nil {
+		io = result321.Io
 	}
 	return
 }
@@ -3060,7 +3058,7 @@ func (p *HbaseClient) RecvScannerOpen() (value ScannerID, io *IOError, err error
  * to pass a regex in the column qualifier.
  *  - Attributes: Scan attributes
  */
-func (p *HbaseClient) ScannerOpenWithStop(tableName Text, startRow Text, stopRow Text, columns thrift.TList, attributes thrift.TMap) (retval327 ScannerID, io *IOError, err error) {
+func (p *HbaseClient) ScannerOpenWithStop(tableName Text, startRow Text, stopRow Text, columns []Text, attributes map[string]Text) (retval324 ScannerID, io *IOError, err error) {
 	err = p.SendScannerOpenWithStop(tableName, startRow, stopRow, columns, attributes)
 	if err != nil {
 		return
@@ -3068,7 +3066,7 @@ func (p *HbaseClient) ScannerOpenWithStop(tableName Text, startRow Text, stopRow
 	return p.RecvScannerOpenWithStop()
 }
 
-func (p *HbaseClient) SendScannerOpenWithStop(tableName Text, startRow Text, stopRow Text, columns thrift.TList, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendScannerOpenWithStop(tableName Text, startRow Text, stopRow Text, columns []Text, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -3076,13 +3074,13 @@ func (p *HbaseClient) SendScannerOpenWithStop(tableName Text, startRow Text, sto
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("scannerOpenWithStop", thrift.CALL, p.SeqId)
-	args328 := NewScannerOpenWithStopArgs()
-	args328.TableName = tableName
-	args328.StartRow = startRow
-	args328.StopRow = stopRow
-	args328.Columns = columns
-	args328.Attributes = attributes
-	err = args328.Write(oprot)
+	args325 := NewScannerOpenWithStopArgs()
+	args325.TableName = tableName
+	args325.StartRow = startRow
+	args325.StopRow = stopRow
+	args325.Columns = columns
+	args325.Attributes = attributes
+	err = args325.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -3099,28 +3097,28 @@ func (p *HbaseClient) RecvScannerOpenWithStop() (value ScannerID, io *IOError, e
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error330 := thrift.NewTApplicationExceptionDefault()
-		var error331 error
-		error331, err = error330.Read(iprot)
+		error327 := thrift.NewTApplicationExceptionDefault()
+		var error328 error
+		error328, err = error327.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error331
+		err = error328
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result329 := NewScannerOpenWithStopResult()
-	err = result329.Read(iprot)
+	result326 := NewScannerOpenWithStopResult()
+	err = result326.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result329.Success
-	if result329.Io != nil {
-		io = result329.Io
+	value = result326.Success
+	if result326.Io != nil {
+		io = result326.Io
 	}
 	return
 }
@@ -3137,7 +3135,7 @@ func (p *HbaseClient) RecvScannerOpenWithStop() (value ScannerID, io *IOError, e
  *  - Columns: the columns you want returned
  *  - Attributes: Scan attributes
  */
-func (p *HbaseClient) ScannerOpenWithPrefix(tableName Text, startAndPrefix Text, columns thrift.TList, attributes thrift.TMap) (retval332 ScannerID, io *IOError, err error) {
+func (p *HbaseClient) ScannerOpenWithPrefix(tableName Text, startAndPrefix Text, columns []Text, attributes map[string]Text) (retval329 ScannerID, io *IOError, err error) {
 	err = p.SendScannerOpenWithPrefix(tableName, startAndPrefix, columns, attributes)
 	if err != nil {
 		return
@@ -3145,7 +3143,7 @@ func (p *HbaseClient) ScannerOpenWithPrefix(tableName Text, startAndPrefix Text,
 	return p.RecvScannerOpenWithPrefix()
 }
 
-func (p *HbaseClient) SendScannerOpenWithPrefix(tableName Text, startAndPrefix Text, columns thrift.TList, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendScannerOpenWithPrefix(tableName Text, startAndPrefix Text, columns []Text, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -3153,12 +3151,12 @@ func (p *HbaseClient) SendScannerOpenWithPrefix(tableName Text, startAndPrefix T
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("scannerOpenWithPrefix", thrift.CALL, p.SeqId)
-	args333 := NewScannerOpenWithPrefixArgs()
-	args333.TableName = tableName
-	args333.StartAndPrefix = startAndPrefix
-	args333.Columns = columns
-	args333.Attributes = attributes
-	err = args333.Write(oprot)
+	args330 := NewScannerOpenWithPrefixArgs()
+	args330.TableName = tableName
+	args330.StartAndPrefix = startAndPrefix
+	args330.Columns = columns
+	args330.Attributes = attributes
+	err = args330.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -3175,28 +3173,28 @@ func (p *HbaseClient) RecvScannerOpenWithPrefix() (value ScannerID, io *IOError,
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error335 := thrift.NewTApplicationExceptionDefault()
-		var error336 error
-		error336, err = error335.Read(iprot)
+		error332 := thrift.NewTApplicationExceptionDefault()
+		var error333 error
+		error333, err = error332.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error336
+		err = error333
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result334 := NewScannerOpenWithPrefixResult()
-	err = result334.Read(iprot)
+	result331 := NewScannerOpenWithPrefixResult()
+	err = result331.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result334.Success
-	if result334.Io != nil {
-		io = result334.Io
+	value = result331.Success
+	if result331.Io != nil {
+		io = result331.Io
 	}
 	return
 }
@@ -3218,7 +3216,7 @@ func (p *HbaseClient) RecvScannerOpenWithPrefix() (value ScannerID, io *IOError,
  *  - Timestamp: timestamp
  *  - Attributes: Scan attributes
  */
-func (p *HbaseClient) ScannerOpenTs(tableName Text, startRow Text, columns thrift.TList, timestamp int64, attributes thrift.TMap) (retval337 ScannerID, io *IOError, err error) {
+func (p *HbaseClient) ScannerOpenTs(tableName Text, startRow Text, columns []Text, timestamp int64, attributes map[string]Text) (retval334 ScannerID, io *IOError, err error) {
 	err = p.SendScannerOpenTs(tableName, startRow, columns, timestamp, attributes)
 	if err != nil {
 		return
@@ -3226,7 +3224,7 @@ func (p *HbaseClient) ScannerOpenTs(tableName Text, startRow Text, columns thrif
 	return p.RecvScannerOpenTs()
 }
 
-func (p *HbaseClient) SendScannerOpenTs(tableName Text, startRow Text, columns thrift.TList, timestamp int64, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendScannerOpenTs(tableName Text, startRow Text, columns []Text, timestamp int64, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -3234,13 +3232,13 @@ func (p *HbaseClient) SendScannerOpenTs(tableName Text, startRow Text, columns t
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("scannerOpenTs", thrift.CALL, p.SeqId)
-	args338 := NewScannerOpenTsArgs()
-	args338.TableName = tableName
-	args338.StartRow = startRow
-	args338.Columns = columns
-	args338.Timestamp = timestamp
-	args338.Attributes = attributes
-	err = args338.Write(oprot)
+	args335 := NewScannerOpenTsArgs()
+	args335.TableName = tableName
+	args335.StartRow = startRow
+	args335.Columns = columns
+	args335.Timestamp = timestamp
+	args335.Attributes = attributes
+	err = args335.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -3257,28 +3255,28 @@ func (p *HbaseClient) RecvScannerOpenTs() (value ScannerID, io *IOError, err err
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error340 := thrift.NewTApplicationExceptionDefault()
-		var error341 error
-		error341, err = error340.Read(iprot)
+		error337 := thrift.NewTApplicationExceptionDefault()
+		var error338 error
+		error338, err = error337.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error341
+		err = error338
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result339 := NewScannerOpenTsResult()
-	err = result339.Read(iprot)
+	result336 := NewScannerOpenTsResult()
+	err = result336.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result339.Success
-	if result339.Io != nil {
-		io = result339.Io
+	value = result336.Success
+	if result336.Io != nil {
+		io = result336.Io
 	}
 	return
 }
@@ -3303,7 +3301,7 @@ func (p *HbaseClient) RecvScannerOpenTs() (value ScannerID, io *IOError, err err
  *  - Timestamp: timestamp
  *  - Attributes: Scan attributes
  */
-func (p *HbaseClient) ScannerOpenWithStopTs(tableName Text, startRow Text, stopRow Text, columns thrift.TList, timestamp int64, attributes thrift.TMap) (retval342 ScannerID, io *IOError, err error) {
+func (p *HbaseClient) ScannerOpenWithStopTs(tableName Text, startRow Text, stopRow Text, columns []Text, timestamp int64, attributes map[string]Text) (retval339 ScannerID, io *IOError, err error) {
 	err = p.SendScannerOpenWithStopTs(tableName, startRow, stopRow, columns, timestamp, attributes)
 	if err != nil {
 		return
@@ -3311,7 +3309,7 @@ func (p *HbaseClient) ScannerOpenWithStopTs(tableName Text, startRow Text, stopR
 	return p.RecvScannerOpenWithStopTs()
 }
 
-func (p *HbaseClient) SendScannerOpenWithStopTs(tableName Text, startRow Text, stopRow Text, columns thrift.TList, timestamp int64, attributes thrift.TMap) (err error) {
+func (p *HbaseClient) SendScannerOpenWithStopTs(tableName Text, startRow Text, stopRow Text, columns []Text, timestamp int64, attributes map[string]Text) (err error) {
 	oprot := p.OutputProtocol
 	if oprot != nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -3319,14 +3317,14 @@ func (p *HbaseClient) SendScannerOpenWithStopTs(tableName Text, startRow Text, s
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("scannerOpenWithStopTs", thrift.CALL, p.SeqId)
-	args343 := NewScannerOpenWithStopTsArgs()
-	args343.TableName = tableName
-	args343.StartRow = startRow
-	args343.StopRow = stopRow
-	args343.Columns = columns
-	args343.Timestamp = timestamp
-	args343.Attributes = attributes
-	err = args343.Write(oprot)
+	args340 := NewScannerOpenWithStopTsArgs()
+	args340.TableName = tableName
+	args340.StartRow = startRow
+	args340.StopRow = stopRow
+	args340.Columns = columns
+	args340.Timestamp = timestamp
+	args340.Attributes = attributes
+	err = args340.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -3343,28 +3341,28 @@ func (p *HbaseClient) RecvScannerOpenWithStopTs() (value ScannerID, io *IOError,
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error345 := thrift.NewTApplicationExceptionDefault()
-		var error346 error
-		error346, err = error345.Read(iprot)
+		error342 := thrift.NewTApplicationExceptionDefault()
+		var error343 error
+		error343, err = error342.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error346
+		err = error343
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result344 := NewScannerOpenWithStopTsResult()
-	err = result344.Read(iprot)
+	result341 := NewScannerOpenWithStopTsResult()
+	err = result341.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result344.Success
-	if result344.Io != nil {
-		io = result344.Io
+	value = result341.Success
+	if result341.Io != nil {
+		io = result341.Io
 	}
 	return
 }
@@ -3384,7 +3382,7 @@ func (p *HbaseClient) RecvScannerOpenWithStopTs() (value ScannerID, io *IOError,
  * Parameters:
  *  - Id: id of a scanner returned by scannerOpen
  */
-func (p *HbaseClient) ScannerGet(id ScannerID) (retval347 thrift.TList, io *IOError, ia *IllegalArgument, err error) {
+func (p *HbaseClient) ScannerGet(id ScannerID) (retval344 []*TRowResult, io *IOError, ia *IllegalArgument, err error) {
 	err = p.SendScannerGet(id)
 	if err != nil {
 		return
@@ -3400,15 +3398,15 @@ func (p *HbaseClient) SendScannerGet(id ScannerID) (err error) {
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("scannerGet", thrift.CALL, p.SeqId)
-	args348 := NewScannerGetArgs()
-	args348.Id = id
-	err = args348.Write(oprot)
+	args345 := NewScannerGetArgs()
+	args345.Id = id
+	err = args345.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvScannerGet() (value thrift.TList, io *IOError, ia *IllegalArgument, err error) {
+func (p *HbaseClient) RecvScannerGet() (value []*TRowResult, io *IOError, ia *IllegalArgument, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -3419,31 +3417,31 @@ func (p *HbaseClient) RecvScannerGet() (value thrift.TList, io *IOError, ia *Ill
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error350 := thrift.NewTApplicationExceptionDefault()
-		var error351 error
-		error351, err = error350.Read(iprot)
+		error347 := thrift.NewTApplicationExceptionDefault()
+		var error348 error
+		error348, err = error347.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error351
+		err = error348
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result349 := NewScannerGetResult()
-	err = result349.Read(iprot)
+	result346 := NewScannerGetResult()
+	err = result346.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result349.Success
-	if result349.Io != nil {
-		io = result349.Io
+	value = result346.Success
+	if result346.Io != nil {
+		io = result346.Io
 	}
-	if result349.Ia != nil {
-		ia = result349.Ia
+	if result346.Ia != nil {
+		ia = result346.Ia
 	}
 	return
 }
@@ -3464,7 +3462,7 @@ func (p *HbaseClient) RecvScannerGet() (value thrift.TList, io *IOError, ia *Ill
  *  - Id: id of a scanner returned by scannerOpen
  *  - NbRows: number of results to return
  */
-func (p *HbaseClient) ScannerGetList(id ScannerID, nbRows int32) (retval352 thrift.TList, io *IOError, ia *IllegalArgument, err error) {
+func (p *HbaseClient) ScannerGetList(id ScannerID, nbRows int32) (retval349 []*TRowResult, io *IOError, ia *IllegalArgument, err error) {
 	err = p.SendScannerGetList(id, nbRows)
 	if err != nil {
 		return
@@ -3480,16 +3478,16 @@ func (p *HbaseClient) SendScannerGetList(id ScannerID, nbRows int32) (err error)
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("scannerGetList", thrift.CALL, p.SeqId)
-	args353 := NewScannerGetListArgs()
-	args353.Id = id
-	args353.NbRows = nbRows
-	err = args353.Write(oprot)
+	args350 := NewScannerGetListArgs()
+	args350.Id = id
+	args350.NbRows = nbRows
+	err = args350.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvScannerGetList() (value thrift.TList, io *IOError, ia *IllegalArgument, err error) {
+func (p *HbaseClient) RecvScannerGetList() (value []*TRowResult, io *IOError, ia *IllegalArgument, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -3500,31 +3498,31 @@ func (p *HbaseClient) RecvScannerGetList() (value thrift.TList, io *IOError, ia 
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error355 := thrift.NewTApplicationExceptionDefault()
-		var error356 error
-		error356, err = error355.Read(iprot)
+		error352 := thrift.NewTApplicationExceptionDefault()
+		var error353 error
+		error353, err = error352.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error356
+		err = error353
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result354 := NewScannerGetListResult()
-	err = result354.Read(iprot)
+	result351 := NewScannerGetListResult()
+	err = result351.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result354.Success
-	if result354.Io != nil {
-		io = result354.Io
+	value = result351.Success
+	if result351.Io != nil {
+		io = result351.Io
 	}
-	if result354.Ia != nil {
-		ia = result354.Ia
+	if result351.Ia != nil {
+		ia = result351.Ia
 	}
 	return
 }
@@ -3553,9 +3551,9 @@ func (p *HbaseClient) SendScannerClose(id ScannerID) (err error) {
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("scannerClose", thrift.CALL, p.SeqId)
-	args358 := NewScannerCloseArgs()
-	args358.Id = id
-	err = args358.Write(oprot)
+	args355 := NewScannerCloseArgs()
+	args355.Id = id
+	err = args355.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -3572,30 +3570,30 @@ func (p *HbaseClient) RecvScannerClose() (io *IOError, ia *IllegalArgument, err 
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error360 := thrift.NewTApplicationExceptionDefault()
-		var error361 error
-		error361, err = error360.Read(iprot)
+		error357 := thrift.NewTApplicationExceptionDefault()
+		var error358 error
+		error358, err = error357.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error361
+		err = error358
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result359 := NewScannerCloseResult()
-	err = result359.Read(iprot)
+	result356 := NewScannerCloseResult()
+	err = result356.Read(iprot)
 	iprot.ReadMessageEnd()
-	if result359.Io != nil {
-		io = result359.Io
+	if result356.Io != nil {
+		io = result356.Io
 	}
-	if result359.Ia != nil {
-		ia = result359.Ia
+	if result356.Ia != nil {
+		ia = result356.Ia
 	}
 	return
 }
@@ -3610,7 +3608,7 @@ func (p *HbaseClient) RecvScannerClose() (io *IOError, ia *IllegalArgument, err 
  *  - Row: row key
  *  - Family: column name
  */
-func (p *HbaseClient) GetRowOrBefore(tableName Text, row Text, family Text) (retval362 thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) GetRowOrBefore(tableName Text, row Text, family Text) (retval359 []*TCell, io *IOError, err error) {
 	err = p.SendGetRowOrBefore(tableName, row, family)
 	if err != nil {
 		return
@@ -3626,17 +3624,17 @@ func (p *HbaseClient) SendGetRowOrBefore(tableName Text, row Text, family Text) 
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("getRowOrBefore", thrift.CALL, p.SeqId)
-	args363 := NewGetRowOrBeforeArgs()
-	args363.TableName = tableName
-	args363.Row = row
-	args363.Family = family
-	err = args363.Write(oprot)
+	args360 := NewGetRowOrBeforeArgs()
+	args360.TableName = tableName
+	args360.Row = row
+	args360.Family = family
+	err = args360.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
 }
 
-func (p *HbaseClient) RecvGetRowOrBefore() (value thrift.TList, io *IOError, err error) {
+func (p *HbaseClient) RecvGetRowOrBefore() (value []*TCell, io *IOError, err error) {
 	iprot := p.InputProtocol
 	if iprot == nil {
 		iprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -3647,28 +3645,28 @@ func (p *HbaseClient) RecvGetRowOrBefore() (value thrift.TList, io *IOError, err
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error365 := thrift.NewTApplicationExceptionDefault()
-		var error366 error
-		error366, err = error365.Read(iprot)
+		error362 := thrift.NewTApplicationExceptionDefault()
+		var error363 error
+		error363, err = error362.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error366
+		err = error363
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result364 := NewGetRowOrBeforeResult()
-	err = result364.Read(iprot)
+	result361 := NewGetRowOrBeforeResult()
+	err = result361.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result364.Success
-	if result364.Io != nil {
-		io = result364.Io
+	value = result361.Success
+	if result361.Io != nil {
+		io = result361.Io
 	}
 	return
 }
@@ -3682,7 +3680,7 @@ func (p *HbaseClient) RecvGetRowOrBefore() (value thrift.TList, io *IOError, err
  * Parameters:
  *  - Row: row key
  */
-func (p *HbaseClient) GetRegionInfo(row Text) (retval367 *TRegionInfo, io *IOError, err error) {
+func (p *HbaseClient) GetRegionInfo(row Text) (retval364 *TRegionInfo, io *IOError, err error) {
 	err = p.SendGetRegionInfo(row)
 	if err != nil {
 		return
@@ -3698,9 +3696,9 @@ func (p *HbaseClient) SendGetRegionInfo(row Text) (err error) {
 	}
 	p.SeqId++
 	oprot.WriteMessageBegin("getRegionInfo", thrift.CALL, p.SeqId)
-	args368 := NewGetRegionInfoArgs()
-	args368.Row = row
-	err = args368.Write(oprot)
+	args365 := NewGetRegionInfoArgs()
+	args365.Row = row
+	err = args365.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Transport().Flush()
 	return
@@ -3717,28 +3715,28 @@ func (p *HbaseClient) RecvGetRegionInfo() (value *TRegionInfo, io *IOError, err 
 		return
 	}
 	if mTypeId == thrift.EXCEPTION {
-		error370 := thrift.NewTApplicationExceptionDefault()
-		var error371 error
-		error371, err = error370.Read(iprot)
+		error367 := thrift.NewTApplicationExceptionDefault()
+		var error368 error
+		error368, err = error367.Read(iprot)
 		if err != nil {
 			return
 		}
 		if err = iprot.ReadMessageEnd(); err != nil {
 			return
 		}
-		err = error371
+		err = error368
 		return
 	}
 	if p.SeqId != seqId {
 		err = thrift.NewTApplicationException(thrift.BAD_SEQUENCE_ID, "ping failed: out of sequence response")
 		return
 	}
-	result369 := NewGetRegionInfoResult()
-	err = result369.Read(iprot)
+	result366 := NewGetRegionInfoResult()
+	err = result366.Read(iprot)
 	iprot.ReadMessageEnd()
-	value = result369.Success
-	if result369.Io != nil {
-		io = result369.Io
+	value = result366.Success
+	if result366.Io != nil {
+		io = result366.Io
 	}
 	return
 }
@@ -3767,51 +3765,51 @@ func (p *HbaseProcessor) ProcessorMap() map[string]thrift.TProcessorFunction {
 
 func NewHbaseProcessor(handler IHbase) *HbaseProcessor {
 
-	self372 := &HbaseProcessor{handler: handler, processorMap: make(map[string]thrift.TProcessorFunction)}
-	self372.processorMap["enableTable"] = &hbaseProcessorEnableTable{handler: handler}
-	self372.processorMap["disableTable"] = &hbaseProcessorDisableTable{handler: handler}
-	self372.processorMap["isTableEnabled"] = &hbaseProcessorIsTableEnabled{handler: handler}
-	self372.processorMap["compact"] = &hbaseProcessorCompact{handler: handler}
-	self372.processorMap["majorCompact"] = &hbaseProcessorMajorCompact{handler: handler}
-	self372.processorMap["getTableNames"] = &hbaseProcessorGetTableNames{handler: handler}
-	self372.processorMap["getColumnDescriptors"] = &hbaseProcessorGetColumnDescriptors{handler: handler}
-	self372.processorMap["getTableRegions"] = &hbaseProcessorGetTableRegions{handler: handler}
-	self372.processorMap["createTable"] = &hbaseProcessorCreateTable{handler: handler}
-	self372.processorMap["deleteTable"] = &hbaseProcessorDeleteTable{handler: handler}
-	self372.processorMap["get"] = &hbaseProcessorGet{handler: handler}
-	self372.processorMap["getVer"] = &hbaseProcessorGetVer{handler: handler}
-	self372.processorMap["getVerTs"] = &hbaseProcessorGetVerTs{handler: handler}
-	self372.processorMap["getRow"] = &hbaseProcessorGetRow{handler: handler}
-	self372.processorMap["getRowWithColumns"] = &hbaseProcessorGetRowWithColumns{handler: handler}
-	self372.processorMap["getRowTs"] = &hbaseProcessorGetRowTs{handler: handler}
-	self372.processorMap["getRowWithColumnsTs"] = &hbaseProcessorGetRowWithColumnsTs{handler: handler}
-	self372.processorMap["getRows"] = &hbaseProcessorGetRows{handler: handler}
-	self372.processorMap["getRowsWithColumns"] = &hbaseProcessorGetRowsWithColumns{handler: handler}
-	self372.processorMap["getRowsTs"] = &hbaseProcessorGetRowsTs{handler: handler}
-	self372.processorMap["getRowsWithColumnsTs"] = &hbaseProcessorGetRowsWithColumnsTs{handler: handler}
-	self372.processorMap["mutateRow"] = &hbaseProcessorMutateRow{handler: handler}
-	self372.processorMap["mutateRowTs"] = &hbaseProcessorMutateRowTs{handler: handler}
-	self372.processorMap["mutateRows"] = &hbaseProcessorMutateRows{handler: handler}
-	self372.processorMap["mutateRowsTs"] = &hbaseProcessorMutateRowsTs{handler: handler}
-	self372.processorMap["atomicIncrement"] = &hbaseProcessorAtomicIncrement{handler: handler}
-	self372.processorMap["deleteAll"] = &hbaseProcessorDeleteAll{handler: handler}
-	self372.processorMap["deleteAllTs"] = &hbaseProcessorDeleteAllTs{handler: handler}
-	self372.processorMap["deleteAllRow"] = &hbaseProcessorDeleteAllRow{handler: handler}
-	self372.processorMap["increment"] = &hbaseProcessorIncrement{handler: handler}
-	self372.processorMap["incrementRows"] = &hbaseProcessorIncrementRows{handler: handler}
-	self372.processorMap["deleteAllRowTs"] = &hbaseProcessorDeleteAllRowTs{handler: handler}
-	self372.processorMap["scannerOpenWithScan"] = &hbaseProcessorScannerOpenWithScan{handler: handler}
-	self372.processorMap["scannerOpen"] = &hbaseProcessorScannerOpen{handler: handler}
-	self372.processorMap["scannerOpenWithStop"] = &hbaseProcessorScannerOpenWithStop{handler: handler}
-	self372.processorMap["scannerOpenWithPrefix"] = &hbaseProcessorScannerOpenWithPrefix{handler: handler}
-	self372.processorMap["scannerOpenTs"] = &hbaseProcessorScannerOpenTs{handler: handler}
-	self372.processorMap["scannerOpenWithStopTs"] = &hbaseProcessorScannerOpenWithStopTs{handler: handler}
-	self372.processorMap["scannerGet"] = &hbaseProcessorScannerGet{handler: handler}
-	self372.processorMap["scannerGetList"] = &hbaseProcessorScannerGetList{handler: handler}
-	self372.processorMap["scannerClose"] = &hbaseProcessorScannerClose{handler: handler}
-	self372.processorMap["getRowOrBefore"] = &hbaseProcessorGetRowOrBefore{handler: handler}
-	self372.processorMap["getRegionInfo"] = &hbaseProcessorGetRegionInfo{handler: handler}
-	return self372
+	self369 := &HbaseProcessor{handler: handler, processorMap: make(map[string]thrift.TProcessorFunction)}
+	self369.processorMap["enableTable"] = &hbaseProcessorEnableTable{handler: handler}
+	self369.processorMap["disableTable"] = &hbaseProcessorDisableTable{handler: handler}
+	self369.processorMap["isTableEnabled"] = &hbaseProcessorIsTableEnabled{handler: handler}
+	self369.processorMap["compact"] = &hbaseProcessorCompact{handler: handler}
+	self369.processorMap["majorCompact"] = &hbaseProcessorMajorCompact{handler: handler}
+	self369.processorMap["getTableNames"] = &hbaseProcessorGetTableNames{handler: handler}
+	self369.processorMap["getColumnDescriptors"] = &hbaseProcessorGetColumnDescriptors{handler: handler}
+	self369.processorMap["getTableRegions"] = &hbaseProcessorGetTableRegions{handler: handler}
+	self369.processorMap["createTable"] = &hbaseProcessorCreateTable{handler: handler}
+	self369.processorMap["deleteTable"] = &hbaseProcessorDeleteTable{handler: handler}
+	self369.processorMap["get"] = &hbaseProcessorGet{handler: handler}
+	self369.processorMap["getVer"] = &hbaseProcessorGetVer{handler: handler}
+	self369.processorMap["getVerTs"] = &hbaseProcessorGetVerTs{handler: handler}
+	self369.processorMap["getRow"] = &hbaseProcessorGetRow{handler: handler}
+	self369.processorMap["getRowWithColumns"] = &hbaseProcessorGetRowWithColumns{handler: handler}
+	self369.processorMap["getRowTs"] = &hbaseProcessorGetRowTs{handler: handler}
+	self369.processorMap["getRowWithColumnsTs"] = &hbaseProcessorGetRowWithColumnsTs{handler: handler}
+	self369.processorMap["getRows"] = &hbaseProcessorGetRows{handler: handler}
+	self369.processorMap["getRowsWithColumns"] = &hbaseProcessorGetRowsWithColumns{handler: handler}
+	self369.processorMap["getRowsTs"] = &hbaseProcessorGetRowsTs{handler: handler}
+	self369.processorMap["getRowsWithColumnsTs"] = &hbaseProcessorGetRowsWithColumnsTs{handler: handler}
+	self369.processorMap["mutateRow"] = &hbaseProcessorMutateRow{handler: handler}
+	self369.processorMap["mutateRowTs"] = &hbaseProcessorMutateRowTs{handler: handler}
+	self369.processorMap["mutateRows"] = &hbaseProcessorMutateRows{handler: handler}
+	self369.processorMap["mutateRowsTs"] = &hbaseProcessorMutateRowsTs{handler: handler}
+	self369.processorMap["atomicIncrement"] = &hbaseProcessorAtomicIncrement{handler: handler}
+	self369.processorMap["deleteAll"] = &hbaseProcessorDeleteAll{handler: handler}
+	self369.processorMap["deleteAllTs"] = &hbaseProcessorDeleteAllTs{handler: handler}
+	self369.processorMap["deleteAllRow"] = &hbaseProcessorDeleteAllRow{handler: handler}
+	self369.processorMap["increment"] = &hbaseProcessorIncrement{handler: handler}
+	self369.processorMap["incrementRows"] = &hbaseProcessorIncrementRows{handler: handler}
+	self369.processorMap["deleteAllRowTs"] = &hbaseProcessorDeleteAllRowTs{handler: handler}
+	self369.processorMap["scannerOpenWithScan"] = &hbaseProcessorScannerOpenWithScan{handler: handler}
+	self369.processorMap["scannerOpen"] = &hbaseProcessorScannerOpen{handler: handler}
+	self369.processorMap["scannerOpenWithStop"] = &hbaseProcessorScannerOpenWithStop{handler: handler}
+	self369.processorMap["scannerOpenWithPrefix"] = &hbaseProcessorScannerOpenWithPrefix{handler: handler}
+	self369.processorMap["scannerOpenTs"] = &hbaseProcessorScannerOpenTs{handler: handler}
+	self369.processorMap["scannerOpenWithStopTs"] = &hbaseProcessorScannerOpenWithStopTs{handler: handler}
+	self369.processorMap["scannerGet"] = &hbaseProcessorScannerGet{handler: handler}
+	self369.processorMap["scannerGetList"] = &hbaseProcessorScannerGetList{handler: handler}
+	self369.processorMap["scannerClose"] = &hbaseProcessorScannerClose{handler: handler}
+	self369.processorMap["getRowOrBefore"] = &hbaseProcessorGetRowOrBefore{handler: handler}
+	self369.processorMap["getRegionInfo"] = &hbaseProcessorGetRegionInfo{handler: handler}
+	return self369
 }
 
 func (p *HbaseProcessor) Process(iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
@@ -3823,12 +3821,12 @@ func (p *HbaseProcessor) Process(iprot, oprot thrift.TProtocol) (success bool, e
 	if !nameFound || process == nil {
 		iprot.Skip(thrift.STRUCT)
 		iprot.ReadMessageEnd()
-		x373 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function "+name)
+		x370 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function "+name)
 		oprot.WriteMessageBegin(name, thrift.EXCEPTION, seqId)
-		x373.Write(oprot)
+		x370.Write(oprot)
 		oprot.WriteMessageEnd()
 		oprot.Transport().Flush()
-		return false, x373
+		return false, x370
 	}
 	return process.Process(seqId, iprot, oprot)
 }
@@ -5689,16 +5687,16 @@ func (p *hbaseProcessorGetRegionInfo) Process(seqId int32, iprot, oprot thrift.T
  *  - TableName: name of the table
  */
 type EnableTableArgs struct {
-	thrift.TStruct
 	TableName Bytes "tableName" // 1
 }
 
+var tstructEnableTableArgs = thrift.NewTStruct("enableTable_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+})
+
+func (*EnableTableArgs) GetTStruct() thrift.TStruct { return tstructEnableTableArgs }
 func NewEnableTableArgs() *EnableTableArgs {
-	output := &EnableTableArgs{
-		TStruct: thrift.NewTStruct("enableTable_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-		}),
-	}
+	output := &EnableTableArgs{}
 	{
 	}
 	return output
@@ -5712,12 +5710,8 @@ func (p *EnableTableArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructEnableTableArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructEnableTableArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -5725,29 +5719,25 @@ func (p *EnableTableArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Bytes
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -5760,17 +5750,13 @@ func (p *EnableTableArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	return err
 }
 
-func (p *EnableTableArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v374, err375 := iprot.ReadBinary()
-	if err375 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err375)
+func (p *EnableTableArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v371, err372 := iprot.ReadBinary()
+	if err372 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err372)
 	}
-	p.TableName = Bytes(v374)
+	p.TableName = Bytes(v371)
 	return err
-}
-
-func (p *EnableTableArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *EnableTableArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -5778,7 +5764,7 @@ func (p *EnableTableArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
@@ -5793,9 +5779,9 @@ func (p *EnableTableArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *EnableTableArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *EnableTableArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -5811,34 +5797,12 @@ func (p *EnableTableArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *EnableTableArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *EnableTableArgs) TStructName() string {
 	return "EnableTableArgs"
 }
 
 func (p *EnableTableArgs) ThriftName() string {
 	return "enableTable_args"
-}
-
-func (p *EnableTableArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("EnableTableArgs(%+v)", *p)
-}
-
-func (p *EnableTableArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*EnableTableArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *EnableTableArgs) AttributeByFieldId(id int) interface{} {
@@ -5853,7 +5817,7 @@ func (p *EnableTableArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *EnableTableArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
+		thrift.NewTField("tableName", thrift.STRING, 1),
 	})
 }
 
@@ -5862,16 +5826,16 @@ func (p *EnableTableArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type EnableTableResult struct {
-	thrift.TStruct
 	Io *IOError "io" // 1
 }
 
+var tstructEnableTableResult = thrift.NewTStruct("enableTable_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*EnableTableResult) GetTStruct() thrift.TStruct { return tstructEnableTableResult }
 func NewEnableTableResult() *EnableTableResult {
-	output := &EnableTableResult{
-		TStruct: thrift.NewTStruct("enableTable_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &EnableTableResult{}
 	{
 	}
 	return output
@@ -5885,12 +5849,8 @@ func (p *EnableTableResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructEnableTableResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructEnableTableResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -5898,29 +5858,25 @@ func (p *EnableTableResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -5933,17 +5889,13 @@ func (p *EnableTableResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *EnableTableResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *EnableTableResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err378 := p.Io.Read(iprot)
-	if err378 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err378)
+	err375 := p.Io.Read(iprot)
+	if err375 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err375)
 	}
 	return err
-}
-
-func (p *EnableTableResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *EnableTableResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -5953,7 +5905,7 @@ func (p *EnableTableResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -5968,7 +5920,7 @@ func (p *EnableTableResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *EnableTableResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *EnableTableResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -5986,34 +5938,12 @@ func (p *EnableTableResult) WriteField1(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *EnableTableResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *EnableTableResult) TStructName() string {
 	return "EnableTableResult"
 }
 
 func (p *EnableTableResult) ThriftName() string {
 	return "enableTable_result"
-}
-
-func (p *EnableTableResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("EnableTableResult(%+v)", *p)
-}
-
-func (p *EnableTableResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*EnableTableResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *EnableTableResult) AttributeByFieldId(id int) interface{} {
@@ -6037,16 +5967,16 @@ func (p *EnableTableResult) TStructFields() thrift.TFieldContainer {
  *  - TableName: name of the table
  */
 type DisableTableArgs struct {
-	thrift.TStruct
 	TableName Bytes "tableName" // 1
 }
 
+var tstructDisableTableArgs = thrift.NewTStruct("disableTable_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+})
+
+func (*DisableTableArgs) GetTStruct() thrift.TStruct { return tstructDisableTableArgs }
 func NewDisableTableArgs() *DisableTableArgs {
-	output := &DisableTableArgs{
-		TStruct: thrift.NewTStruct("disableTable_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-		}),
-	}
+	output := &DisableTableArgs{}
 	{
 	}
 	return output
@@ -6060,12 +5990,8 @@ func (p *DisableTableArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructDisableTableArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructDisableTableArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -6073,29 +5999,25 @@ func (p *DisableTableArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Bytes
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -6108,17 +6030,13 @@ func (p *DisableTableArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *DisableTableArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v379, err380 := iprot.ReadBinary()
-	if err380 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err380)
+func (p *DisableTableArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v376, err377 := iprot.ReadBinary()
+	if err377 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err377)
 	}
-	p.TableName = Bytes(v379)
+	p.TableName = Bytes(v376)
 	return err
-}
-
-func (p *DisableTableArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *DisableTableArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -6126,7 +6044,7 @@ func (p *DisableTableArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
@@ -6141,9 +6059,9 @@ func (p *DisableTableArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *DisableTableArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DisableTableArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -6159,34 +6077,12 @@ func (p *DisableTableArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *DisableTableArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *DisableTableArgs) TStructName() string {
 	return "DisableTableArgs"
 }
 
 func (p *DisableTableArgs) ThriftName() string {
 	return "disableTable_args"
-}
-
-func (p *DisableTableArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("DisableTableArgs(%+v)", *p)
-}
-
-func (p *DisableTableArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*DisableTableArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *DisableTableArgs) AttributeByFieldId(id int) interface{} {
@@ -6201,7 +6097,7 @@ func (p *DisableTableArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *DisableTableArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
+		thrift.NewTField("tableName", thrift.STRING, 1),
 	})
 }
 
@@ -6210,16 +6106,16 @@ func (p *DisableTableArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type DisableTableResult struct {
-	thrift.TStruct
 	Io *IOError "io" // 1
 }
 
+var tstructDisableTableResult = thrift.NewTStruct("disableTable_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*DisableTableResult) GetTStruct() thrift.TStruct { return tstructDisableTableResult }
 func NewDisableTableResult() *DisableTableResult {
-	output := &DisableTableResult{
-		TStruct: thrift.NewTStruct("disableTable_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &DisableTableResult{}
 	{
 	}
 	return output
@@ -6233,12 +6129,8 @@ func (p *DisableTableResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructDisableTableResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructDisableTableResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -6246,29 +6138,25 @@ func (p *DisableTableResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -6281,17 +6169,13 @@ func (p *DisableTableResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *DisableTableResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DisableTableResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err383 := p.Io.Read(iprot)
-	if err383 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err383)
+	err380 := p.Io.Read(iprot)
+	if err380 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err380)
 	}
 	return err
-}
-
-func (p *DisableTableResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *DisableTableResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -6301,7 +6185,7 @@ func (p *DisableTableResult) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -6316,7 +6200,7 @@ func (p *DisableTableResult) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *DisableTableResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DisableTableResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -6334,34 +6218,12 @@ func (p *DisableTableResult) WriteField1(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *DisableTableResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *DisableTableResult) TStructName() string {
 	return "DisableTableResult"
 }
 
 func (p *DisableTableResult) ThriftName() string {
 	return "disableTable_result"
-}
-
-func (p *DisableTableResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("DisableTableResult(%+v)", *p)
-}
-
-func (p *DisableTableResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*DisableTableResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *DisableTableResult) AttributeByFieldId(id int) interface{} {
@@ -6385,16 +6247,16 @@ func (p *DisableTableResult) TStructFields() thrift.TFieldContainer {
  *  - TableName: name of the table to check
  */
 type IsTableEnabledArgs struct {
-	thrift.TStruct
 	TableName Bytes "tableName" // 1
 }
 
+var tstructIsTableEnabledArgs = thrift.NewTStruct("isTableEnabled_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+})
+
+func (*IsTableEnabledArgs) GetTStruct() thrift.TStruct { return tstructIsTableEnabledArgs }
 func NewIsTableEnabledArgs() *IsTableEnabledArgs {
-	output := &IsTableEnabledArgs{
-		TStruct: thrift.NewTStruct("isTableEnabled_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-		}),
-	}
+	output := &IsTableEnabledArgs{}
 	{
 	}
 	return output
@@ -6408,12 +6270,8 @@ func (p *IsTableEnabledArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructIsTableEnabledArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructIsTableEnabledArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -6421,29 +6279,25 @@ func (p *IsTableEnabledArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Bytes
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -6456,17 +6310,13 @@ func (p *IsTableEnabledArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *IsTableEnabledArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v384, err385 := iprot.ReadBinary()
-	if err385 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err385)
+func (p *IsTableEnabledArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v381, err382 := iprot.ReadBinary()
+	if err382 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err382)
 	}
-	p.TableName = Bytes(v384)
+	p.TableName = Bytes(v381)
 	return err
-}
-
-func (p *IsTableEnabledArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *IsTableEnabledArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -6474,7 +6324,7 @@ func (p *IsTableEnabledArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
@@ -6489,9 +6339,9 @@ func (p *IsTableEnabledArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *IsTableEnabledArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *IsTableEnabledArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -6507,34 +6357,12 @@ func (p *IsTableEnabledArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *IsTableEnabledArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *IsTableEnabledArgs) TStructName() string {
 	return "IsTableEnabledArgs"
 }
 
 func (p *IsTableEnabledArgs) ThriftName() string {
 	return "isTableEnabled_args"
-}
-
-func (p *IsTableEnabledArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("IsTableEnabledArgs(%+v)", *p)
-}
-
-func (p *IsTableEnabledArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*IsTableEnabledArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *IsTableEnabledArgs) AttributeByFieldId(id int) interface{} {
@@ -6549,7 +6377,7 @@ func (p *IsTableEnabledArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *IsTableEnabledArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
+		thrift.NewTField("tableName", thrift.STRING, 1),
 	})
 }
 
@@ -6559,18 +6387,18 @@ func (p *IsTableEnabledArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type IsTableEnabledResult struct {
-	thrift.TStruct
 	Success bool     "success" // 0
 	Io      *IOError "io"      // 1
 }
 
+var tstructIsTableEnabledResult = thrift.NewTStruct("isTableEnabled_result", []thrift.TField{
+	thrift.NewTField("success", thrift.BOOL, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*IsTableEnabledResult) GetTStruct() thrift.TStruct { return tstructIsTableEnabledResult }
 func NewIsTableEnabledResult() *IsTableEnabledResult {
-	output := &IsTableEnabledResult{
-		TStruct: thrift.NewTStruct("isTableEnabled_result", []thrift.TField{
-			thrift.NewTField("success", thrift.BOOL, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &IsTableEnabledResult{}
 	{
 	}
 	return output
@@ -6584,12 +6412,8 @@ func (p *IsTableEnabledResult) Read(iprot thrift.TProtocol) (err thrift.TProtoco
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructIsTableEnabledResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructIsTableEnabledResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -6597,46 +6421,37 @@ func (p *IsTableEnabledResult) Read(iprot thrift.TProtocol) (err thrift.TProtoco
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //bool
 			if fieldTypeId == thrift.BOOL {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -6649,30 +6464,22 @@ func (p *IsTableEnabledResult) Read(iprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *IsTableEnabledResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v386, err387 := iprot.ReadBool()
-	if err387 != nil {
-		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err387)
+func (p *IsTableEnabledResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v383, err384 := iprot.ReadBool()
+	if err384 != nil {
+		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err384)
 	}
-	p.Success = v386
+	p.Success = v383
 	return err
 }
 
-func (p *IsTableEnabledResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *IsTableEnabledResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *IsTableEnabledResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err390 := p.Io.Read(iprot)
-	if err390 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err390)
+	err387 := p.Io.Read(iprot)
+	if err387 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err387)
 	}
 	return err
-}
-
-func (p *IsTableEnabledResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *IsTableEnabledResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -6682,11 +6489,11 @@ func (p *IsTableEnabledResult) Write(oprot thrift.TProtocol) (err thrift.TProtoc
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -6701,7 +6508,7 @@ func (p *IsTableEnabledResult) Write(oprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *IsTableEnabledResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *IsTableEnabledResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("success", thrift.BOOL, 0)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
@@ -6717,11 +6524,7 @@ func (p *IsTableEnabledResult) WriteField0(oprot thrift.TProtocol) (err thrift.T
 	return err
 }
 
-func (p *IsTableEnabledResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *IsTableEnabledResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *IsTableEnabledResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -6739,34 +6542,12 @@ func (p *IsTableEnabledResult) WriteField1(oprot thrift.TProtocol) (err thrift.T
 	return err
 }
 
-func (p *IsTableEnabledResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *IsTableEnabledResult) TStructName() string {
 	return "IsTableEnabledResult"
 }
 
 func (p *IsTableEnabledResult) ThriftName() string {
 	return "isTableEnabled_result"
-}
-
-func (p *IsTableEnabledResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("IsTableEnabledResult(%+v)", *p)
-}
-
-func (p *IsTableEnabledResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*IsTableEnabledResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *IsTableEnabledResult) AttributeByFieldId(id int) interface{} {
@@ -6793,16 +6574,16 @@ func (p *IsTableEnabledResult) TStructFields() thrift.TFieldContainer {
  *  - TableNameOrRegionName
  */
 type CompactArgs struct {
-	thrift.TStruct
 	TableNameOrRegionName Bytes "tableNameOrRegionName" // 1
 }
 
+var tstructCompactArgs = thrift.NewTStruct("compact_args", []thrift.TField{
+	thrift.NewTField("tableNameOrRegionName", thrift.STRING, 1),
+})
+
+func (*CompactArgs) GetTStruct() thrift.TStruct { return tstructCompactArgs }
 func NewCompactArgs() *CompactArgs {
-	output := &CompactArgs{
-		TStruct: thrift.NewTStruct("compact_args", []thrift.TField{
-			thrift.NewTField("tableNameOrRegionName", thrift.BINARY, 1),
-		}),
-	}
+	output := &CompactArgs{}
 	{
 	}
 	return output
@@ -6816,12 +6597,8 @@ func (p *CompactArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExceptio
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructCompactArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructCompactArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -6829,29 +6606,25 @@ func (p *CompactArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExceptio
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableNameOrRegionName" {
+		switch fieldId {
+		case 1: //Bytes
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -6864,17 +6637,13 @@ func (p *CompactArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExceptio
 	return err
 }
 
-func (p *CompactArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v391, err392 := iprot.ReadBinary()
-	if err392 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableNameOrRegionName", p.ThriftName(), err392)
+func (p *CompactArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v388, err389 := iprot.ReadBinary()
+	if err389 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableNameOrRegionName", p.ThriftName(), err389)
 	}
-	p.TableNameOrRegionName = Bytes(v391)
+	p.TableNameOrRegionName = Bytes(v388)
 	return err
-}
-
-func (p *CompactArgs) ReadFieldTableNameOrRegionName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *CompactArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -6882,7 +6651,7 @@ func (p *CompactArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcepti
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
@@ -6897,9 +6666,9 @@ func (p *CompactArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcepti
 	return err
 }
 
-func (p *CompactArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *CompactArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableNameOrRegionName != nil {
-		err = oprot.WriteFieldBegin("tableNameOrRegionName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableNameOrRegionName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableNameOrRegionName", p.ThriftName(), err)
 		}
@@ -6915,34 +6684,12 @@ func (p *CompactArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *CompactArgs) WriteFieldTableNameOrRegionName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *CompactArgs) TStructName() string {
 	return "CompactArgs"
 }
 
 func (p *CompactArgs) ThriftName() string {
 	return "compact_args"
-}
-
-func (p *CompactArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("CompactArgs(%+v)", *p)
-}
-
-func (p *CompactArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*CompactArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *CompactArgs) AttributeByFieldId(id int) interface{} {
@@ -6957,7 +6704,7 @@ func (p *CompactArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *CompactArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableNameOrRegionName", thrift.BINARY, 1),
+		thrift.NewTField("tableNameOrRegionName", thrift.STRING, 1),
 	})
 }
 
@@ -6966,16 +6713,16 @@ func (p *CompactArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type CompactResult struct {
-	thrift.TStruct
 	Io *IOError "io" // 1
 }
 
+var tstructCompactResult = thrift.NewTStruct("compact_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*CompactResult) GetTStruct() thrift.TStruct { return tstructCompactResult }
 func NewCompactResult() *CompactResult {
-	output := &CompactResult{
-		TStruct: thrift.NewTStruct("compact_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &CompactResult{}
 	{
 	}
 	return output
@@ -6989,12 +6736,8 @@ func (p *CompactResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructCompactResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructCompactResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -7002,29 +6745,25 @@ func (p *CompactResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -7037,17 +6776,13 @@ func (p *CompactResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 	return err
 }
 
-func (p *CompactResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *CompactResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err395 := p.Io.Read(iprot)
-	if err395 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err395)
+	err392 := p.Io.Read(iprot)
+	if err392 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err392)
 	}
 	return err
-}
-
-func (p *CompactResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *CompactResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -7057,7 +6792,7 @@ func (p *CompactResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcep
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -7072,7 +6807,7 @@ func (p *CompactResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcep
 	return err
 }
 
-func (p *CompactResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *CompactResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -7090,34 +6825,12 @@ func (p *CompactResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *CompactResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *CompactResult) TStructName() string {
 	return "CompactResult"
 }
 
 func (p *CompactResult) ThriftName() string {
 	return "compact_result"
-}
-
-func (p *CompactResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("CompactResult(%+v)", *p)
-}
-
-func (p *CompactResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*CompactResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *CompactResult) AttributeByFieldId(id int) interface{} {
@@ -7141,16 +6854,16 @@ func (p *CompactResult) TStructFields() thrift.TFieldContainer {
  *  - TableNameOrRegionName
  */
 type MajorCompactArgs struct {
-	thrift.TStruct
 	TableNameOrRegionName Bytes "tableNameOrRegionName" // 1
 }
 
+var tstructMajorCompactArgs = thrift.NewTStruct("majorCompact_args", []thrift.TField{
+	thrift.NewTField("tableNameOrRegionName", thrift.STRING, 1),
+})
+
+func (*MajorCompactArgs) GetTStruct() thrift.TStruct { return tstructMajorCompactArgs }
 func NewMajorCompactArgs() *MajorCompactArgs {
-	output := &MajorCompactArgs{
-		TStruct: thrift.NewTStruct("majorCompact_args", []thrift.TField{
-			thrift.NewTField("tableNameOrRegionName", thrift.BINARY, 1),
-		}),
-	}
+	output := &MajorCompactArgs{}
 	{
 	}
 	return output
@@ -7164,12 +6877,8 @@ func (p *MajorCompactArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructMajorCompactArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructMajorCompactArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -7177,29 +6886,25 @@ func (p *MajorCompactArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableNameOrRegionName" {
+		switch fieldId {
+		case 1: //Bytes
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -7212,17 +6917,13 @@ func (p *MajorCompactArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *MajorCompactArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v396, err397 := iprot.ReadBinary()
-	if err397 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableNameOrRegionName", p.ThriftName(), err397)
+func (p *MajorCompactArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v393, err394 := iprot.ReadBinary()
+	if err394 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableNameOrRegionName", p.ThriftName(), err394)
 	}
-	p.TableNameOrRegionName = Bytes(v396)
+	p.TableNameOrRegionName = Bytes(v393)
 	return err
-}
-
-func (p *MajorCompactArgs) ReadFieldTableNameOrRegionName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *MajorCompactArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -7230,7 +6931,7 @@ func (p *MajorCompactArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
@@ -7245,9 +6946,9 @@ func (p *MajorCompactArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *MajorCompactArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MajorCompactArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableNameOrRegionName != nil {
-		err = oprot.WriteFieldBegin("tableNameOrRegionName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableNameOrRegionName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableNameOrRegionName", p.ThriftName(), err)
 		}
@@ -7263,34 +6964,12 @@ func (p *MajorCompactArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *MajorCompactArgs) WriteFieldTableNameOrRegionName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *MajorCompactArgs) TStructName() string {
 	return "MajorCompactArgs"
 }
 
 func (p *MajorCompactArgs) ThriftName() string {
 	return "majorCompact_args"
-}
-
-func (p *MajorCompactArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("MajorCompactArgs(%+v)", *p)
-}
-
-func (p *MajorCompactArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*MajorCompactArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *MajorCompactArgs) AttributeByFieldId(id int) interface{} {
@@ -7305,7 +6984,7 @@ func (p *MajorCompactArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *MajorCompactArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableNameOrRegionName", thrift.BINARY, 1),
+		thrift.NewTField("tableNameOrRegionName", thrift.STRING, 1),
 	})
 }
 
@@ -7314,16 +6993,16 @@ func (p *MajorCompactArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type MajorCompactResult struct {
-	thrift.TStruct
 	Io *IOError "io" // 1
 }
 
+var tstructMajorCompactResult = thrift.NewTStruct("majorCompact_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*MajorCompactResult) GetTStruct() thrift.TStruct { return tstructMajorCompactResult }
 func NewMajorCompactResult() *MajorCompactResult {
-	output := &MajorCompactResult{
-		TStruct: thrift.NewTStruct("majorCompact_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &MajorCompactResult{}
 	{
 	}
 	return output
@@ -7337,12 +7016,8 @@ func (p *MajorCompactResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructMajorCompactResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructMajorCompactResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -7350,29 +7025,25 @@ func (p *MajorCompactResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -7385,17 +7056,13 @@ func (p *MajorCompactResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *MajorCompactResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MajorCompactResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err400 := p.Io.Read(iprot)
-	if err400 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err400)
+	err397 := p.Io.Read(iprot)
+	if err397 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err397)
 	}
 	return err
-}
-
-func (p *MajorCompactResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *MajorCompactResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -7405,7 +7072,7 @@ func (p *MajorCompactResult) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -7420,7 +7087,7 @@ func (p *MajorCompactResult) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *MajorCompactResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MajorCompactResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -7438,34 +7105,12 @@ func (p *MajorCompactResult) WriteField1(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *MajorCompactResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *MajorCompactResult) TStructName() string {
 	return "MajorCompactResult"
 }
 
 func (p *MajorCompactResult) ThriftName() string {
 	return "majorCompact_result"
-}
-
-func (p *MajorCompactResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("MajorCompactResult(%+v)", *p)
-}
-
-func (p *MajorCompactResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*MajorCompactResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *MajorCompactResult) AttributeByFieldId(id int) interface{} {
@@ -7485,13 +7130,13 @@ func (p *MajorCompactResult) TStructFields() thrift.TFieldContainer {
 }
 
 type GetTableNamesArgs struct {
-	thrift.TStruct
 }
 
+var tstructGetTableNamesArgs = thrift.NewTStruct("getTableNames_args", []thrift.TField{})
+
+func (*GetTableNamesArgs) GetTStruct() thrift.TStruct { return tstructGetTableNamesArgs }
 func NewGetTableNamesArgs() *GetTableNamesArgs {
-	output := &GetTableNamesArgs{
-		TStruct: thrift.NewTStruct("getTableNames_args", []thrift.TField{}),
-	}
+	output := &GetTableNamesArgs{}
 	{
 	}
 	return output
@@ -7505,12 +7150,8 @@ func (p *GetTableNamesArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetTableNamesArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetTableNamesArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -7518,10 +7159,13 @@ func (p *GetTableNamesArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		err = iprot.Skip(fieldTypeId)
-		if err != nil {
-			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-		}
+		switch fieldId {
+		default:
+			err = iprot.Skip(fieldTypeId)
+			if err != nil {
+				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+			}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -7558,24 +7202,6 @@ func (p *GetTableNamesArgs) ThriftName() string {
 	return "getTableNames_args"
 }
 
-func (p *GetTableNamesArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetTableNamesArgs(%+v)", *p)
-}
-
-func (p *GetTableNamesArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetTableNamesArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
-}
-
 func (p *GetTableNamesArgs) AttributeByFieldId(id int) interface{} {
 	switch id {
 	default:
@@ -7594,18 +7220,18 @@ func (p *GetTableNamesArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetTableNamesResult struct {
-	thrift.TStruct
-	Success thrift.TList "success" // 0
-	Io      *IOError     "io"      // 1
+	Success []Text   "success" // 0
+	Io      *IOError "io"      // 1
 }
 
+var tstructGetTableNamesResult = thrift.NewTStruct("getTableNames_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetTableNamesResult) GetTStruct() thrift.TStruct { return tstructGetTableNamesResult }
 func NewGetTableNamesResult() *GetTableNamesResult {
-	output := &GetTableNamesResult{
-		TStruct: thrift.NewTStruct("getTableNames_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetTableNamesResult{}
 	{
 	}
 	return output
@@ -7619,12 +7245,8 @@ func (p *GetTableNamesResult) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetTableNamesResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetTableNamesResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -7632,46 +7254,37 @@ func (p *GetTableNamesResult) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -7684,19 +7297,20 @@ func (p *GetTableNamesResult) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetTableNamesResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype406, _size403, err := iprot.ReadListBegin()
+func (p *GetTableNamesResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype403, _size400, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype406, _size403)
-	for _i407 := 0; _i407 < _size403; _i407++ {
-		v409, err410 := iprot.ReadBinary()
-		if err410 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_elem408", "", err410)
+	_ = _etype403
+	p.Success = make([]Text, _size400, _size400)
+	for i := 0; i < _size400; i++ {
+		v406, err407 := iprot.ReadBinary()
+		if err407 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_elem405", "", err407)
 		}
-		_elem408 := Text(v409)
-		p.Success.Push(_elem408)
+		_elem405 := Text(v406)
+		p.Success[i] = _elem405
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -7705,21 +7319,13 @@ func (p *GetTableNamesResult) ReadField0(iprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *GetTableNamesResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetTableNamesResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetTableNamesResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err413 := p.Io.Read(iprot)
-	if err413 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err413)
+	err410 := p.Io.Read(iprot)
+	if err410 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err410)
 	}
 	return err
-}
-
-func (p *GetTableNamesResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetTableNamesResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -7729,11 +7335,11 @@ func (p *GetTableNamesResult) Write(oprot thrift.TProtocol) (err thrift.TProtoco
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -7748,21 +7354,20 @@ func (p *GetTableNamesResult) Write(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *GetTableNamesResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetTableNamesResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.BINARY, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRING, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter414 := range p.Success.Iter() {
-			Iter415 := Iter414.(Text)
-			err = oprot.WriteBinary(Iter415)
+		for _, Iter411 := range p.Success {
+			err = oprot.WriteBinary(Iter411)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Iter415", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Iter411", "", err)
 			}
 		}
 		err = oprot.WriteListEnd()
@@ -7777,11 +7382,7 @@ func (p *GetTableNamesResult) WriteField0(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *GetTableNamesResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetTableNamesResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetTableNamesResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -7799,34 +7400,12 @@ func (p *GetTableNamesResult) WriteField1(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *GetTableNamesResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetTableNamesResult) TStructName() string {
 	return "GetTableNamesResult"
 }
 
 func (p *GetTableNamesResult) ThriftName() string {
 	return "getTableNames_result"
-}
-
-func (p *GetTableNamesResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetTableNamesResult(%+v)", *p)
-}
-
-func (p *GetTableNamesResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetTableNamesResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetTableNamesResult) AttributeByFieldId(id int) interface{} {
@@ -7853,16 +7432,16 @@ func (p *GetTableNamesResult) TStructFields() thrift.TFieldContainer {
  *  - TableName: table name
  */
 type GetColumnDescriptorsArgs struct {
-	thrift.TStruct
 	TableName Text "tableName" // 1
 }
 
+var tstructGetColumnDescriptorsArgs = thrift.NewTStruct("getColumnDescriptors_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+})
+
+func (*GetColumnDescriptorsArgs) GetTStruct() thrift.TStruct { return tstructGetColumnDescriptorsArgs }
 func NewGetColumnDescriptorsArgs() *GetColumnDescriptorsArgs {
-	output := &GetColumnDescriptorsArgs{
-		TStruct: thrift.NewTStruct("getColumnDescriptors_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-		}),
-	}
+	output := &GetColumnDescriptorsArgs{}
 	{
 	}
 	return output
@@ -7876,12 +7455,8 @@ func (p *GetColumnDescriptorsArgs) Read(iprot thrift.TProtocol) (err thrift.TPro
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetColumnDescriptorsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetColumnDescriptorsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -7889,29 +7464,25 @@ func (p *GetColumnDescriptorsArgs) Read(iprot thrift.TProtocol) (err thrift.TPro
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -7924,17 +7495,13 @@ func (p *GetColumnDescriptorsArgs) Read(iprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *GetColumnDescriptorsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v416, err417 := iprot.ReadBinary()
-	if err417 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err417)
+func (p *GetColumnDescriptorsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v412, err413 := iprot.ReadBinary()
+	if err413 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err413)
 	}
-	p.TableName = Text(v416)
+	p.TableName = Text(v412)
 	return err
-}
-
-func (p *GetColumnDescriptorsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetColumnDescriptorsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -7942,7 +7509,7 @@ func (p *GetColumnDescriptorsArgs) Write(oprot thrift.TProtocol) (err thrift.TPr
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
@@ -7957,9 +7524,9 @@ func (p *GetColumnDescriptorsArgs) Write(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *GetColumnDescriptorsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetColumnDescriptorsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -7975,34 +7542,12 @@ func (p *GetColumnDescriptorsArgs) WriteField1(oprot thrift.TProtocol) (err thri
 	return err
 }
 
-func (p *GetColumnDescriptorsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetColumnDescriptorsArgs) TStructName() string {
 	return "GetColumnDescriptorsArgs"
 }
 
 func (p *GetColumnDescriptorsArgs) ThriftName() string {
 	return "getColumnDescriptors_args"
-}
-
-func (p *GetColumnDescriptorsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetColumnDescriptorsArgs(%+v)", *p)
-}
-
-func (p *GetColumnDescriptorsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetColumnDescriptorsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetColumnDescriptorsArgs) AttributeByFieldId(id int) interface{} {
@@ -8017,7 +7562,7 @@ func (p *GetColumnDescriptorsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *GetColumnDescriptorsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
+		thrift.NewTField("tableName", thrift.STRING, 1),
 	})
 }
 
@@ -8027,18 +7572,20 @@ func (p *GetColumnDescriptorsArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetColumnDescriptorsResult struct {
-	thrift.TStruct
-	Success thrift.TMap "success" // 0
-	Io      *IOError    "io"      // 1
+	Success map[string]*ColumnDescriptor "success" // 0
+	Io      *IOError                     "io"      // 1
 }
 
+var tstructGetColumnDescriptorsResult = thrift.NewTStruct("getColumnDescriptors_result", []thrift.TField{
+	thrift.NewTField("success", thrift.MAP, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetColumnDescriptorsResult) GetTStruct() thrift.TStruct {
+	return tstructGetColumnDescriptorsResult
+}
 func NewGetColumnDescriptorsResult() *GetColumnDescriptorsResult {
-	output := &GetColumnDescriptorsResult{
-		TStruct: thrift.NewTStruct("getColumnDescriptors_result", []thrift.TField{
-			thrift.NewTField("success", thrift.MAP, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetColumnDescriptorsResult{}
 	{
 	}
 	return output
@@ -8052,12 +7599,8 @@ func (p *GetColumnDescriptorsResult) Read(iprot thrift.TProtocol) (err thrift.TP
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetColumnDescriptorsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetColumnDescriptorsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -8065,46 +7608,37 @@ func (p *GetColumnDescriptorsResult) Read(iprot thrift.TProtocol) (err thrift.TP
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -8117,24 +7651,25 @@ func (p *GetColumnDescriptorsResult) Read(iprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *GetColumnDescriptorsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype421, _vtype422, _size420, err := iprot.ReadMapBegin()
+func (p *GetColumnDescriptorsResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype417, _vtype418, _size416, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTMap(_ktype421, _vtype422, _size420)
-	for _i424 := 0; _i424 < _size420; _i424++ {
-		v427, err428 := iprot.ReadBinary()
-		if err428 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key425", "", err428)
+	_, _ = _ktype417, _vtype418
+	p.Success = make(map[string]*ColumnDescriptor, _size416)
+	for i := 0; i < _size416; i++ {
+		v423, err424 := iprot.ReadString()
+		if err424 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key421", "", err424)
 		}
-		_key425 := Text(v427)
-		_val426 := NewColumnDescriptor()
-		err431 := _val426.Read(iprot)
-		if err431 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_val426ColumnDescriptor", err431)
+		_key421 := v423
+		_val422 := NewColumnDescriptor()
+		err427 := _val422.Read(iprot)
+		if err427 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_val422ColumnDescriptor", err427)
 		}
-		p.Success.Set(_key425, _val426)
+		p.Success[_key421] = _val422
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -8143,21 +7678,13 @@ func (p *GetColumnDescriptorsResult) ReadField0(iprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *GetColumnDescriptorsResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetColumnDescriptorsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetColumnDescriptorsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err434 := p.Io.Read(iprot)
-	if err434 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err434)
+	err430 := p.Io.Read(iprot)
+	if err430 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err430)
 	}
 	return err
-}
-
-func (p *GetColumnDescriptorsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetColumnDescriptorsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -8167,11 +7694,11 @@ func (p *GetColumnDescriptorsResult) Write(oprot thrift.TProtocol) (err thrift.T
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -8186,23 +7713,22 @@ func (p *GetColumnDescriptorsResult) Write(oprot thrift.TProtocol) (err thrift.T
 	return err
 }
 
-func (p *GetColumnDescriptorsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetColumnDescriptorsResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.MAP, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter435 := range p.Success.Iter() {
-			Kiter436, Viter437 := Miter435.Key().(Text), Miter435.Value().(*ColumnDescriptor)
-			err = oprot.WriteBinary(Kiter436)
+		for Kiter431, Viter432 := range p.Success {
+			err = oprot.WriteString(Kiter431)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter436", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter431", "", err)
 			}
-			err = Viter437.Write(oprot)
+			err = Viter432.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("ColumnDescriptor", err)
 			}
@@ -8219,11 +7745,7 @@ func (p *GetColumnDescriptorsResult) WriteField0(oprot thrift.TProtocol) (err th
 	return err
 }
 
-func (p *GetColumnDescriptorsResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetColumnDescriptorsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetColumnDescriptorsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -8241,34 +7763,12 @@ func (p *GetColumnDescriptorsResult) WriteField1(oprot thrift.TProtocol) (err th
 	return err
 }
 
-func (p *GetColumnDescriptorsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetColumnDescriptorsResult) TStructName() string {
 	return "GetColumnDescriptorsResult"
 }
 
 func (p *GetColumnDescriptorsResult) ThriftName() string {
 	return "getColumnDescriptors_result"
-}
-
-func (p *GetColumnDescriptorsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetColumnDescriptorsResult(%+v)", *p)
-}
-
-func (p *GetColumnDescriptorsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetColumnDescriptorsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetColumnDescriptorsResult) AttributeByFieldId(id int) interface{} {
@@ -8295,16 +7795,16 @@ func (p *GetColumnDescriptorsResult) TStructFields() thrift.TFieldContainer {
  *  - TableName: table name
  */
 type GetTableRegionsArgs struct {
-	thrift.TStruct
 	TableName Text "tableName" // 1
 }
 
+var tstructGetTableRegionsArgs = thrift.NewTStruct("getTableRegions_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+})
+
+func (*GetTableRegionsArgs) GetTStruct() thrift.TStruct { return tstructGetTableRegionsArgs }
 func NewGetTableRegionsArgs() *GetTableRegionsArgs {
-	output := &GetTableRegionsArgs{
-		TStruct: thrift.NewTStruct("getTableRegions_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-		}),
-	}
+	output := &GetTableRegionsArgs{}
 	{
 	}
 	return output
@@ -8318,12 +7818,8 @@ func (p *GetTableRegionsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetTableRegionsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetTableRegionsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -8331,29 +7827,25 @@ func (p *GetTableRegionsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -8366,17 +7858,13 @@ func (p *GetTableRegionsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetTableRegionsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v438, err439 := iprot.ReadBinary()
-	if err439 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err439)
+func (p *GetTableRegionsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v433, err434 := iprot.ReadBinary()
+	if err434 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err434)
 	}
-	p.TableName = Text(v438)
+	p.TableName = Text(v433)
 	return err
-}
-
-func (p *GetTableRegionsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetTableRegionsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -8384,7 +7872,7 @@ func (p *GetTableRegionsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtoco
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
@@ -8399,9 +7887,9 @@ func (p *GetTableRegionsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *GetTableRegionsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetTableRegionsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -8417,34 +7905,12 @@ func (p *GetTableRegionsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *GetTableRegionsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetTableRegionsArgs) TStructName() string {
 	return "GetTableRegionsArgs"
 }
 
 func (p *GetTableRegionsArgs) ThriftName() string {
 	return "getTableRegions_args"
-}
-
-func (p *GetTableRegionsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetTableRegionsArgs(%+v)", *p)
-}
-
-func (p *GetTableRegionsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetTableRegionsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetTableRegionsArgs) AttributeByFieldId(id int) interface{} {
@@ -8459,7 +7925,7 @@ func (p *GetTableRegionsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *GetTableRegionsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
+		thrift.NewTField("tableName", thrift.STRING, 1),
 	})
 }
 
@@ -8469,18 +7935,18 @@ func (p *GetTableRegionsArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetTableRegionsResult struct {
-	thrift.TStruct
-	Success thrift.TList "success" // 0
-	Io      *IOError     "io"      // 1
+	Success []*TRegionInfo "success" // 0
+	Io      *IOError       "io"      // 1
 }
 
+var tstructGetTableRegionsResult = thrift.NewTStruct("getTableRegions_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetTableRegionsResult) GetTStruct() thrift.TStruct { return tstructGetTableRegionsResult }
 func NewGetTableRegionsResult() *GetTableRegionsResult {
-	output := &GetTableRegionsResult{
-		TStruct: thrift.NewTStruct("getTableRegions_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetTableRegionsResult{}
 	{
 	}
 	return output
@@ -8494,12 +7960,8 @@ func (p *GetTableRegionsResult) Read(iprot thrift.TProtocol) (err thrift.TProtoc
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetTableRegionsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetTableRegionsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -8507,46 +7969,37 @@ func (p *GetTableRegionsResult) Read(iprot thrift.TProtocol) (err thrift.TProtoc
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -8559,19 +8012,20 @@ func (p *GetTableRegionsResult) Read(iprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *GetTableRegionsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype445, _size442, err := iprot.ReadListBegin()
+func (p *GetTableRegionsResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype440, _size437, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype445, _size442)
-	for _i446 := 0; _i446 < _size442; _i446++ {
-		_elem447 := NewTRegionInfo()
-		err450 := _elem447.Read(iprot)
-		if err450 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem447TRegionInfo", err450)
+	_ = _etype440
+	p.Success = make([]*TRegionInfo, _size437, _size437)
+	for i := 0; i < _size437; i++ {
+		_elem442 := NewTRegionInfo()
+		err445 := _elem442.Read(iprot)
+		if err445 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem442TRegionInfo", err445)
 		}
-		p.Success.Push(_elem447)
+		p.Success[i] = _elem442
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -8580,21 +8034,13 @@ func (p *GetTableRegionsResult) ReadField0(iprot thrift.TProtocol) (err thrift.T
 	return err
 }
 
-func (p *GetTableRegionsResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetTableRegionsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetTableRegionsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err453 := p.Io.Read(iprot)
-	if err453 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err453)
+	err448 := p.Io.Read(iprot)
+	if err448 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err448)
 	}
 	return err
-}
-
-func (p *GetTableRegionsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetTableRegionsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -8604,11 +8050,11 @@ func (p *GetTableRegionsResult) Write(oprot thrift.TProtocol) (err thrift.TProto
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -8623,19 +8069,18 @@ func (p *GetTableRegionsResult) Write(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *GetTableRegionsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetTableRegionsResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter454 := range p.Success.Iter() {
-			Iter455 := Iter454.(*TRegionInfo)
-			err = Iter455.Write(oprot)
+		for _, Iter449 := range p.Success {
+			err = Iter449.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TRegionInfo", err)
 			}
@@ -8652,11 +8097,7 @@ func (p *GetTableRegionsResult) WriteField0(oprot thrift.TProtocol) (err thrift.
 	return err
 }
 
-func (p *GetTableRegionsResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetTableRegionsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetTableRegionsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -8674,34 +8115,12 @@ func (p *GetTableRegionsResult) WriteField1(oprot thrift.TProtocol) (err thrift.
 	return err
 }
 
-func (p *GetTableRegionsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetTableRegionsResult) TStructName() string {
 	return "GetTableRegionsResult"
 }
 
 func (p *GetTableRegionsResult) ThriftName() string {
 	return "getTableRegions_result"
-}
-
-func (p *GetTableRegionsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetTableRegionsResult(%+v)", *p)
-}
-
-func (p *GetTableRegionsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetTableRegionsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetTableRegionsResult) AttributeByFieldId(id int) interface{} {
@@ -8729,18 +8148,18 @@ func (p *GetTableRegionsResult) TStructFields() thrift.TFieldContainer {
  *  - ColumnFamilies: list of column family descriptors
  */
 type CreateTableArgs struct {
-	thrift.TStruct
-	TableName      Text         "tableName"      // 1
-	ColumnFamilies thrift.TList "columnFamilies" // 2
+	TableName      Text                "tableName"      // 1
+	ColumnFamilies []*ColumnDescriptor "columnFamilies" // 2
 }
 
+var tstructCreateTableArgs = thrift.NewTStruct("createTable_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("columnFamilies", thrift.LIST, 2),
+})
+
+func (*CreateTableArgs) GetTStruct() thrift.TStruct { return tstructCreateTableArgs }
 func NewCreateTableArgs() *CreateTableArgs {
-	output := &CreateTableArgs{
-		TStruct: thrift.NewTStruct("createTable_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("columnFamilies", thrift.LIST, 2),
-		}),
-	}
+	output := &CreateTableArgs{}
 	{
 	}
 	return output
@@ -8754,12 +8173,8 @@ func (p *CreateTableArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructCreateTableArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructCreateTableArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -8767,46 +8182,37 @@ func (p *CreateTableArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 2 || fieldName == "columnFamilies" {
+		case 2: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -8819,32 +8225,29 @@ func (p *CreateTableArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	return err
 }
 
-func (p *CreateTableArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v456, err457 := iprot.ReadBinary()
-	if err457 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err457)
+func (p *CreateTableArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v450, err451 := iprot.ReadBinary()
+	if err451 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err451)
 	}
-	p.TableName = Text(v456)
+	p.TableName = Text(v450)
 	return err
 }
 
-func (p *CreateTableArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *CreateTableArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype463, _size460, err := iprot.ReadListBegin()
+func (p *CreateTableArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype457, _size454, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.ColumnFamilies", "", err)
 	}
-	p.ColumnFamilies = thrift.NewTList(_etype463, _size460)
-	for _i464 := 0; _i464 < _size460; _i464++ {
-		_elem465 := NewColumnDescriptor()
-		err468 := _elem465.Read(iprot)
-		if err468 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem465ColumnDescriptor", err468)
+	_ = _etype457
+	p.ColumnFamilies = make([]*ColumnDescriptor, _size454, _size454)
+	for i := 0; i < _size454; i++ {
+		_elem459 := NewColumnDescriptor()
+		err462 := _elem459.Read(iprot)
+		if err462 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem459ColumnDescriptor", err462)
 		}
-		p.ColumnFamilies.Push(_elem465)
+		p.ColumnFamilies[i] = _elem459
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -8853,20 +8256,16 @@ func (p *CreateTableArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *CreateTableArgs) ReadFieldColumnFamilies(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
 func (p *CreateTableArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("createTable_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
@@ -8881,9 +8280,9 @@ func (p *CreateTableArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *CreateTableArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *CreateTableArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -8899,23 +8298,18 @@ func (p *CreateTableArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *CreateTableArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *CreateTableArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *CreateTableArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.ColumnFamilies != nil {
 		err = oprot.WriteFieldBegin("columnFamilies", thrift.LIST, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "columnFamilies", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.ColumnFamilies.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.ColumnFamilies))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter469 := range p.ColumnFamilies.Iter() {
-			Iter470 := Iter469.(*ColumnDescriptor)
-			err = Iter470.Write(oprot)
+		for _, Iter463 := range p.ColumnFamilies {
+			err = Iter463.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("ColumnDescriptor", err)
 			}
@@ -8932,34 +8326,12 @@ func (p *CreateTableArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *CreateTableArgs) WriteFieldColumnFamilies(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
 func (p *CreateTableArgs) TStructName() string {
 	return "CreateTableArgs"
 }
 
 func (p *CreateTableArgs) ThriftName() string {
 	return "createTable_args"
-}
-
-func (p *CreateTableArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("CreateTableArgs(%+v)", *p)
-}
-
-func (p *CreateTableArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*CreateTableArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *CreateTableArgs) AttributeByFieldId(id int) interface{} {
@@ -8976,7 +8348,7 @@ func (p *CreateTableArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *CreateTableArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
+		thrift.NewTField("tableName", thrift.STRING, 1),
 		thrift.NewTField("columnFamilies", thrift.LIST, 2),
 	})
 }
@@ -8988,20 +8360,20 @@ func (p *CreateTableArgs) TStructFields() thrift.TFieldContainer {
  *  - Exist
  */
 type CreateTableResult struct {
-	thrift.TStruct
 	Io    *IOError         "io"    // 1
 	Ia    *IllegalArgument "ia"    // 2
 	Exist *AlreadyExists   "exist" // 3
 }
 
+var tstructCreateTableResult = thrift.NewTStruct("createTable_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+	thrift.NewTField("ia", thrift.STRUCT, 2),
+	thrift.NewTField("exist", thrift.STRUCT, 3),
+})
+
+func (*CreateTableResult) GetTStruct() thrift.TStruct { return tstructCreateTableResult }
 func NewCreateTableResult() *CreateTableResult {
-	output := &CreateTableResult{
-		TStruct: thrift.NewTStruct("createTable_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-			thrift.NewTField("ia", thrift.STRUCT, 2),
-			thrift.NewTField("exist", thrift.STRUCT, 3),
-		}),
-	}
+	output := &CreateTableResult{}
 	{
 	}
 	return output
@@ -9015,12 +8387,8 @@ func (p *CreateTableResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructCreateTableResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructCreateTableResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -9028,63 +8396,49 @@ func (p *CreateTableResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "ia" {
-			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
 			}
-		} else if fieldId == 3 || fieldName == "exist" {
+		case 2: //IllegalArgument
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField3(iprot)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else if fieldTypeId == thrift.VOID {
+			} else {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 3: //AlreadyExists
+			if fieldTypeId == thrift.STRUCT {
+				err = p.readField3(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -9097,43 +8451,31 @@ func (p *CreateTableResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *CreateTableResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *CreateTableResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err473 := p.Io.Read(iprot)
-	if err473 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err473)
+	err466 := p.Io.Read(iprot)
+	if err466 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err466)
 	}
 	return err
 }
 
-func (p *CreateTableResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *CreateTableResult) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *CreateTableResult) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Ia = NewIllegalArgument()
-	err476 := p.Ia.Read(iprot)
-	if err476 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err476)
+	err469 := p.Ia.Read(iprot)
+	if err469 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err469)
 	}
 	return err
 }
 
-func (p *CreateTableResult) ReadFieldIa(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *CreateTableResult) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *CreateTableResult) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Exist = NewAlreadyExists()
-	err479 := p.Exist.Read(iprot)
-	if err479 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.ExistAlreadyExists", err479)
+	err472 := p.Exist.Read(iprot)
+	if err472 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.ExistAlreadyExists", err472)
 	}
 	return err
-}
-
-func (p *CreateTableResult) ReadFieldExist(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
 }
 
 func (p *CreateTableResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -9143,15 +8485,15 @@ func (p *CreateTableResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	}
 	switch {
 	case p.Exist != nil:
-		if err = p.WriteField3(oprot); err != nil {
+		if err = p.writeField3(oprot); err != nil {
 			return err
 		}
 	case p.Ia != nil:
-		if err = p.WriteField2(oprot); err != nil {
+		if err = p.writeField2(oprot); err != nil {
 			return err
 		}
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -9166,7 +8508,7 @@ func (p *CreateTableResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *CreateTableResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *CreateTableResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -9184,11 +8526,7 @@ func (p *CreateTableResult) WriteField1(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *CreateTableResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *CreateTableResult) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *CreateTableResult) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Ia != nil {
 		err = oprot.WriteFieldBegin("ia", thrift.STRUCT, 2)
 		if err != nil {
@@ -9206,11 +8544,7 @@ func (p *CreateTableResult) WriteField2(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *CreateTableResult) WriteFieldIa(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *CreateTableResult) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *CreateTableResult) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Exist != nil {
 		err = oprot.WriteFieldBegin("exist", thrift.STRUCT, 3)
 		if err != nil {
@@ -9228,34 +8562,12 @@ func (p *CreateTableResult) WriteField3(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *CreateTableResult) WriteFieldExist(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
 func (p *CreateTableResult) TStructName() string {
 	return "CreateTableResult"
 }
 
 func (p *CreateTableResult) ThriftName() string {
 	return "createTable_result"
-}
-
-func (p *CreateTableResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("CreateTableResult(%+v)", *p)
-}
-
-func (p *CreateTableResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*CreateTableResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *CreateTableResult) AttributeByFieldId(id int) interface{} {
@@ -9285,16 +8597,16 @@ func (p *CreateTableResult) TStructFields() thrift.TFieldContainer {
  *  - TableName: name of table to delete
  */
 type DeleteTableArgs struct {
-	thrift.TStruct
 	TableName Text "tableName" // 1
 }
 
+var tstructDeleteTableArgs = thrift.NewTStruct("deleteTable_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+})
+
+func (*DeleteTableArgs) GetTStruct() thrift.TStruct { return tstructDeleteTableArgs }
 func NewDeleteTableArgs() *DeleteTableArgs {
-	output := &DeleteTableArgs{
-		TStruct: thrift.NewTStruct("deleteTable_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-		}),
-	}
+	output := &DeleteTableArgs{}
 	{
 	}
 	return output
@@ -9308,12 +8620,8 @@ func (p *DeleteTableArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructDeleteTableArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructDeleteTableArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -9321,29 +8629,25 @@ func (p *DeleteTableArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -9356,17 +8660,13 @@ func (p *DeleteTableArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	return err
 }
 
-func (p *DeleteTableArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v480, err481 := iprot.ReadBinary()
-	if err481 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err481)
+func (p *DeleteTableArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v473, err474 := iprot.ReadBinary()
+	if err474 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err474)
 	}
-	p.TableName = Text(v480)
+	p.TableName = Text(v473)
 	return err
-}
-
-func (p *DeleteTableArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *DeleteTableArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -9374,7 +8674,7 @@ func (p *DeleteTableArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
@@ -9389,9 +8689,9 @@ func (p *DeleteTableArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *DeleteTableArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteTableArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -9407,34 +8707,12 @@ func (p *DeleteTableArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *DeleteTableArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *DeleteTableArgs) TStructName() string {
 	return "DeleteTableArgs"
 }
 
 func (p *DeleteTableArgs) ThriftName() string {
 	return "deleteTable_args"
-}
-
-func (p *DeleteTableArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("DeleteTableArgs(%+v)", *p)
-}
-
-func (p *DeleteTableArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*DeleteTableArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *DeleteTableArgs) AttributeByFieldId(id int) interface{} {
@@ -9449,7 +8727,7 @@ func (p *DeleteTableArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *DeleteTableArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
+		thrift.NewTField("tableName", thrift.STRING, 1),
 	})
 }
 
@@ -9458,16 +8736,16 @@ func (p *DeleteTableArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type DeleteTableResult struct {
-	thrift.TStruct
 	Io *IOError "io" // 1
 }
 
+var tstructDeleteTableResult = thrift.NewTStruct("deleteTable_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*DeleteTableResult) GetTStruct() thrift.TStruct { return tstructDeleteTableResult }
 func NewDeleteTableResult() *DeleteTableResult {
-	output := &DeleteTableResult{
-		TStruct: thrift.NewTStruct("deleteTable_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &DeleteTableResult{}
 	{
 	}
 	return output
@@ -9481,12 +8759,8 @@ func (p *DeleteTableResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructDeleteTableResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructDeleteTableResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -9494,29 +8768,25 @@ func (p *DeleteTableResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -9529,17 +8799,13 @@ func (p *DeleteTableResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *DeleteTableResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteTableResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err484 := p.Io.Read(iprot)
-	if err484 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err484)
+	err477 := p.Io.Read(iprot)
+	if err477 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err477)
 	}
 	return err
-}
-
-func (p *DeleteTableResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *DeleteTableResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -9549,7 +8815,7 @@ func (p *DeleteTableResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -9564,7 +8830,7 @@ func (p *DeleteTableResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *DeleteTableResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteTableResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -9582,34 +8848,12 @@ func (p *DeleteTableResult) WriteField1(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *DeleteTableResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *DeleteTableResult) TStructName() string {
 	return "DeleteTableResult"
 }
 
 func (p *DeleteTableResult) ThriftName() string {
 	return "deleteTable_result"
-}
-
-func (p *DeleteTableResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("DeleteTableResult(%+v)", *p)
-}
-
-func (p *DeleteTableResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*DeleteTableResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *DeleteTableResult) AttributeByFieldId(id int) interface{} {
@@ -9636,22 +8880,22 @@ func (p *DeleteTableResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Get attributes
  */
 type GetArgs struct {
-	thrift.TStruct
-	TableName  Text        "tableName"  // 1
-	Row        Text        "row"        // 2
-	Column     Text        "column"     // 3
-	Attributes thrift.TMap "attributes" // 4
+	TableName  Text            "tableName"  // 1
+	Row        Text            "row"        // 2
+	Column     Text            "column"     // 3
+	Attributes map[string]Text "attributes" // 4
 }
 
+var tstructGetArgs = thrift.NewTStruct("get_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("row", thrift.STRING, 2),
+	thrift.NewTField("column", thrift.STRING, 3),
+	thrift.NewTField("attributes", thrift.MAP, 4),
+})
+
+func (*GetArgs) GetTStruct() thrift.TStruct { return tstructGetArgs }
 func NewGetArgs() *GetArgs {
-	output := &GetArgs{
-		TStruct: thrift.NewTStruct("get_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("row", thrift.BINARY, 2),
-			thrift.NewTField("column", thrift.BINARY, 3),
-			thrift.NewTField("attributes", thrift.MAP, 4),
-		}),
-	}
+	output := &GetArgs{}
 	{
 	}
 	return output
@@ -9665,12 +8909,8 @@ func (p *GetArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -9678,80 +8918,61 @@ func (p *GetArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "row" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
 			}
-		} else if fieldId == 3 || fieldName == "column" {
+		case 2: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField3(iprot)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else if fieldTypeId == thrift.VOID {
+			} else {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 3: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField3(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "attributes" {
+		case 4: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -9764,63 +8985,52 @@ func (p *GetArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	return err
 }
 
-func (p *GetArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v485, err486 := iprot.ReadBinary()
-	if err486 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err486)
+func (p *GetArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v478, err479 := iprot.ReadBinary()
+	if err479 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err479)
 	}
-	p.TableName = Text(v485)
+	p.TableName = Text(v478)
 	return err
 }
 
-func (p *GetArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *GetArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v487, err488 := iprot.ReadBinary()
-	if err488 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err488)
+func (p *GetArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v480, err481 := iprot.ReadBinary()
+	if err481 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err481)
 	}
-	p.Row = Text(v487)
+	p.Row = Text(v480)
 	return err
 }
 
-func (p *GetArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *GetArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v489, err490 := iprot.ReadBinary()
-	if err490 != nil {
-		return thrift.NewTProtocolExceptionReadField(3, "column", p.ThriftName(), err490)
+func (p *GetArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v482, err483 := iprot.ReadBinary()
+	if err483 != nil {
+		return thrift.NewTProtocolExceptionReadField(3, "column", p.ThriftName(), err483)
 	}
-	p.Column = Text(v489)
+	p.Column = Text(v482)
 	return err
 }
 
-func (p *GetArgs) ReadFieldColumn(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *GetArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype494, _vtype495, _size493, err := iprot.ReadMapBegin()
+func (p *GetArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype487, _vtype488, _size486, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype494, _vtype495, _size493)
-	for _i497 := 0; _i497 < _size493; _i497++ {
-		v500, err501 := iprot.ReadBinary()
-		if err501 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key498", "", err501)
+	_, _ = _ktype487, _vtype488
+	p.Attributes = make(map[string]Text, _size486)
+	for i := 0; i < _size486; i++ {
+		v493, err494 := iprot.ReadString()
+		if err494 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key491", "", err494)
 		}
-		_key498 := Text(v500)
-		v502, err503 := iprot.ReadBinary()
-		if err503 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val499", "", err503)
+		_key491 := v493
+		v495, err496 := iprot.ReadBinary()
+		if err496 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val492", "", err496)
 		}
-		_val499 := Text(v502)
-		p.Attributes.Set(_key498, _val499)
+		_val492 := Text(v495)
+		p.Attributes[_key491] = _val492
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -9829,28 +9039,24 @@ func (p *GetArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 	return err
 }
 
-func (p *GetArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
 func (p *GetArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("get_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
@@ -9865,9 +9071,9 @@ func (p *GetArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) 
 	return err
 }
 
-func (p *GetArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -9883,13 +9089,9 @@ func (p *GetArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolExcep
 	return err
 }
 
-func (p *GetArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *GetArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "row", p.ThriftName(), err)
 		}
@@ -9905,13 +9107,9 @@ func (p *GetArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolExcep
 	return err
 }
 
-func (p *GetArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *GetArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Column != nil {
-		err = oprot.WriteFieldBegin("column", thrift.BINARY, 3)
+		err = oprot.WriteFieldBegin("column", thrift.STRING, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "column", p.ThriftName(), err)
 		}
@@ -9927,29 +9125,24 @@ func (p *GetArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolExcep
 	return err
 }
 
-func (p *GetArgs) WriteFieldColumn(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *GetArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 4)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(4, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter504 := range p.Attributes.Iter() {
-			Kiter505, Viter506 := Miter504.Key().(Text), Miter504.Value().(Text)
-			err = oprot.WriteBinary(Kiter505)
+		for Kiter497, Viter498 := range p.Attributes {
+			err = oprot.WriteString(Kiter497)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter505", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter497", "", err)
 			}
-			err = oprot.WriteBinary(Viter506)
+			err = oprot.WriteBinary(Viter498)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter506", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter498", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -9964,34 +9157,12 @@ func (p *GetArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolExcep
 	return err
 }
 
-func (p *GetArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
 func (p *GetArgs) TStructName() string {
 	return "GetArgs"
 }
 
 func (p *GetArgs) ThriftName() string {
 	return "get_args"
-}
-
-func (p *GetArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetArgs(%+v)", *p)
-}
-
-func (p *GetArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetArgs) AttributeByFieldId(id int) interface{} {
@@ -10012,9 +9183,9 @@ func (p *GetArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *GetArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("row", thrift.BINARY, 2),
-		thrift.NewTField("column", thrift.BINARY, 3),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("row", thrift.STRING, 2),
+		thrift.NewTField("column", thrift.STRING, 3),
 		thrift.NewTField("attributes", thrift.MAP, 4),
 	})
 }
@@ -10025,18 +9196,18 @@ func (p *GetArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetResult struct {
-	thrift.TStruct
-	Success thrift.TList "success" // 0
-	Io      *IOError     "io"      // 1
+	Success []*TCell "success" // 0
+	Io      *IOError "io"      // 1
 }
 
+var tstructGetResult = thrift.NewTStruct("get_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetResult) GetTStruct() thrift.TStruct { return tstructGetResult }
 func NewGetResult() *GetResult {
-	output := &GetResult{
-		TStruct: thrift.NewTStruct("get_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetResult{}
 	{
 	}
 	return output
@@ -10050,12 +9221,8 @@ func (p *GetResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolException)
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -10063,46 +9230,37 @@ func (p *GetResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolException)
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -10115,19 +9273,20 @@ func (p *GetResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolException)
 	return err
 }
 
-func (p *GetResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype512, _size509, err := iprot.ReadListBegin()
+func (p *GetResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype504, _size501, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype512, _size509)
-	for _i513 := 0; _i513 < _size509; _i513++ {
-		_elem514 := NewTCell()
-		err517 := _elem514.Read(iprot)
-		if err517 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem514TCell", err517)
+	_ = _etype504
+	p.Success = make([]*TCell, _size501, _size501)
+	for i := 0; i < _size501; i++ {
+		_elem506 := NewTCell()
+		err509 := _elem506.Read(iprot)
+		if err509 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem506TCell", err509)
 		}
-		p.Success.Push(_elem514)
+		p.Success[i] = _elem506
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -10136,21 +9295,13 @@ func (p *GetResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	return err
 }
 
-func (p *GetResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err520 := p.Io.Read(iprot)
-	if err520 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err520)
+	err512 := p.Io.Read(iprot)
+	if err512 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err512)
 	}
 	return err
-}
-
-func (p *GetResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -10160,11 +9311,11 @@ func (p *GetResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -10179,19 +9330,18 @@ func (p *GetResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException
 	return err
 }
 
-func (p *GetResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter521 := range p.Success.Iter() {
-			Iter522 := Iter521.(*TCell)
-			err = Iter522.Write(oprot)
+		for _, Iter513 := range p.Success {
+			err = Iter513.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TCell", err)
 			}
@@ -10208,11 +9358,7 @@ func (p *GetResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *GetResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -10230,34 +9376,12 @@ func (p *GetResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *GetResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetResult) TStructName() string {
 	return "GetResult"
 }
 
 func (p *GetResult) ThriftName() string {
 	return "get_result"
-}
-
-func (p *GetResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetResult(%+v)", *p)
-}
-
-func (p *GetResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetResult) AttributeByFieldId(id int) interface{} {
@@ -10288,24 +9412,24 @@ func (p *GetResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Get attributes
  */
 type GetVerArgs struct {
-	thrift.TStruct
-	TableName   Text        "tableName"   // 1
-	Row         Text        "row"         // 2
-	Column      Text        "column"      // 3
-	NumVersions int32       "numVersions" // 4
-	Attributes  thrift.TMap "attributes"  // 5
+	TableName   Text            "tableName"   // 1
+	Row         Text            "row"         // 2
+	Column      Text            "column"      // 3
+	NumVersions int32           "numVersions" // 4
+	Attributes  map[string]Text "attributes"  // 5
 }
 
+var tstructGetVerArgs = thrift.NewTStruct("getVer_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("row", thrift.STRING, 2),
+	thrift.NewTField("column", thrift.STRING, 3),
+	thrift.NewTField("numVersions", thrift.I32, 4),
+	thrift.NewTField("attributes", thrift.MAP, 5),
+})
+
+func (*GetVerArgs) GetTStruct() thrift.TStruct { return tstructGetVerArgs }
 func NewGetVerArgs() *GetVerArgs {
-	output := &GetVerArgs{
-		TStruct: thrift.NewTStruct("getVer_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("row", thrift.BINARY, 2),
-			thrift.NewTField("column", thrift.BINARY, 3),
-			thrift.NewTField("numVersions", thrift.I32, 4),
-			thrift.NewTField("attributes", thrift.MAP, 5),
-		}),
-	}
+	output := &GetVerArgs{}
 	{
 	}
 	return output
@@ -10319,12 +9443,8 @@ func (p *GetVerArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolException
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetVerArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetVerArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -10332,97 +9452,73 @@ func (p *GetVerArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolException
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "row" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
 			}
-		} else if fieldId == 3 || fieldName == "column" {
+		case 2: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField3(iprot)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else if fieldTypeId == thrift.VOID {
+			} else {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 3: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField3(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "numVersions" {
+		case 4: //i32
 			if fieldTypeId == thrift.I32 {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 5 || fieldName == "attributes" {
+		case 5: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField5(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField5(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField5(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -10435,76 +9531,61 @@ func (p *GetVerArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolException
 	return err
 }
 
-func (p *GetVerArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v523, err524 := iprot.ReadBinary()
-	if err524 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err524)
+func (p *GetVerArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v514, err515 := iprot.ReadBinary()
+	if err515 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err515)
 	}
-	p.TableName = Text(v523)
+	p.TableName = Text(v514)
 	return err
 }
 
-func (p *GetVerArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *GetVerArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v525, err526 := iprot.ReadBinary()
-	if err526 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err526)
+func (p *GetVerArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v516, err517 := iprot.ReadBinary()
+	if err517 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err517)
 	}
-	p.Row = Text(v525)
+	p.Row = Text(v516)
 	return err
 }
 
-func (p *GetVerArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *GetVerArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v527, err528 := iprot.ReadBinary()
-	if err528 != nil {
-		return thrift.NewTProtocolExceptionReadField(3, "column", p.ThriftName(), err528)
+func (p *GetVerArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v518, err519 := iprot.ReadBinary()
+	if err519 != nil {
+		return thrift.NewTProtocolExceptionReadField(3, "column", p.ThriftName(), err519)
 	}
-	p.Column = Text(v527)
+	p.Column = Text(v518)
 	return err
 }
 
-func (p *GetVerArgs) ReadFieldColumn(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *GetVerArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v529, err530 := iprot.ReadI32()
-	if err530 != nil {
-		return thrift.NewTProtocolExceptionReadField(4, "numVersions", p.ThriftName(), err530)
+func (p *GetVerArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v520, err521 := iprot.ReadI32()
+	if err521 != nil {
+		return thrift.NewTProtocolExceptionReadField(4, "numVersions", p.ThriftName(), err521)
 	}
-	p.NumVersions = v529
+	p.NumVersions = v520
 	return err
 }
 
-func (p *GetVerArgs) ReadFieldNumVersions(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
-func (p *GetVerArgs) ReadField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype534, _vtype535, _size533, err := iprot.ReadMapBegin()
+func (p *GetVerArgs) readField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype525, _vtype526, _size524, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype534, _vtype535, _size533)
-	for _i537 := 0; _i537 < _size533; _i537++ {
-		v540, err541 := iprot.ReadBinary()
-		if err541 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key538", "", err541)
+	_, _ = _ktype525, _vtype526
+	p.Attributes = make(map[string]Text, _size524)
+	for i := 0; i < _size524; i++ {
+		v531, err532 := iprot.ReadString()
+		if err532 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key529", "", err532)
 		}
-		_key538 := Text(v540)
-		v542, err543 := iprot.ReadBinary()
-		if err543 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val539", "", err543)
+		_key529 := v531
+		v533, err534 := iprot.ReadBinary()
+		if err534 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val530", "", err534)
 		}
-		_val539 := Text(v542)
-		p.Attributes.Set(_key538, _val539)
+		_val530 := Text(v533)
+		p.Attributes[_key529] = _val530
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -10513,32 +9594,28 @@ func (p *GetVerArgs) ReadField5(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *GetVerArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField5(iprot)
-}
-
 func (p *GetVerArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("getVer_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField5(oprot)
+	err = p.writeField5(oprot)
 	if err != nil {
 		return err
 	}
@@ -10553,9 +9630,9 @@ func (p *GetVerArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExceptio
 	return err
 }
 
-func (p *GetVerArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -10571,13 +9648,9 @@ func (p *GetVerArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *GetVerArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *GetVerArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "row", p.ThriftName(), err)
 		}
@@ -10593,13 +9666,9 @@ func (p *GetVerArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *GetVerArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *GetVerArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Column != nil {
-		err = oprot.WriteFieldBegin("column", thrift.BINARY, 3)
+		err = oprot.WriteFieldBegin("column", thrift.STRING, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "column", p.ThriftName(), err)
 		}
@@ -10615,11 +9684,7 @@ func (p *GetVerArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *GetVerArgs) WriteFieldColumn(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *GetVerArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("numVersions", thrift.I32, 4)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(4, "numVersions", p.ThriftName(), err)
@@ -10635,29 +9700,24 @@ func (p *GetVerArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *GetVerArgs) WriteFieldNumVersions(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
-func (p *GetVerArgs) WriteField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerArgs) writeField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 5)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(5, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter544 := range p.Attributes.Iter() {
-			Kiter545, Viter546 := Miter544.Key().(Text), Miter544.Value().(Text)
-			err = oprot.WriteBinary(Kiter545)
+		for Kiter535, Viter536 := range p.Attributes {
+			err = oprot.WriteString(Kiter535)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter545", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter535", "", err)
 			}
-			err = oprot.WriteBinary(Viter546)
+			err = oprot.WriteBinary(Viter536)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter546", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter536", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -10672,34 +9732,12 @@ func (p *GetVerArgs) WriteField5(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *GetVerArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField5(oprot)
-}
-
 func (p *GetVerArgs) TStructName() string {
 	return "GetVerArgs"
 }
 
 func (p *GetVerArgs) ThriftName() string {
 	return "getVer_args"
-}
-
-func (p *GetVerArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetVerArgs(%+v)", *p)
-}
-
-func (p *GetVerArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetVerArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetVerArgs) AttributeByFieldId(id int) interface{} {
@@ -10722,9 +9760,9 @@ func (p *GetVerArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *GetVerArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("row", thrift.BINARY, 2),
-		thrift.NewTField("column", thrift.BINARY, 3),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("row", thrift.STRING, 2),
+		thrift.NewTField("column", thrift.STRING, 3),
 		thrift.NewTField("numVersions", thrift.I32, 4),
 		thrift.NewTField("attributes", thrift.MAP, 5),
 	})
@@ -10736,18 +9774,18 @@ func (p *GetVerArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetVerResult struct {
-	thrift.TStruct
-	Success thrift.TList "success" // 0
-	Io      *IOError     "io"      // 1
+	Success []*TCell "success" // 0
+	Io      *IOError "io"      // 1
 }
 
+var tstructGetVerResult = thrift.NewTStruct("getVer_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetVerResult) GetTStruct() thrift.TStruct { return tstructGetVerResult }
 func NewGetVerResult() *GetVerResult {
-	output := &GetVerResult{
-		TStruct: thrift.NewTStruct("getVer_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetVerResult{}
 	{
 	}
 	return output
@@ -10761,12 +9799,8 @@ func (p *GetVerResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcepti
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetVerResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetVerResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -10774,46 +9808,37 @@ func (p *GetVerResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcepti
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -10826,19 +9851,20 @@ func (p *GetVerResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcepti
 	return err
 }
 
-func (p *GetVerResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype552, _size549, err := iprot.ReadListBegin()
+func (p *GetVerResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype542, _size539, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype552, _size549)
-	for _i553 := 0; _i553 < _size549; _i553++ {
-		_elem554 := NewTCell()
-		err557 := _elem554.Read(iprot)
-		if err557 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem554TCell", err557)
+	_ = _etype542
+	p.Success = make([]*TCell, _size539, _size539)
+	for i := 0; i < _size539; i++ {
+		_elem544 := NewTCell()
+		err547 := _elem544.Read(iprot)
+		if err547 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem544TCell", err547)
 		}
-		p.Success.Push(_elem554)
+		p.Success[i] = _elem544
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -10847,21 +9873,13 @@ func (p *GetVerResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *GetVerResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetVerResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err560 := p.Io.Read(iprot)
-	if err560 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err560)
+	err550 := p.Io.Read(iprot)
+	if err550 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err550)
 	}
 	return err
-}
-
-func (p *GetVerResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetVerResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -10871,11 +9889,11 @@ func (p *GetVerResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcept
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -10890,19 +9908,18 @@ func (p *GetVerResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcept
 	return err
 }
 
-func (p *GetVerResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter561 := range p.Success.Iter() {
-			Iter562 := Iter561.(*TCell)
-			err = Iter562.Write(oprot)
+		for _, Iter551 := range p.Success {
+			err = Iter551.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TCell", err)
 			}
@@ -10919,11 +9936,7 @@ func (p *GetVerResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetVerResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetVerResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -10941,34 +9954,12 @@ func (p *GetVerResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetVerResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetVerResult) TStructName() string {
 	return "GetVerResult"
 }
 
 func (p *GetVerResult) ThriftName() string {
 	return "getVer_result"
-}
-
-func (p *GetVerResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetVerResult(%+v)", *p)
-}
-
-func (p *GetVerResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetVerResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetVerResult) AttributeByFieldId(id int) interface{} {
@@ -11000,26 +9991,26 @@ func (p *GetVerResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Get attributes
  */
 type GetVerTsArgs struct {
-	thrift.TStruct
-	TableName   Text        "tableName"   // 1
-	Row         Text        "row"         // 2
-	Column      Text        "column"      // 3
-	Timestamp   int64       "timestamp"   // 4
-	NumVersions int32       "numVersions" // 5
-	Attributes  thrift.TMap "attributes"  // 6
+	TableName   Text            "tableName"   // 1
+	Row         Text            "row"         // 2
+	Column      Text            "column"      // 3
+	Timestamp   int64           "timestamp"   // 4
+	NumVersions int32           "numVersions" // 5
+	Attributes  map[string]Text "attributes"  // 6
 }
 
+var tstructGetVerTsArgs = thrift.NewTStruct("getVerTs_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("row", thrift.STRING, 2),
+	thrift.NewTField("column", thrift.STRING, 3),
+	thrift.NewTField("timestamp", thrift.I64, 4),
+	thrift.NewTField("numVersions", thrift.I32, 5),
+	thrift.NewTField("attributes", thrift.MAP, 6),
+})
+
+func (*GetVerTsArgs) GetTStruct() thrift.TStruct { return tstructGetVerTsArgs }
 func NewGetVerTsArgs() *GetVerTsArgs {
-	output := &GetVerTsArgs{
-		TStruct: thrift.NewTStruct("getVerTs_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("row", thrift.BINARY, 2),
-			thrift.NewTField("column", thrift.BINARY, 3),
-			thrift.NewTField("timestamp", thrift.I64, 4),
-			thrift.NewTField("numVersions", thrift.I32, 5),
-			thrift.NewTField("attributes", thrift.MAP, 6),
-		}),
-	}
+	output := &GetVerTsArgs{}
 	{
 	}
 	return output
@@ -11033,12 +10024,8 @@ func (p *GetVerTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcepti
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetVerTsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetVerTsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -11046,114 +10033,85 @@ func (p *GetVerTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcepti
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "row" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
 			}
-		} else if fieldId == 3 || fieldName == "column" {
+		case 2: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField3(iprot)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else if fieldTypeId == thrift.VOID {
+			} else {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 3: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField3(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "timestamp" {
+		case 4: //i64
 			if fieldTypeId == thrift.I64 {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 5 || fieldName == "numVersions" {
+		case 5: //i32
 			if fieldTypeId == thrift.I32 {
-				err = p.ReadField5(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField5(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField5(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 6 || fieldName == "attributes" {
+		case 6: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField6(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField6(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField6(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -11166,89 +10124,70 @@ func (p *GetVerTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcepti
 	return err
 }
 
-func (p *GetVerTsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v563, err564 := iprot.ReadBinary()
-	if err564 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err564)
+func (p *GetVerTsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v552, err553 := iprot.ReadBinary()
+	if err553 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err553)
 	}
-	p.TableName = Text(v563)
+	p.TableName = Text(v552)
 	return err
 }
 
-func (p *GetVerTsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *GetVerTsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v565, err566 := iprot.ReadBinary()
-	if err566 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err566)
+func (p *GetVerTsArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v554, err555 := iprot.ReadBinary()
+	if err555 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err555)
 	}
-	p.Row = Text(v565)
+	p.Row = Text(v554)
 	return err
 }
 
-func (p *GetVerTsArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *GetVerTsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v567, err568 := iprot.ReadBinary()
-	if err568 != nil {
-		return thrift.NewTProtocolExceptionReadField(3, "column", p.ThriftName(), err568)
+func (p *GetVerTsArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v556, err557 := iprot.ReadBinary()
+	if err557 != nil {
+		return thrift.NewTProtocolExceptionReadField(3, "column", p.ThriftName(), err557)
 	}
-	p.Column = Text(v567)
+	p.Column = Text(v556)
 	return err
 }
 
-func (p *GetVerTsArgs) ReadFieldColumn(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *GetVerTsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v569, err570 := iprot.ReadI64()
-	if err570 != nil {
-		return thrift.NewTProtocolExceptionReadField(4, "timestamp", p.ThriftName(), err570)
+func (p *GetVerTsArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v558, err559 := iprot.ReadI64()
+	if err559 != nil {
+		return thrift.NewTProtocolExceptionReadField(4, "timestamp", p.ThriftName(), err559)
 	}
-	p.Timestamp = v569
+	p.Timestamp = v558
 	return err
 }
 
-func (p *GetVerTsArgs) ReadFieldTimestamp(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
-func (p *GetVerTsArgs) ReadField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v571, err572 := iprot.ReadI32()
-	if err572 != nil {
-		return thrift.NewTProtocolExceptionReadField(5, "numVersions", p.ThriftName(), err572)
+func (p *GetVerTsArgs) readField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v560, err561 := iprot.ReadI32()
+	if err561 != nil {
+		return thrift.NewTProtocolExceptionReadField(5, "numVersions", p.ThriftName(), err561)
 	}
-	p.NumVersions = v571
+	p.NumVersions = v560
 	return err
 }
 
-func (p *GetVerTsArgs) ReadFieldNumVersions(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField5(iprot)
-}
-
-func (p *GetVerTsArgs) ReadField6(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype576, _vtype577, _size575, err := iprot.ReadMapBegin()
+func (p *GetVerTsArgs) readField6(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype565, _vtype566, _size564, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype576, _vtype577, _size575)
-	for _i579 := 0; _i579 < _size575; _i579++ {
-		v582, err583 := iprot.ReadBinary()
-		if err583 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key580", "", err583)
+	_, _ = _ktype565, _vtype566
+	p.Attributes = make(map[string]Text, _size564)
+	for i := 0; i < _size564; i++ {
+		v571, err572 := iprot.ReadString()
+		if err572 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key569", "", err572)
 		}
-		_key580 := Text(v582)
-		v584, err585 := iprot.ReadBinary()
-		if err585 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val581", "", err585)
+		_key569 := v571
+		v573, err574 := iprot.ReadBinary()
+		if err574 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val570", "", err574)
 		}
-		_val581 := Text(v584)
-		p.Attributes.Set(_key580, _val581)
+		_val570 := Text(v573)
+		p.Attributes[_key569] = _val570
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -11257,36 +10196,32 @@ func (p *GetVerTsArgs) ReadField6(iprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *GetVerTsArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField6(iprot)
-}
-
 func (p *GetVerTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("getVerTs_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField5(oprot)
+	err = p.writeField5(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField6(oprot)
+	err = p.writeField6(oprot)
 	if err != nil {
 		return err
 	}
@@ -11301,9 +10236,9 @@ func (p *GetVerTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcept
 	return err
 }
 
-func (p *GetVerTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerTsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -11319,13 +10254,9 @@ func (p *GetVerTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetVerTsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *GetVerTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerTsArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "row", p.ThriftName(), err)
 		}
@@ -11341,13 +10272,9 @@ func (p *GetVerTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetVerTsArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *GetVerTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerTsArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Column != nil {
-		err = oprot.WriteFieldBegin("column", thrift.BINARY, 3)
+		err = oprot.WriteFieldBegin("column", thrift.STRING, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "column", p.ThriftName(), err)
 		}
@@ -11363,11 +10290,7 @@ func (p *GetVerTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetVerTsArgs) WriteFieldColumn(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *GetVerTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerTsArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("timestamp", thrift.I64, 4)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(4, "timestamp", p.ThriftName(), err)
@@ -11383,11 +10306,7 @@ func (p *GetVerTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetVerTsArgs) WriteFieldTimestamp(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
-func (p *GetVerTsArgs) WriteField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerTsArgs) writeField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("numVersions", thrift.I32, 5)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(5, "numVersions", p.ThriftName(), err)
@@ -11403,29 +10322,24 @@ func (p *GetVerTsArgs) WriteField5(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetVerTsArgs) WriteFieldNumVersions(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField5(oprot)
-}
-
-func (p *GetVerTsArgs) WriteField6(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerTsArgs) writeField6(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 6)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(6, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter586 := range p.Attributes.Iter() {
-			Kiter587, Viter588 := Miter586.Key().(Text), Miter586.Value().(Text)
-			err = oprot.WriteBinary(Kiter587)
+		for Kiter575, Viter576 := range p.Attributes {
+			err = oprot.WriteString(Kiter575)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter587", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter575", "", err)
 			}
-			err = oprot.WriteBinary(Viter588)
+			err = oprot.WriteBinary(Viter576)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter588", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter576", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -11440,34 +10354,12 @@ func (p *GetVerTsArgs) WriteField6(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetVerTsArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField6(oprot)
-}
-
 func (p *GetVerTsArgs) TStructName() string {
 	return "GetVerTsArgs"
 }
 
 func (p *GetVerTsArgs) ThriftName() string {
 	return "getVerTs_args"
-}
-
-func (p *GetVerTsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetVerTsArgs(%+v)", *p)
-}
-
-func (p *GetVerTsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetVerTsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetVerTsArgs) AttributeByFieldId(id int) interface{} {
@@ -11492,9 +10384,9 @@ func (p *GetVerTsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *GetVerTsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("row", thrift.BINARY, 2),
-		thrift.NewTField("column", thrift.BINARY, 3),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("row", thrift.STRING, 2),
+		thrift.NewTField("column", thrift.STRING, 3),
 		thrift.NewTField("timestamp", thrift.I64, 4),
 		thrift.NewTField("numVersions", thrift.I32, 5),
 		thrift.NewTField("attributes", thrift.MAP, 6),
@@ -11507,18 +10399,18 @@ func (p *GetVerTsArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetVerTsResult struct {
-	thrift.TStruct
-	Success thrift.TList "success" // 0
-	Io      *IOError     "io"      // 1
+	Success []*TCell "success" // 0
+	Io      *IOError "io"      // 1
 }
 
+var tstructGetVerTsResult = thrift.NewTStruct("getVerTs_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetVerTsResult) GetTStruct() thrift.TStruct { return tstructGetVerTsResult }
 func NewGetVerTsResult() *GetVerTsResult {
-	output := &GetVerTsResult{
-		TStruct: thrift.NewTStruct("getVerTs_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetVerTsResult{}
 	{
 	}
 	return output
@@ -11532,12 +10424,8 @@ func (p *GetVerTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcep
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetVerTsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetVerTsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -11545,46 +10433,37 @@ func (p *GetVerTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcep
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -11597,19 +10476,20 @@ func (p *GetVerTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcep
 	return err
 }
 
-func (p *GetVerTsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype594, _size591, err := iprot.ReadListBegin()
+func (p *GetVerTsResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype582, _size579, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype594, _size591)
-	for _i595 := 0; _i595 < _size591; _i595++ {
-		_elem596 := NewTCell()
-		err599 := _elem596.Read(iprot)
-		if err599 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem596TCell", err599)
+	_ = _etype582
+	p.Success = make([]*TCell, _size579, _size579)
+	for i := 0; i < _size579; i++ {
+		_elem584 := NewTCell()
+		err587 := _elem584.Read(iprot)
+		if err587 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem584TCell", err587)
 		}
-		p.Success.Push(_elem596)
+		p.Success[i] = _elem584
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -11618,21 +10498,13 @@ func (p *GetVerTsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *GetVerTsResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetVerTsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerTsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err602 := p.Io.Read(iprot)
-	if err602 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err602)
+	err590 := p.Io.Read(iprot)
+	if err590 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err590)
 	}
 	return err
-}
-
-func (p *GetVerTsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetVerTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -11642,11 +10514,11 @@ func (p *GetVerTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExce
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -11661,19 +10533,18 @@ func (p *GetVerTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExce
 	return err
 }
 
-func (p *GetVerTsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerTsResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter603 := range p.Success.Iter() {
-			Iter604 := Iter603.(*TCell)
-			err = Iter604.Write(oprot)
+		for _, Iter591 := range p.Success {
+			err = Iter591.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TCell", err)
 			}
@@ -11690,11 +10561,7 @@ func (p *GetVerTsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *GetVerTsResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetVerTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetVerTsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -11712,34 +10579,12 @@ func (p *GetVerTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *GetVerTsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetVerTsResult) TStructName() string {
 	return "GetVerTsResult"
 }
 
 func (p *GetVerTsResult) ThriftName() string {
 	return "getVerTs_result"
-}
-
-func (p *GetVerTsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetVerTsResult(%+v)", *p)
-}
-
-func (p *GetVerTsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetVerTsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetVerTsResult) AttributeByFieldId(id int) interface{} {
@@ -11768,20 +10613,20 @@ func (p *GetVerTsResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Get attributes
  */
 type GetRowArgs struct {
-	thrift.TStruct
-	TableName  Text        "tableName"  // 1
-	Row        Text        "row"        // 2
-	Attributes thrift.TMap "attributes" // 3
+	TableName  Text            "tableName"  // 1
+	Row        Text            "row"        // 2
+	Attributes map[string]Text "attributes" // 3
 }
 
+var tstructGetRowArgs = thrift.NewTStruct("getRow_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("row", thrift.STRING, 2),
+	thrift.NewTField("attributes", thrift.MAP, 3),
+})
+
+func (*GetRowArgs) GetTStruct() thrift.TStruct { return tstructGetRowArgs }
 func NewGetRowArgs() *GetRowArgs {
-	output := &GetRowArgs{
-		TStruct: thrift.NewTStruct("getRow_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("row", thrift.BINARY, 2),
-			thrift.NewTField("attributes", thrift.MAP, 3),
-		}),
-	}
+	output := &GetRowArgs{}
 	{
 	}
 	return output
@@ -11795,12 +10640,8 @@ func (p *GetRowArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolException
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -11808,63 +10649,49 @@ func (p *GetRowArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolException
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "row" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "attributes" {
+		case 3: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -11877,50 +10704,43 @@ func (p *GetRowArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolException
 	return err
 }
 
-func (p *GetRowArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v605, err606 := iprot.ReadBinary()
-	if err606 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err606)
+func (p *GetRowArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v592, err593 := iprot.ReadBinary()
+	if err593 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err593)
 	}
-	p.TableName = Text(v605)
+	p.TableName = Text(v592)
 	return err
 }
 
-func (p *GetRowArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *GetRowArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v607, err608 := iprot.ReadBinary()
-	if err608 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err608)
+func (p *GetRowArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v594, err595 := iprot.ReadBinary()
+	if err595 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err595)
 	}
-	p.Row = Text(v607)
+	p.Row = Text(v594)
 	return err
 }
 
-func (p *GetRowArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *GetRowArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype612, _vtype613, _size611, err := iprot.ReadMapBegin()
+func (p *GetRowArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype599, _vtype600, _size598, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype612, _vtype613, _size611)
-	for _i615 := 0; _i615 < _size611; _i615++ {
-		v618, err619 := iprot.ReadBinary()
-		if err619 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key616", "", err619)
+	_, _ = _ktype599, _vtype600
+	p.Attributes = make(map[string]Text, _size598)
+	for i := 0; i < _size598; i++ {
+		v605, err606 := iprot.ReadString()
+		if err606 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key603", "", err606)
 		}
-		_key616 := Text(v618)
-		v620, err621 := iprot.ReadBinary()
-		if err621 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val617", "", err621)
+		_key603 := v605
+		v607, err608 := iprot.ReadBinary()
+		if err608 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val604", "", err608)
 		}
-		_val617 := Text(v620)
-		p.Attributes.Set(_key616, _val617)
+		_val604 := Text(v607)
+		p.Attributes[_key603] = _val604
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -11929,24 +10749,20 @@ func (p *GetRowArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *GetRowArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
 func (p *GetRowArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("getRow_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
@@ -11961,9 +10777,9 @@ func (p *GetRowArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExceptio
 	return err
 }
 
-func (p *GetRowArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -11979,13 +10795,9 @@ func (p *GetRowArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *GetRowArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *GetRowArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "row", p.ThriftName(), err)
 		}
@@ -12001,29 +10813,24 @@ func (p *GetRowArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *GetRowArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *GetRowArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter622 := range p.Attributes.Iter() {
-			Kiter623, Viter624 := Miter622.Key().(Text), Miter622.Value().(Text)
-			err = oprot.WriteBinary(Kiter623)
+		for Kiter609, Viter610 := range p.Attributes {
+			err = oprot.WriteString(Kiter609)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter623", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter609", "", err)
 			}
-			err = oprot.WriteBinary(Viter624)
+			err = oprot.WriteBinary(Viter610)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter624", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter610", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -12038,34 +10845,12 @@ func (p *GetRowArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *GetRowArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
 func (p *GetRowArgs) TStructName() string {
 	return "GetRowArgs"
 }
 
 func (p *GetRowArgs) ThriftName() string {
 	return "getRow_args"
-}
-
-func (p *GetRowArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowArgs(%+v)", *p)
-}
-
-func (p *GetRowArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowArgs) AttributeByFieldId(id int) interface{} {
@@ -12084,8 +10869,8 @@ func (p *GetRowArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *GetRowArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("row", thrift.BINARY, 2),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("row", thrift.STRING, 2),
 		thrift.NewTField("attributes", thrift.MAP, 3),
 	})
 }
@@ -12096,18 +10881,18 @@ func (p *GetRowArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetRowResult struct {
-	thrift.TStruct
-	Success thrift.TList "success" // 0
-	Io      *IOError     "io"      // 1
+	Success []*TRowResult "success" // 0
+	Io      *IOError      "io"      // 1
 }
 
+var tstructGetRowResult = thrift.NewTStruct("getRow_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetRowResult) GetTStruct() thrift.TStruct { return tstructGetRowResult }
 func NewGetRowResult() *GetRowResult {
-	output := &GetRowResult{
-		TStruct: thrift.NewTStruct("getRow_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetRowResult{}
 	{
 	}
 	return output
@@ -12121,12 +10906,8 @@ func (p *GetRowResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcepti
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -12134,46 +10915,37 @@ func (p *GetRowResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcepti
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -12186,19 +10958,20 @@ func (p *GetRowResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcepti
 	return err
 }
 
-func (p *GetRowResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype630, _size627, err := iprot.ReadListBegin()
+func (p *GetRowResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype616, _size613, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype630, _size627)
-	for _i631 := 0; _i631 < _size627; _i631++ {
-		_elem632 := NewTRowResult()
-		err635 := _elem632.Read(iprot)
-		if err635 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem632TRowResult", err635)
+	_ = _etype616
+	p.Success = make([]*TRowResult, _size613, _size613)
+	for i := 0; i < _size613; i++ {
+		_elem618 := NewTRowResult()
+		err621 := _elem618.Read(iprot)
+		if err621 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem618TRowResult", err621)
 		}
-		p.Success.Push(_elem632)
+		p.Success[i] = _elem618
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -12207,21 +10980,13 @@ func (p *GetRowResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *GetRowResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetRowResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err638 := p.Io.Read(iprot)
-	if err638 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err638)
+	err624 := p.Io.Read(iprot)
+	if err624 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err624)
 	}
 	return err
-}
-
-func (p *GetRowResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetRowResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -12231,11 +10996,11 @@ func (p *GetRowResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcept
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -12250,19 +11015,18 @@ func (p *GetRowResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcept
 	return err
 }
 
-func (p *GetRowResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter639 := range p.Success.Iter() {
-			Iter640 := Iter639.(*TRowResult)
-			err = Iter640.Write(oprot)
+		for _, Iter625 := range p.Success {
+			err = Iter625.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TRowResult", err)
 			}
@@ -12279,11 +11043,7 @@ func (p *GetRowResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetRowResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetRowResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -12301,34 +11061,12 @@ func (p *GetRowResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetRowResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetRowResult) TStructName() string {
 	return "GetRowResult"
 }
 
 func (p *GetRowResult) ThriftName() string {
 	return "getRow_result"
-}
-
-func (p *GetRowResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowResult(%+v)", *p)
-}
-
-func (p *GetRowResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowResult) AttributeByFieldId(id int) interface{} {
@@ -12358,22 +11096,22 @@ func (p *GetRowResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Get attributes
  */
 type GetRowWithColumnsArgs struct {
-	thrift.TStruct
-	TableName  Text         "tableName"  // 1
-	Row        Text         "row"        // 2
-	Columns    thrift.TList "columns"    // 3
-	Attributes thrift.TMap  "attributes" // 4
+	TableName  Text            "tableName"  // 1
+	Row        Text            "row"        // 2
+	Columns    []Text          "columns"    // 3
+	Attributes map[string]Text "attributes" // 4
 }
 
+var tstructGetRowWithColumnsArgs = thrift.NewTStruct("getRowWithColumns_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("row", thrift.STRING, 2),
+	thrift.NewTField("columns", thrift.LIST, 3),
+	thrift.NewTField("attributes", thrift.MAP, 4),
+})
+
+func (*GetRowWithColumnsArgs) GetTStruct() thrift.TStruct { return tstructGetRowWithColumnsArgs }
 func NewGetRowWithColumnsArgs() *GetRowWithColumnsArgs {
-	output := &GetRowWithColumnsArgs{
-		TStruct: thrift.NewTStruct("getRowWithColumns_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("row", thrift.BINARY, 2),
-			thrift.NewTField("columns", thrift.LIST, 3),
-			thrift.NewTField("attributes", thrift.MAP, 4),
-		}),
-	}
+	output := &GetRowWithColumnsArgs{}
 	{
 	}
 	return output
@@ -12387,12 +11125,8 @@ func (p *GetRowWithColumnsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtoc
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowWithColumnsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowWithColumnsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -12400,80 +11134,61 @@ func (p *GetRowWithColumnsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtoc
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "row" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "columns" {
+		case 3: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "attributes" {
+		case 4: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -12486,45 +11201,38 @@ func (p *GetRowWithColumnsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *GetRowWithColumnsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v641, err642 := iprot.ReadBinary()
-	if err642 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err642)
+func (p *GetRowWithColumnsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v626, err627 := iprot.ReadBinary()
+	if err627 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err627)
 	}
-	p.TableName = Text(v641)
+	p.TableName = Text(v626)
 	return err
 }
 
-func (p *GetRowWithColumnsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *GetRowWithColumnsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v643, err644 := iprot.ReadBinary()
-	if err644 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err644)
+func (p *GetRowWithColumnsArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v628, err629 := iprot.ReadBinary()
+	if err629 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err629)
 	}
-	p.Row = Text(v643)
+	p.Row = Text(v628)
 	return err
 }
 
-func (p *GetRowWithColumnsArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *GetRowWithColumnsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype650, _size647, err := iprot.ReadListBegin()
+func (p *GetRowWithColumnsArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype635, _size632, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Columns", "", err)
 	}
-	p.Columns = thrift.NewTList(_etype650, _size647)
-	for _i651 := 0; _i651 < _size647; _i651++ {
-		v653, err654 := iprot.ReadBinary()
-		if err654 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_elem652", "", err654)
+	_ = _etype635
+	p.Columns = make([]Text, _size632, _size632)
+	for i := 0; i < _size632; i++ {
+		v638, err639 := iprot.ReadBinary()
+		if err639 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_elem637", "", err639)
 		}
-		_elem652 := Text(v653)
-		p.Columns.Push(_elem652)
+		_elem637 := Text(v638)
+		p.Columns[i] = _elem637
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -12533,28 +11241,25 @@ func (p *GetRowWithColumnsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.T
 	return err
 }
 
-func (p *GetRowWithColumnsArgs) ReadFieldColumns(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *GetRowWithColumnsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype658, _vtype659, _size657, err := iprot.ReadMapBegin()
+func (p *GetRowWithColumnsArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype643, _vtype644, _size642, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype658, _vtype659, _size657)
-	for _i661 := 0; _i661 < _size657; _i661++ {
-		v664, err665 := iprot.ReadBinary()
-		if err665 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key662", "", err665)
+	_, _ = _ktype643, _vtype644
+	p.Attributes = make(map[string]Text, _size642)
+	for i := 0; i < _size642; i++ {
+		v649, err650 := iprot.ReadString()
+		if err650 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key647", "", err650)
 		}
-		_key662 := Text(v664)
-		v666, err667 := iprot.ReadBinary()
-		if err667 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val663", "", err667)
+		_key647 := v649
+		v651, err652 := iprot.ReadBinary()
+		if err652 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val648", "", err652)
 		}
-		_val663 := Text(v666)
-		p.Attributes.Set(_key662, _val663)
+		_val648 := Text(v651)
+		p.Attributes[_key647] = _val648
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -12563,28 +11268,24 @@ func (p *GetRowWithColumnsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.T
 	return err
 }
 
-func (p *GetRowWithColumnsArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
 func (p *GetRowWithColumnsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("getRowWithColumns_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
@@ -12599,9 +11300,9 @@ func (p *GetRowWithColumnsArgs) Write(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *GetRowWithColumnsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowWithColumnsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -12617,13 +11318,9 @@ func (p *GetRowWithColumnsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.
 	return err
 }
 
-func (p *GetRowWithColumnsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *GetRowWithColumnsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowWithColumnsArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "row", p.ThriftName(), err)
 		}
@@ -12639,25 +11336,20 @@ func (p *GetRowWithColumnsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.
 	return err
 }
 
-func (p *GetRowWithColumnsArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *GetRowWithColumnsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowWithColumnsArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Columns != nil {
 		err = oprot.WriteFieldBegin("columns", thrift.LIST, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "columns", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.BINARY, p.Columns.Len())
+		err = oprot.WriteListBegin(thrift.STRING, len(p.Columns))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter668 := range p.Columns.Iter() {
-			Iter669 := Iter668.(Text)
-			err = oprot.WriteBinary(Iter669)
+		for _, Iter653 := range p.Columns {
+			err = oprot.WriteBinary(Iter653)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Iter669", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Iter653", "", err)
 			}
 		}
 		err = oprot.WriteListEnd()
@@ -12672,29 +11364,24 @@ func (p *GetRowWithColumnsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.
 	return err
 }
 
-func (p *GetRowWithColumnsArgs) WriteFieldColumns(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *GetRowWithColumnsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowWithColumnsArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 4)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(4, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter670 := range p.Attributes.Iter() {
-			Kiter671, Viter672 := Miter670.Key().(Text), Miter670.Value().(Text)
-			err = oprot.WriteBinary(Kiter671)
+		for Kiter654, Viter655 := range p.Attributes {
+			err = oprot.WriteString(Kiter654)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter671", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter654", "", err)
 			}
-			err = oprot.WriteBinary(Viter672)
+			err = oprot.WriteBinary(Viter655)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter672", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter655", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -12709,34 +11396,12 @@ func (p *GetRowWithColumnsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.
 	return err
 }
 
-func (p *GetRowWithColumnsArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
 func (p *GetRowWithColumnsArgs) TStructName() string {
 	return "GetRowWithColumnsArgs"
 }
 
 func (p *GetRowWithColumnsArgs) ThriftName() string {
 	return "getRowWithColumns_args"
-}
-
-func (p *GetRowWithColumnsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowWithColumnsArgs(%+v)", *p)
-}
-
-func (p *GetRowWithColumnsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowWithColumnsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowWithColumnsArgs) AttributeByFieldId(id int) interface{} {
@@ -12757,8 +11422,8 @@ func (p *GetRowWithColumnsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *GetRowWithColumnsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("row", thrift.BINARY, 2),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("row", thrift.STRING, 2),
 		thrift.NewTField("columns", thrift.LIST, 3),
 		thrift.NewTField("attributes", thrift.MAP, 4),
 	})
@@ -12770,18 +11435,18 @@ func (p *GetRowWithColumnsArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetRowWithColumnsResult struct {
-	thrift.TStruct
-	Success thrift.TList "success" // 0
-	Io      *IOError     "io"      // 1
+	Success []*TRowResult "success" // 0
+	Io      *IOError      "io"      // 1
 }
 
+var tstructGetRowWithColumnsResult = thrift.NewTStruct("getRowWithColumns_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetRowWithColumnsResult) GetTStruct() thrift.TStruct { return tstructGetRowWithColumnsResult }
 func NewGetRowWithColumnsResult() *GetRowWithColumnsResult {
-	output := &GetRowWithColumnsResult{
-		TStruct: thrift.NewTStruct("getRowWithColumns_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetRowWithColumnsResult{}
 	{
 	}
 	return output
@@ -12795,12 +11460,8 @@ func (p *GetRowWithColumnsResult) Read(iprot thrift.TProtocol) (err thrift.TProt
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowWithColumnsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowWithColumnsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -12808,46 +11469,37 @@ func (p *GetRowWithColumnsResult) Read(iprot thrift.TProtocol) (err thrift.TProt
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -12860,19 +11512,20 @@ func (p *GetRowWithColumnsResult) Read(iprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *GetRowWithColumnsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype678, _size675, err := iprot.ReadListBegin()
+func (p *GetRowWithColumnsResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype661, _size658, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype678, _size675)
-	for _i679 := 0; _i679 < _size675; _i679++ {
-		_elem680 := NewTRowResult()
-		err683 := _elem680.Read(iprot)
-		if err683 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem680TRowResult", err683)
+	_ = _etype661
+	p.Success = make([]*TRowResult, _size658, _size658)
+	for i := 0; i < _size658; i++ {
+		_elem663 := NewTRowResult()
+		err666 := _elem663.Read(iprot)
+		if err666 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem663TRowResult", err666)
 		}
-		p.Success.Push(_elem680)
+		p.Success[i] = _elem663
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -12881,21 +11534,13 @@ func (p *GetRowWithColumnsResult) ReadField0(iprot thrift.TProtocol) (err thrift
 	return err
 }
 
-func (p *GetRowWithColumnsResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetRowWithColumnsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowWithColumnsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err686 := p.Io.Read(iprot)
-	if err686 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err686)
+	err669 := p.Io.Read(iprot)
+	if err669 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err669)
 	}
 	return err
-}
-
-func (p *GetRowWithColumnsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetRowWithColumnsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -12905,11 +11550,11 @@ func (p *GetRowWithColumnsResult) Write(oprot thrift.TProtocol) (err thrift.TPro
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -12924,19 +11569,18 @@ func (p *GetRowWithColumnsResult) Write(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *GetRowWithColumnsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowWithColumnsResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter687 := range p.Success.Iter() {
-			Iter688 := Iter687.(*TRowResult)
-			err = Iter688.Write(oprot)
+		for _, Iter670 := range p.Success {
+			err = Iter670.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TRowResult", err)
 			}
@@ -12953,11 +11597,7 @@ func (p *GetRowWithColumnsResult) WriteField0(oprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *GetRowWithColumnsResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetRowWithColumnsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowWithColumnsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -12975,34 +11615,12 @@ func (p *GetRowWithColumnsResult) WriteField1(oprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *GetRowWithColumnsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetRowWithColumnsResult) TStructName() string {
 	return "GetRowWithColumnsResult"
 }
 
 func (p *GetRowWithColumnsResult) ThriftName() string {
 	return "getRowWithColumns_result"
-}
-
-func (p *GetRowWithColumnsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowWithColumnsResult(%+v)", *p)
-}
-
-func (p *GetRowWithColumnsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowWithColumnsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowWithColumnsResult) AttributeByFieldId(id int) interface{} {
@@ -13032,22 +11650,22 @@ func (p *GetRowWithColumnsResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Get attributes
  */
 type GetRowTsArgs struct {
-	thrift.TStruct
-	TableName  Text        "tableName"  // 1
-	Row        Text        "row"        // 2
-	Timestamp  int64       "timestamp"  // 3
-	Attributes thrift.TMap "attributes" // 4
+	TableName  Text            "tableName"  // 1
+	Row        Text            "row"        // 2
+	Timestamp  int64           "timestamp"  // 3
+	Attributes map[string]Text "attributes" // 4
 }
 
+var tstructGetRowTsArgs = thrift.NewTStruct("getRowTs_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("row", thrift.STRING, 2),
+	thrift.NewTField("timestamp", thrift.I64, 3),
+	thrift.NewTField("attributes", thrift.MAP, 4),
+})
+
+func (*GetRowTsArgs) GetTStruct() thrift.TStruct { return tstructGetRowTsArgs }
 func NewGetRowTsArgs() *GetRowTsArgs {
-	output := &GetRowTsArgs{
-		TStruct: thrift.NewTStruct("getRowTs_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("row", thrift.BINARY, 2),
-			thrift.NewTField("timestamp", thrift.I64, 3),
-			thrift.NewTField("attributes", thrift.MAP, 4),
-		}),
-	}
+	output := &GetRowTsArgs{}
 	{
 	}
 	return output
@@ -13061,12 +11679,8 @@ func (p *GetRowTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcepti
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowTsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowTsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -13074,80 +11688,61 @@ func (p *GetRowTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcepti
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "row" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "timestamp" {
+		case 3: //i64
 			if fieldTypeId == thrift.I64 {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "attributes" {
+		case 4: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -13160,63 +11755,52 @@ func (p *GetRowTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcepti
 	return err
 }
 
-func (p *GetRowTsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v689, err690 := iprot.ReadBinary()
-	if err690 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err690)
+func (p *GetRowTsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v671, err672 := iprot.ReadBinary()
+	if err672 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err672)
 	}
-	p.TableName = Text(v689)
+	p.TableName = Text(v671)
 	return err
 }
 
-func (p *GetRowTsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *GetRowTsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v691, err692 := iprot.ReadBinary()
-	if err692 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err692)
+func (p *GetRowTsArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v673, err674 := iprot.ReadBinary()
+	if err674 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err674)
 	}
-	p.Row = Text(v691)
+	p.Row = Text(v673)
 	return err
 }
 
-func (p *GetRowTsArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *GetRowTsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v693, err694 := iprot.ReadI64()
-	if err694 != nil {
-		return thrift.NewTProtocolExceptionReadField(3, "timestamp", p.ThriftName(), err694)
+func (p *GetRowTsArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v675, err676 := iprot.ReadI64()
+	if err676 != nil {
+		return thrift.NewTProtocolExceptionReadField(3, "timestamp", p.ThriftName(), err676)
 	}
-	p.Timestamp = v693
+	p.Timestamp = v675
 	return err
 }
 
-func (p *GetRowTsArgs) ReadFieldTimestamp(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *GetRowTsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype698, _vtype699, _size697, err := iprot.ReadMapBegin()
+func (p *GetRowTsArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype680, _vtype681, _size679, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype698, _vtype699, _size697)
-	for _i701 := 0; _i701 < _size697; _i701++ {
-		v704, err705 := iprot.ReadBinary()
-		if err705 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key702", "", err705)
+	_, _ = _ktype680, _vtype681
+	p.Attributes = make(map[string]Text, _size679)
+	for i := 0; i < _size679; i++ {
+		v686, err687 := iprot.ReadString()
+		if err687 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key684", "", err687)
 		}
-		_key702 := Text(v704)
-		v706, err707 := iprot.ReadBinary()
-		if err707 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val703", "", err707)
+		_key684 := v686
+		v688, err689 := iprot.ReadBinary()
+		if err689 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val685", "", err689)
 		}
-		_val703 := Text(v706)
-		p.Attributes.Set(_key702, _val703)
+		_val685 := Text(v688)
+		p.Attributes[_key684] = _val685
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -13225,28 +11809,24 @@ func (p *GetRowTsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *GetRowTsArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
 func (p *GetRowTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("getRowTs_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
@@ -13261,9 +11841,9 @@ func (p *GetRowTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcept
 	return err
 }
 
-func (p *GetRowTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowTsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -13279,13 +11859,9 @@ func (p *GetRowTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetRowTsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *GetRowTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowTsArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "row", p.ThriftName(), err)
 		}
@@ -13301,11 +11877,7 @@ func (p *GetRowTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetRowTsArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *GetRowTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowTsArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("timestamp", thrift.I64, 3)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(3, "timestamp", p.ThriftName(), err)
@@ -13321,29 +11893,24 @@ func (p *GetRowTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetRowTsArgs) WriteFieldTimestamp(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *GetRowTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowTsArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 4)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(4, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter708 := range p.Attributes.Iter() {
-			Kiter709, Viter710 := Miter708.Key().(Text), Miter708.Value().(Text)
-			err = oprot.WriteBinary(Kiter709)
+		for Kiter690, Viter691 := range p.Attributes {
+			err = oprot.WriteString(Kiter690)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter709", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter690", "", err)
 			}
-			err = oprot.WriteBinary(Viter710)
+			err = oprot.WriteBinary(Viter691)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter710", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter691", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -13358,34 +11925,12 @@ func (p *GetRowTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetRowTsArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
 func (p *GetRowTsArgs) TStructName() string {
 	return "GetRowTsArgs"
 }
 
 func (p *GetRowTsArgs) ThriftName() string {
 	return "getRowTs_args"
-}
-
-func (p *GetRowTsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowTsArgs(%+v)", *p)
-}
-
-func (p *GetRowTsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowTsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowTsArgs) AttributeByFieldId(id int) interface{} {
@@ -13406,8 +11951,8 @@ func (p *GetRowTsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *GetRowTsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("row", thrift.BINARY, 2),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("row", thrift.STRING, 2),
 		thrift.NewTField("timestamp", thrift.I64, 3),
 		thrift.NewTField("attributes", thrift.MAP, 4),
 	})
@@ -13419,18 +11964,18 @@ func (p *GetRowTsArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetRowTsResult struct {
-	thrift.TStruct
-	Success thrift.TList "success" // 0
-	Io      *IOError     "io"      // 1
+	Success []*TRowResult "success" // 0
+	Io      *IOError      "io"      // 1
 }
 
+var tstructGetRowTsResult = thrift.NewTStruct("getRowTs_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetRowTsResult) GetTStruct() thrift.TStruct { return tstructGetRowTsResult }
 func NewGetRowTsResult() *GetRowTsResult {
-	output := &GetRowTsResult{
-		TStruct: thrift.NewTStruct("getRowTs_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetRowTsResult{}
 	{
 	}
 	return output
@@ -13444,12 +11989,8 @@ func (p *GetRowTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcep
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowTsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowTsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -13457,46 +11998,37 @@ func (p *GetRowTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcep
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -13509,19 +12041,20 @@ func (p *GetRowTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcep
 	return err
 }
 
-func (p *GetRowTsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype716, _size713, err := iprot.ReadListBegin()
+func (p *GetRowTsResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype697, _size694, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype716, _size713)
-	for _i717 := 0; _i717 < _size713; _i717++ {
-		_elem718 := NewTRowResult()
-		err721 := _elem718.Read(iprot)
-		if err721 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem718TRowResult", err721)
+	_ = _etype697
+	p.Success = make([]*TRowResult, _size694, _size694)
+	for i := 0; i < _size694; i++ {
+		_elem699 := NewTRowResult()
+		err702 := _elem699.Read(iprot)
+		if err702 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem699TRowResult", err702)
 		}
-		p.Success.Push(_elem718)
+		p.Success[i] = _elem699
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -13530,21 +12063,13 @@ func (p *GetRowTsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *GetRowTsResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetRowTsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowTsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err724 := p.Io.Read(iprot)
-	if err724 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err724)
+	err705 := p.Io.Read(iprot)
+	if err705 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err705)
 	}
 	return err
-}
-
-func (p *GetRowTsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetRowTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -13554,11 +12079,11 @@ func (p *GetRowTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExce
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -13573,19 +12098,18 @@ func (p *GetRowTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExce
 	return err
 }
 
-func (p *GetRowTsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowTsResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter725 := range p.Success.Iter() {
-			Iter726 := Iter725.(*TRowResult)
-			err = Iter726.Write(oprot)
+		for _, Iter706 := range p.Success {
+			err = Iter706.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TRowResult", err)
 			}
@@ -13602,11 +12126,7 @@ func (p *GetRowTsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *GetRowTsResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetRowTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowTsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -13624,34 +12144,12 @@ func (p *GetRowTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *GetRowTsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetRowTsResult) TStructName() string {
 	return "GetRowTsResult"
 }
 
 func (p *GetRowTsResult) ThriftName() string {
 	return "getRowTs_result"
-}
-
-func (p *GetRowTsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowTsResult(%+v)", *p)
-}
-
-func (p *GetRowTsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowTsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowTsResult) AttributeByFieldId(id int) interface{} {
@@ -13682,24 +12180,24 @@ func (p *GetRowTsResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Get attributes
  */
 type GetRowWithColumnsTsArgs struct {
-	thrift.TStruct
-	TableName  Text         "tableName"  // 1
-	Row        Text         "row"        // 2
-	Columns    thrift.TList "columns"    // 3
-	Timestamp  int64        "timestamp"  // 4
-	Attributes thrift.TMap  "attributes" // 5
+	TableName  Text            "tableName"  // 1
+	Row        Text            "row"        // 2
+	Columns    []Text          "columns"    // 3
+	Timestamp  int64           "timestamp"  // 4
+	Attributes map[string]Text "attributes" // 5
 }
 
+var tstructGetRowWithColumnsTsArgs = thrift.NewTStruct("getRowWithColumnsTs_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("row", thrift.STRING, 2),
+	thrift.NewTField("columns", thrift.LIST, 3),
+	thrift.NewTField("timestamp", thrift.I64, 4),
+	thrift.NewTField("attributes", thrift.MAP, 5),
+})
+
+func (*GetRowWithColumnsTsArgs) GetTStruct() thrift.TStruct { return tstructGetRowWithColumnsTsArgs }
 func NewGetRowWithColumnsTsArgs() *GetRowWithColumnsTsArgs {
-	output := &GetRowWithColumnsTsArgs{
-		TStruct: thrift.NewTStruct("getRowWithColumnsTs_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("row", thrift.BINARY, 2),
-			thrift.NewTField("columns", thrift.LIST, 3),
-			thrift.NewTField("timestamp", thrift.I64, 4),
-			thrift.NewTField("attributes", thrift.MAP, 5),
-		}),
-	}
+	output := &GetRowWithColumnsTsArgs{}
 	{
 	}
 	return output
@@ -13713,12 +12211,8 @@ func (p *GetRowWithColumnsTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProt
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowWithColumnsTsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowWithColumnsTsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -13726,97 +12220,73 @@ func (p *GetRowWithColumnsTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProt
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "row" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "columns" {
+		case 3: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "timestamp" {
+		case 4: //i64
 			if fieldTypeId == thrift.I64 {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 5 || fieldName == "attributes" {
+		case 5: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField5(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField5(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField5(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -13829,45 +12299,38 @@ func (p *GetRowWithColumnsTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *GetRowWithColumnsTsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v727, err728 := iprot.ReadBinary()
-	if err728 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err728)
+func (p *GetRowWithColumnsTsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v707, err708 := iprot.ReadBinary()
+	if err708 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err708)
 	}
-	p.TableName = Text(v727)
+	p.TableName = Text(v707)
 	return err
 }
 
-func (p *GetRowWithColumnsTsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *GetRowWithColumnsTsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v729, err730 := iprot.ReadBinary()
-	if err730 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err730)
+func (p *GetRowWithColumnsTsArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v709, err710 := iprot.ReadBinary()
+	if err710 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err710)
 	}
-	p.Row = Text(v729)
+	p.Row = Text(v709)
 	return err
 }
 
-func (p *GetRowWithColumnsTsArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *GetRowWithColumnsTsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype736, _size733, err := iprot.ReadListBegin()
+func (p *GetRowWithColumnsTsArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype716, _size713, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Columns", "", err)
 	}
-	p.Columns = thrift.NewTList(_etype736, _size733)
-	for _i737 := 0; _i737 < _size733; _i737++ {
-		v739, err740 := iprot.ReadBinary()
-		if err740 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_elem738", "", err740)
+	_ = _etype716
+	p.Columns = make([]Text, _size713, _size713)
+	for i := 0; i < _size713; i++ {
+		v719, err720 := iprot.ReadBinary()
+		if err720 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_elem718", "", err720)
 		}
-		_elem738 := Text(v739)
-		p.Columns.Push(_elem738)
+		_elem718 := Text(v719)
+		p.Columns[i] = _elem718
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -13876,41 +12339,34 @@ func (p *GetRowWithColumnsTsArgs) ReadField3(iprot thrift.TProtocol) (err thrift
 	return err
 }
 
-func (p *GetRowWithColumnsTsArgs) ReadFieldColumns(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *GetRowWithColumnsTsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v741, err742 := iprot.ReadI64()
-	if err742 != nil {
-		return thrift.NewTProtocolExceptionReadField(4, "timestamp", p.ThriftName(), err742)
+func (p *GetRowWithColumnsTsArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v721, err722 := iprot.ReadI64()
+	if err722 != nil {
+		return thrift.NewTProtocolExceptionReadField(4, "timestamp", p.ThriftName(), err722)
 	}
-	p.Timestamp = v741
+	p.Timestamp = v721
 	return err
 }
 
-func (p *GetRowWithColumnsTsArgs) ReadFieldTimestamp(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
-func (p *GetRowWithColumnsTsArgs) ReadField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype746, _vtype747, _size745, err := iprot.ReadMapBegin()
+func (p *GetRowWithColumnsTsArgs) readField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype726, _vtype727, _size725, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype746, _vtype747, _size745)
-	for _i749 := 0; _i749 < _size745; _i749++ {
-		v752, err753 := iprot.ReadBinary()
-		if err753 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key750", "", err753)
+	_, _ = _ktype726, _vtype727
+	p.Attributes = make(map[string]Text, _size725)
+	for i := 0; i < _size725; i++ {
+		v732, err733 := iprot.ReadString()
+		if err733 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key730", "", err733)
 		}
-		_key750 := Text(v752)
-		v754, err755 := iprot.ReadBinary()
-		if err755 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val751", "", err755)
+		_key730 := v732
+		v734, err735 := iprot.ReadBinary()
+		if err735 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val731", "", err735)
 		}
-		_val751 := Text(v754)
-		p.Attributes.Set(_key750, _val751)
+		_val731 := Text(v734)
+		p.Attributes[_key730] = _val731
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -13919,32 +12375,28 @@ func (p *GetRowWithColumnsTsArgs) ReadField5(iprot thrift.TProtocol) (err thrift
 	return err
 }
 
-func (p *GetRowWithColumnsTsArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField5(iprot)
-}
-
 func (p *GetRowWithColumnsTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("getRowWithColumnsTs_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField5(oprot)
+	err = p.writeField5(oprot)
 	if err != nil {
 		return err
 	}
@@ -13959,9 +12411,9 @@ func (p *GetRowWithColumnsTsArgs) Write(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *GetRowWithColumnsTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowWithColumnsTsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -13977,13 +12429,9 @@ func (p *GetRowWithColumnsTsArgs) WriteField1(oprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *GetRowWithColumnsTsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *GetRowWithColumnsTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowWithColumnsTsArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "row", p.ThriftName(), err)
 		}
@@ -13999,25 +12447,20 @@ func (p *GetRowWithColumnsTsArgs) WriteField2(oprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *GetRowWithColumnsTsArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *GetRowWithColumnsTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowWithColumnsTsArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Columns != nil {
 		err = oprot.WriteFieldBegin("columns", thrift.LIST, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "columns", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.BINARY, p.Columns.Len())
+		err = oprot.WriteListBegin(thrift.STRING, len(p.Columns))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter756 := range p.Columns.Iter() {
-			Iter757 := Iter756.(Text)
-			err = oprot.WriteBinary(Iter757)
+		for _, Iter736 := range p.Columns {
+			err = oprot.WriteBinary(Iter736)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Iter757", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Iter736", "", err)
 			}
 		}
 		err = oprot.WriteListEnd()
@@ -14032,11 +12475,7 @@ func (p *GetRowWithColumnsTsArgs) WriteField3(oprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *GetRowWithColumnsTsArgs) WriteFieldColumns(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *GetRowWithColumnsTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowWithColumnsTsArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("timestamp", thrift.I64, 4)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(4, "timestamp", p.ThriftName(), err)
@@ -14052,29 +12491,24 @@ func (p *GetRowWithColumnsTsArgs) WriteField4(oprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *GetRowWithColumnsTsArgs) WriteFieldTimestamp(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
-func (p *GetRowWithColumnsTsArgs) WriteField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowWithColumnsTsArgs) writeField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 5)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(5, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter758 := range p.Attributes.Iter() {
-			Kiter759, Viter760 := Miter758.Key().(Text), Miter758.Value().(Text)
-			err = oprot.WriteBinary(Kiter759)
+		for Kiter737, Viter738 := range p.Attributes {
+			err = oprot.WriteString(Kiter737)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter759", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter737", "", err)
 			}
-			err = oprot.WriteBinary(Viter760)
+			err = oprot.WriteBinary(Viter738)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter760", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter738", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -14089,34 +12523,12 @@ func (p *GetRowWithColumnsTsArgs) WriteField5(oprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *GetRowWithColumnsTsArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField5(oprot)
-}
-
 func (p *GetRowWithColumnsTsArgs) TStructName() string {
 	return "GetRowWithColumnsTsArgs"
 }
 
 func (p *GetRowWithColumnsTsArgs) ThriftName() string {
 	return "getRowWithColumnsTs_args"
-}
-
-func (p *GetRowWithColumnsTsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowWithColumnsTsArgs(%+v)", *p)
-}
-
-func (p *GetRowWithColumnsTsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowWithColumnsTsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowWithColumnsTsArgs) AttributeByFieldId(id int) interface{} {
@@ -14139,8 +12551,8 @@ func (p *GetRowWithColumnsTsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *GetRowWithColumnsTsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("row", thrift.BINARY, 2),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("row", thrift.STRING, 2),
 		thrift.NewTField("columns", thrift.LIST, 3),
 		thrift.NewTField("timestamp", thrift.I64, 4),
 		thrift.NewTField("attributes", thrift.MAP, 5),
@@ -14153,18 +12565,18 @@ func (p *GetRowWithColumnsTsArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetRowWithColumnsTsResult struct {
-	thrift.TStruct
-	Success thrift.TList "success" // 0
-	Io      *IOError     "io"      // 1
+	Success []*TRowResult "success" // 0
+	Io      *IOError      "io"      // 1
 }
 
+var tstructGetRowWithColumnsTsResult = thrift.NewTStruct("getRowWithColumnsTs_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetRowWithColumnsTsResult) GetTStruct() thrift.TStruct { return tstructGetRowWithColumnsTsResult }
 func NewGetRowWithColumnsTsResult() *GetRowWithColumnsTsResult {
-	output := &GetRowWithColumnsTsResult{
-		TStruct: thrift.NewTStruct("getRowWithColumnsTs_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetRowWithColumnsTsResult{}
 	{
 	}
 	return output
@@ -14178,12 +12590,8 @@ func (p *GetRowWithColumnsTsResult) Read(iprot thrift.TProtocol) (err thrift.TPr
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowWithColumnsTsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowWithColumnsTsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -14191,46 +12599,37 @@ func (p *GetRowWithColumnsTsResult) Read(iprot thrift.TProtocol) (err thrift.TPr
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -14243,19 +12642,20 @@ func (p *GetRowWithColumnsTsResult) Read(iprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *GetRowWithColumnsTsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype766, _size763, err := iprot.ReadListBegin()
+func (p *GetRowWithColumnsTsResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype744, _size741, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype766, _size763)
-	for _i767 := 0; _i767 < _size763; _i767++ {
-		_elem768 := NewTRowResult()
-		err771 := _elem768.Read(iprot)
-		if err771 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem768TRowResult", err771)
+	_ = _etype744
+	p.Success = make([]*TRowResult, _size741, _size741)
+	for i := 0; i < _size741; i++ {
+		_elem746 := NewTRowResult()
+		err749 := _elem746.Read(iprot)
+		if err749 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem746TRowResult", err749)
 		}
-		p.Success.Push(_elem768)
+		p.Success[i] = _elem746
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -14264,21 +12664,13 @@ func (p *GetRowWithColumnsTsResult) ReadField0(iprot thrift.TProtocol) (err thri
 	return err
 }
 
-func (p *GetRowWithColumnsTsResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetRowWithColumnsTsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowWithColumnsTsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err774 := p.Io.Read(iprot)
-	if err774 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err774)
+	err752 := p.Io.Read(iprot)
+	if err752 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err752)
 	}
 	return err
-}
-
-func (p *GetRowWithColumnsTsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetRowWithColumnsTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -14288,11 +12680,11 @@ func (p *GetRowWithColumnsTsResult) Write(oprot thrift.TProtocol) (err thrift.TP
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -14307,19 +12699,18 @@ func (p *GetRowWithColumnsTsResult) Write(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *GetRowWithColumnsTsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowWithColumnsTsResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter775 := range p.Success.Iter() {
-			Iter776 := Iter775.(*TRowResult)
-			err = Iter776.Write(oprot)
+		for _, Iter753 := range p.Success {
+			err = Iter753.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TRowResult", err)
 			}
@@ -14336,11 +12727,7 @@ func (p *GetRowWithColumnsTsResult) WriteField0(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *GetRowWithColumnsTsResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetRowWithColumnsTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowWithColumnsTsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -14358,34 +12745,12 @@ func (p *GetRowWithColumnsTsResult) WriteField1(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *GetRowWithColumnsTsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetRowWithColumnsTsResult) TStructName() string {
 	return "GetRowWithColumnsTsResult"
 }
 
 func (p *GetRowWithColumnsTsResult) ThriftName() string {
 	return "getRowWithColumnsTs_result"
-}
-
-func (p *GetRowWithColumnsTsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowWithColumnsTsResult(%+v)", *p)
-}
-
-func (p *GetRowWithColumnsTsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowWithColumnsTsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowWithColumnsTsResult) AttributeByFieldId(id int) interface{} {
@@ -14414,20 +12779,20 @@ func (p *GetRowWithColumnsTsResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Get attributes
  */
 type GetRowsArgs struct {
-	thrift.TStruct
-	TableName  Text         "tableName"  // 1
-	Rows       thrift.TList "rows"       // 2
-	Attributes thrift.TMap  "attributes" // 3
+	TableName  Text            "tableName"  // 1
+	Rows       []Text          "rows"       // 2
+	Attributes map[string]Text "attributes" // 3
 }
 
+var tstructGetRowsArgs = thrift.NewTStruct("getRows_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("rows", thrift.LIST, 2),
+	thrift.NewTField("attributes", thrift.MAP, 3),
+})
+
+func (*GetRowsArgs) GetTStruct() thrift.TStruct { return tstructGetRowsArgs }
 func NewGetRowsArgs() *GetRowsArgs {
-	output := &GetRowsArgs{
-		TStruct: thrift.NewTStruct("getRows_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("rows", thrift.LIST, 2),
-			thrift.NewTField("attributes", thrift.MAP, 3),
-		}),
-	}
+	output := &GetRowsArgs{}
 	{
 	}
 	return output
@@ -14441,12 +12806,8 @@ func (p *GetRowsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExceptio
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -14454,63 +12815,49 @@ func (p *GetRowsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExceptio
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 2 || fieldName == "rows" {
+		case 2: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "attributes" {
+		case 3: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -14523,32 +12870,29 @@ func (p *GetRowsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExceptio
 	return err
 }
 
-func (p *GetRowsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v777, err778 := iprot.ReadBinary()
-	if err778 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err778)
+func (p *GetRowsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v754, err755 := iprot.ReadBinary()
+	if err755 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err755)
 	}
-	p.TableName = Text(v777)
+	p.TableName = Text(v754)
 	return err
 }
 
-func (p *GetRowsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *GetRowsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype784, _size781, err := iprot.ReadListBegin()
+func (p *GetRowsArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype761, _size758, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Rows", "", err)
 	}
-	p.Rows = thrift.NewTList(_etype784, _size781)
-	for _i785 := 0; _i785 < _size781; _i785++ {
-		v787, err788 := iprot.ReadBinary()
-		if err788 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_elem786", "", err788)
+	_ = _etype761
+	p.Rows = make([]Text, _size758, _size758)
+	for i := 0; i < _size758; i++ {
+		v764, err765 := iprot.ReadBinary()
+		if err765 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_elem763", "", err765)
 		}
-		_elem786 := Text(v787)
-		p.Rows.Push(_elem786)
+		_elem763 := Text(v764)
+		p.Rows[i] = _elem763
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -14557,28 +12901,25 @@ func (p *GetRowsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *GetRowsArgs) ReadFieldRows(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *GetRowsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype792, _vtype793, _size791, err := iprot.ReadMapBegin()
+func (p *GetRowsArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype769, _vtype770, _size768, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype792, _vtype793, _size791)
-	for _i795 := 0; _i795 < _size791; _i795++ {
-		v798, err799 := iprot.ReadBinary()
-		if err799 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key796", "", err799)
+	_, _ = _ktype769, _vtype770
+	p.Attributes = make(map[string]Text, _size768)
+	for i := 0; i < _size768; i++ {
+		v775, err776 := iprot.ReadString()
+		if err776 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key773", "", err776)
 		}
-		_key796 := Text(v798)
-		v800, err801 := iprot.ReadBinary()
-		if err801 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val797", "", err801)
+		_key773 := v775
+		v777, err778 := iprot.ReadBinary()
+		if err778 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val774", "", err778)
 		}
-		_val797 := Text(v800)
-		p.Attributes.Set(_key796, _val797)
+		_val774 := Text(v777)
+		p.Attributes[_key773] = _val774
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -14587,24 +12928,20 @@ func (p *GetRowsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *GetRowsArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
 func (p *GetRowsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("getRows_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
@@ -14619,9 +12956,9 @@ func (p *GetRowsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcepti
 	return err
 }
 
-func (p *GetRowsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -14637,25 +12974,20 @@ func (p *GetRowsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *GetRowsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *GetRowsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Rows != nil {
 		err = oprot.WriteFieldBegin("rows", thrift.LIST, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "rows", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.BINARY, p.Rows.Len())
+		err = oprot.WriteListBegin(thrift.STRING, len(p.Rows))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter802 := range p.Rows.Iter() {
-			Iter803 := Iter802.(Text)
-			err = oprot.WriteBinary(Iter803)
+		for _, Iter779 := range p.Rows {
+			err = oprot.WriteBinary(Iter779)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Iter803", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Iter779", "", err)
 			}
 		}
 		err = oprot.WriteListEnd()
@@ -14670,29 +13002,24 @@ func (p *GetRowsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *GetRowsArgs) WriteFieldRows(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *GetRowsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter804 := range p.Attributes.Iter() {
-			Kiter805, Viter806 := Miter804.Key().(Text), Miter804.Value().(Text)
-			err = oprot.WriteBinary(Kiter805)
+		for Kiter780, Viter781 := range p.Attributes {
+			err = oprot.WriteString(Kiter780)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter805", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter780", "", err)
 			}
-			err = oprot.WriteBinary(Viter806)
+			err = oprot.WriteBinary(Viter781)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter806", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter781", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -14707,34 +13034,12 @@ func (p *GetRowsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *GetRowsArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
 func (p *GetRowsArgs) TStructName() string {
 	return "GetRowsArgs"
 }
 
 func (p *GetRowsArgs) ThriftName() string {
 	return "getRows_args"
-}
-
-func (p *GetRowsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowsArgs(%+v)", *p)
-}
-
-func (p *GetRowsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowsArgs) AttributeByFieldId(id int) interface{} {
@@ -14753,7 +13058,7 @@ func (p *GetRowsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *GetRowsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
+		thrift.NewTField("tableName", thrift.STRING, 1),
 		thrift.NewTField("rows", thrift.LIST, 2),
 		thrift.NewTField("attributes", thrift.MAP, 3),
 	})
@@ -14765,18 +13070,18 @@ func (p *GetRowsArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetRowsResult struct {
-	thrift.TStruct
-	Success thrift.TList "success" // 0
-	Io      *IOError     "io"      // 1
+	Success []*TRowResult "success" // 0
+	Io      *IOError      "io"      // 1
 }
 
+var tstructGetRowsResult = thrift.NewTStruct("getRows_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetRowsResult) GetTStruct() thrift.TStruct { return tstructGetRowsResult }
 func NewGetRowsResult() *GetRowsResult {
-	output := &GetRowsResult{
-		TStruct: thrift.NewTStruct("getRows_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetRowsResult{}
 	{
 	}
 	return output
@@ -14790,12 +13095,8 @@ func (p *GetRowsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -14803,46 +13104,37 @@ func (p *GetRowsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -14855,19 +13147,20 @@ func (p *GetRowsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 	return err
 }
 
-func (p *GetRowsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype812, _size809, err := iprot.ReadListBegin()
+func (p *GetRowsResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype787, _size784, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype812, _size809)
-	for _i813 := 0; _i813 < _size809; _i813++ {
-		_elem814 := NewTRowResult()
-		err817 := _elem814.Read(iprot)
-		if err817 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem814TRowResult", err817)
+	_ = _etype787
+	p.Success = make([]*TRowResult, _size784, _size784)
+	for i := 0; i < _size784; i++ {
+		_elem789 := NewTRowResult()
+		err792 := _elem789.Read(iprot)
+		if err792 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem789TRowResult", err792)
 		}
-		p.Success.Push(_elem814)
+		p.Success[i] = _elem789
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -14876,21 +13169,13 @@ func (p *GetRowsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetRowsResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetRowsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err820 := p.Io.Read(iprot)
-	if err820 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err820)
+	err795 := p.Io.Read(iprot)
+	if err795 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err795)
 	}
 	return err
-}
-
-func (p *GetRowsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetRowsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -14900,11 +13185,11 @@ func (p *GetRowsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcep
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -14919,19 +13204,18 @@ func (p *GetRowsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcep
 	return err
 }
 
-func (p *GetRowsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter821 := range p.Success.Iter() {
-			Iter822 := Iter821.(*TRowResult)
-			err = Iter822.Write(oprot)
+		for _, Iter796 := range p.Success {
+			err = Iter796.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TRowResult", err)
 			}
@@ -14948,11 +13232,7 @@ func (p *GetRowsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *GetRowsResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetRowsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -14970,34 +13250,12 @@ func (p *GetRowsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *GetRowsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetRowsResult) TStructName() string {
 	return "GetRowsResult"
 }
 
 func (p *GetRowsResult) ThriftName() string {
 	return "getRows_result"
-}
-
-func (p *GetRowsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowsResult(%+v)", *p)
-}
-
-func (p *GetRowsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowsResult) AttributeByFieldId(id int) interface{} {
@@ -15027,22 +13285,22 @@ func (p *GetRowsResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Get attributes
  */
 type GetRowsWithColumnsArgs struct {
-	thrift.TStruct
-	TableName  Text         "tableName"  // 1
-	Rows       thrift.TList "rows"       // 2
-	Columns    thrift.TList "columns"    // 3
-	Attributes thrift.TMap  "attributes" // 4
+	TableName  Text            "tableName"  // 1
+	Rows       []Text          "rows"       // 2
+	Columns    []Text          "columns"    // 3
+	Attributes map[string]Text "attributes" // 4
 }
 
+var tstructGetRowsWithColumnsArgs = thrift.NewTStruct("getRowsWithColumns_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("rows", thrift.LIST, 2),
+	thrift.NewTField("columns", thrift.LIST, 3),
+	thrift.NewTField("attributes", thrift.MAP, 4),
+})
+
+func (*GetRowsWithColumnsArgs) GetTStruct() thrift.TStruct { return tstructGetRowsWithColumnsArgs }
 func NewGetRowsWithColumnsArgs() *GetRowsWithColumnsArgs {
-	output := &GetRowsWithColumnsArgs{
-		TStruct: thrift.NewTStruct("getRowsWithColumns_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("rows", thrift.LIST, 2),
-			thrift.NewTField("columns", thrift.LIST, 3),
-			thrift.NewTField("attributes", thrift.MAP, 4),
-		}),
-	}
+	output := &GetRowsWithColumnsArgs{}
 	{
 	}
 	return output
@@ -15056,12 +13314,8 @@ func (p *GetRowsWithColumnsArgs) Read(iprot thrift.TProtocol) (err thrift.TProto
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowsWithColumnsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowsWithColumnsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -15069,80 +13323,61 @@ func (p *GetRowsWithColumnsArgs) Read(iprot thrift.TProtocol) (err thrift.TProto
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 2 || fieldName == "rows" {
+		case 2: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "columns" {
+		case 3: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "attributes" {
+		case 4: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -15155,32 +13390,29 @@ func (p *GetRowsWithColumnsArgs) Read(iprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *GetRowsWithColumnsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v823, err824 := iprot.ReadBinary()
-	if err824 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err824)
+func (p *GetRowsWithColumnsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v797, err798 := iprot.ReadBinary()
+	if err798 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err798)
 	}
-	p.TableName = Text(v823)
+	p.TableName = Text(v797)
 	return err
 }
 
-func (p *GetRowsWithColumnsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *GetRowsWithColumnsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype830, _size827, err := iprot.ReadListBegin()
+func (p *GetRowsWithColumnsArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype804, _size801, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Rows", "", err)
 	}
-	p.Rows = thrift.NewTList(_etype830, _size827)
-	for _i831 := 0; _i831 < _size827; _i831++ {
-		v833, err834 := iprot.ReadBinary()
-		if err834 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_elem832", "", err834)
+	_ = _etype804
+	p.Rows = make([]Text, _size801, _size801)
+	for i := 0; i < _size801; i++ {
+		v807, err808 := iprot.ReadBinary()
+		if err808 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_elem806", "", err808)
 		}
-		_elem832 := Text(v833)
-		p.Rows.Push(_elem832)
+		_elem806 := Text(v807)
+		p.Rows[i] = _elem806
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -15189,23 +13421,20 @@ func (p *GetRowsWithColumnsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.
 	return err
 }
 
-func (p *GetRowsWithColumnsArgs) ReadFieldRows(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *GetRowsWithColumnsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype840, _size837, err := iprot.ReadListBegin()
+func (p *GetRowsWithColumnsArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype814, _size811, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Columns", "", err)
 	}
-	p.Columns = thrift.NewTList(_etype840, _size837)
-	for _i841 := 0; _i841 < _size837; _i841++ {
-		v843, err844 := iprot.ReadBinary()
-		if err844 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_elem842", "", err844)
+	_ = _etype814
+	p.Columns = make([]Text, _size811, _size811)
+	for i := 0; i < _size811; i++ {
+		v817, err818 := iprot.ReadBinary()
+		if err818 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_elem816", "", err818)
 		}
-		_elem842 := Text(v843)
-		p.Columns.Push(_elem842)
+		_elem816 := Text(v817)
+		p.Columns[i] = _elem816
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -15214,28 +13443,25 @@ func (p *GetRowsWithColumnsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.
 	return err
 }
 
-func (p *GetRowsWithColumnsArgs) ReadFieldColumns(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *GetRowsWithColumnsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype848, _vtype849, _size847, err := iprot.ReadMapBegin()
+func (p *GetRowsWithColumnsArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype822, _vtype823, _size821, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype848, _vtype849, _size847)
-	for _i851 := 0; _i851 < _size847; _i851++ {
-		v854, err855 := iprot.ReadBinary()
-		if err855 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key852", "", err855)
+	_, _ = _ktype822, _vtype823
+	p.Attributes = make(map[string]Text, _size821)
+	for i := 0; i < _size821; i++ {
+		v828, err829 := iprot.ReadString()
+		if err829 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key826", "", err829)
 		}
-		_key852 := Text(v854)
-		v856, err857 := iprot.ReadBinary()
-		if err857 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val853", "", err857)
+		_key826 := v828
+		v830, err831 := iprot.ReadBinary()
+		if err831 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val827", "", err831)
 		}
-		_val853 := Text(v856)
-		p.Attributes.Set(_key852, _val853)
+		_val827 := Text(v830)
+		p.Attributes[_key826] = _val827
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -15244,28 +13470,24 @@ func (p *GetRowsWithColumnsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.
 	return err
 }
 
-func (p *GetRowsWithColumnsArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
 func (p *GetRowsWithColumnsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("getRowsWithColumns_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
@@ -15280,9 +13502,9 @@ func (p *GetRowsWithColumnsArgs) Write(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *GetRowsWithColumnsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsWithColumnsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -15298,25 +13520,20 @@ func (p *GetRowsWithColumnsArgs) WriteField1(oprot thrift.TProtocol) (err thrift
 	return err
 }
 
-func (p *GetRowsWithColumnsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *GetRowsWithColumnsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsWithColumnsArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Rows != nil {
 		err = oprot.WriteFieldBegin("rows", thrift.LIST, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "rows", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.BINARY, p.Rows.Len())
+		err = oprot.WriteListBegin(thrift.STRING, len(p.Rows))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter858 := range p.Rows.Iter() {
-			Iter859 := Iter858.(Text)
-			err = oprot.WriteBinary(Iter859)
+		for _, Iter832 := range p.Rows {
+			err = oprot.WriteBinary(Iter832)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Iter859", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Iter832", "", err)
 			}
 		}
 		err = oprot.WriteListEnd()
@@ -15331,25 +13548,20 @@ func (p *GetRowsWithColumnsArgs) WriteField2(oprot thrift.TProtocol) (err thrift
 	return err
 }
 
-func (p *GetRowsWithColumnsArgs) WriteFieldRows(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *GetRowsWithColumnsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsWithColumnsArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Columns != nil {
 		err = oprot.WriteFieldBegin("columns", thrift.LIST, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "columns", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.BINARY, p.Columns.Len())
+		err = oprot.WriteListBegin(thrift.STRING, len(p.Columns))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter860 := range p.Columns.Iter() {
-			Iter861 := Iter860.(Text)
-			err = oprot.WriteBinary(Iter861)
+		for _, Iter833 := range p.Columns {
+			err = oprot.WriteBinary(Iter833)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Iter861", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Iter833", "", err)
 			}
 		}
 		err = oprot.WriteListEnd()
@@ -15364,29 +13576,24 @@ func (p *GetRowsWithColumnsArgs) WriteField3(oprot thrift.TProtocol) (err thrift
 	return err
 }
 
-func (p *GetRowsWithColumnsArgs) WriteFieldColumns(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *GetRowsWithColumnsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsWithColumnsArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 4)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(4, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter862 := range p.Attributes.Iter() {
-			Kiter863, Viter864 := Miter862.Key().(Text), Miter862.Value().(Text)
-			err = oprot.WriteBinary(Kiter863)
+		for Kiter834, Viter835 := range p.Attributes {
+			err = oprot.WriteString(Kiter834)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter863", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter834", "", err)
 			}
-			err = oprot.WriteBinary(Viter864)
+			err = oprot.WriteBinary(Viter835)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter864", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter835", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -15401,34 +13608,12 @@ func (p *GetRowsWithColumnsArgs) WriteField4(oprot thrift.TProtocol) (err thrift
 	return err
 }
 
-func (p *GetRowsWithColumnsArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
 func (p *GetRowsWithColumnsArgs) TStructName() string {
 	return "GetRowsWithColumnsArgs"
 }
 
 func (p *GetRowsWithColumnsArgs) ThriftName() string {
 	return "getRowsWithColumns_args"
-}
-
-func (p *GetRowsWithColumnsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowsWithColumnsArgs(%+v)", *p)
-}
-
-func (p *GetRowsWithColumnsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowsWithColumnsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowsWithColumnsArgs) AttributeByFieldId(id int) interface{} {
@@ -15449,7 +13634,7 @@ func (p *GetRowsWithColumnsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *GetRowsWithColumnsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
+		thrift.NewTField("tableName", thrift.STRING, 1),
 		thrift.NewTField("rows", thrift.LIST, 2),
 		thrift.NewTField("columns", thrift.LIST, 3),
 		thrift.NewTField("attributes", thrift.MAP, 4),
@@ -15462,18 +13647,18 @@ func (p *GetRowsWithColumnsArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetRowsWithColumnsResult struct {
-	thrift.TStruct
-	Success thrift.TList "success" // 0
-	Io      *IOError     "io"      // 1
+	Success []*TRowResult "success" // 0
+	Io      *IOError      "io"      // 1
 }
 
+var tstructGetRowsWithColumnsResult = thrift.NewTStruct("getRowsWithColumns_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetRowsWithColumnsResult) GetTStruct() thrift.TStruct { return tstructGetRowsWithColumnsResult }
 func NewGetRowsWithColumnsResult() *GetRowsWithColumnsResult {
-	output := &GetRowsWithColumnsResult{
-		TStruct: thrift.NewTStruct("getRowsWithColumns_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetRowsWithColumnsResult{}
 	{
 	}
 	return output
@@ -15487,12 +13672,8 @@ func (p *GetRowsWithColumnsResult) Read(iprot thrift.TProtocol) (err thrift.TPro
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowsWithColumnsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowsWithColumnsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -15500,46 +13681,37 @@ func (p *GetRowsWithColumnsResult) Read(iprot thrift.TProtocol) (err thrift.TPro
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -15552,19 +13724,20 @@ func (p *GetRowsWithColumnsResult) Read(iprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *GetRowsWithColumnsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype870, _size867, err := iprot.ReadListBegin()
+func (p *GetRowsWithColumnsResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype841, _size838, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype870, _size867)
-	for _i871 := 0; _i871 < _size867; _i871++ {
-		_elem872 := NewTRowResult()
-		err875 := _elem872.Read(iprot)
-		if err875 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem872TRowResult", err875)
+	_ = _etype841
+	p.Success = make([]*TRowResult, _size838, _size838)
+	for i := 0; i < _size838; i++ {
+		_elem843 := NewTRowResult()
+		err846 := _elem843.Read(iprot)
+		if err846 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem843TRowResult", err846)
 		}
-		p.Success.Push(_elem872)
+		p.Success[i] = _elem843
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -15573,21 +13746,13 @@ func (p *GetRowsWithColumnsResult) ReadField0(iprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *GetRowsWithColumnsResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetRowsWithColumnsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsWithColumnsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err878 := p.Io.Read(iprot)
-	if err878 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err878)
+	err849 := p.Io.Read(iprot)
+	if err849 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err849)
 	}
 	return err
-}
-
-func (p *GetRowsWithColumnsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetRowsWithColumnsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -15597,11 +13762,11 @@ func (p *GetRowsWithColumnsResult) Write(oprot thrift.TProtocol) (err thrift.TPr
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -15616,19 +13781,18 @@ func (p *GetRowsWithColumnsResult) Write(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *GetRowsWithColumnsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsWithColumnsResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter879 := range p.Success.Iter() {
-			Iter880 := Iter879.(*TRowResult)
-			err = Iter880.Write(oprot)
+		for _, Iter850 := range p.Success {
+			err = Iter850.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TRowResult", err)
 			}
@@ -15645,11 +13809,7 @@ func (p *GetRowsWithColumnsResult) WriteField0(oprot thrift.TProtocol) (err thri
 	return err
 }
 
-func (p *GetRowsWithColumnsResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetRowsWithColumnsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsWithColumnsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -15667,34 +13827,12 @@ func (p *GetRowsWithColumnsResult) WriteField1(oprot thrift.TProtocol) (err thri
 	return err
 }
 
-func (p *GetRowsWithColumnsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetRowsWithColumnsResult) TStructName() string {
 	return "GetRowsWithColumnsResult"
 }
 
 func (p *GetRowsWithColumnsResult) ThriftName() string {
 	return "getRowsWithColumns_result"
-}
-
-func (p *GetRowsWithColumnsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowsWithColumnsResult(%+v)", *p)
-}
-
-func (p *GetRowsWithColumnsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowsWithColumnsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowsWithColumnsResult) AttributeByFieldId(id int) interface{} {
@@ -15724,22 +13862,22 @@ func (p *GetRowsWithColumnsResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Get attributes
  */
 type GetRowsTsArgs struct {
-	thrift.TStruct
-	TableName  Text         "tableName"  // 1
-	Rows       thrift.TList "rows"       // 2
-	Timestamp  int64        "timestamp"  // 3
-	Attributes thrift.TMap  "attributes" // 4
+	TableName  Text            "tableName"  // 1
+	Rows       []Text          "rows"       // 2
+	Timestamp  int64           "timestamp"  // 3
+	Attributes map[string]Text "attributes" // 4
 }
 
+var tstructGetRowsTsArgs = thrift.NewTStruct("getRowsTs_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("rows", thrift.LIST, 2),
+	thrift.NewTField("timestamp", thrift.I64, 3),
+	thrift.NewTField("attributes", thrift.MAP, 4),
+})
+
+func (*GetRowsTsArgs) GetTStruct() thrift.TStruct { return tstructGetRowsTsArgs }
 func NewGetRowsTsArgs() *GetRowsTsArgs {
-	output := &GetRowsTsArgs{
-		TStruct: thrift.NewTStruct("getRowsTs_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("rows", thrift.LIST, 2),
-			thrift.NewTField("timestamp", thrift.I64, 3),
-			thrift.NewTField("attributes", thrift.MAP, 4),
-		}),
-	}
+	output := &GetRowsTsArgs{}
 	{
 	}
 	return output
@@ -15753,12 +13891,8 @@ func (p *GetRowsTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowsTsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowsTsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -15766,80 +13900,61 @@ func (p *GetRowsTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 2 || fieldName == "rows" {
+		case 2: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "timestamp" {
+		case 3: //i64
 			if fieldTypeId == thrift.I64 {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "attributes" {
+		case 4: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -15852,32 +13967,29 @@ func (p *GetRowsTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 	return err
 }
 
-func (p *GetRowsTsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v881, err882 := iprot.ReadBinary()
-	if err882 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err882)
+func (p *GetRowsTsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v851, err852 := iprot.ReadBinary()
+	if err852 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err852)
 	}
-	p.TableName = Text(v881)
+	p.TableName = Text(v851)
 	return err
 }
 
-func (p *GetRowsTsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *GetRowsTsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype888, _size885, err := iprot.ReadListBegin()
+func (p *GetRowsTsArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype858, _size855, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Rows", "", err)
 	}
-	p.Rows = thrift.NewTList(_etype888, _size885)
-	for _i889 := 0; _i889 < _size885; _i889++ {
-		v891, err892 := iprot.ReadBinary()
-		if err892 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_elem890", "", err892)
+	_ = _etype858
+	p.Rows = make([]Text, _size855, _size855)
+	for i := 0; i < _size855; i++ {
+		v861, err862 := iprot.ReadBinary()
+		if err862 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_elem860", "", err862)
 		}
-		_elem890 := Text(v891)
-		p.Rows.Push(_elem890)
+		_elem860 := Text(v861)
+		p.Rows[i] = _elem860
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -15886,41 +13998,34 @@ func (p *GetRowsTsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetRowsTsArgs) ReadFieldRows(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *GetRowsTsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v893, err894 := iprot.ReadI64()
-	if err894 != nil {
-		return thrift.NewTProtocolExceptionReadField(3, "timestamp", p.ThriftName(), err894)
+func (p *GetRowsTsArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v863, err864 := iprot.ReadI64()
+	if err864 != nil {
+		return thrift.NewTProtocolExceptionReadField(3, "timestamp", p.ThriftName(), err864)
 	}
-	p.Timestamp = v893
+	p.Timestamp = v863
 	return err
 }
 
-func (p *GetRowsTsArgs) ReadFieldTimestamp(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *GetRowsTsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype898, _vtype899, _size897, err := iprot.ReadMapBegin()
+func (p *GetRowsTsArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype868, _vtype869, _size867, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype898, _vtype899, _size897)
-	for _i901 := 0; _i901 < _size897; _i901++ {
-		v904, err905 := iprot.ReadBinary()
-		if err905 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key902", "", err905)
+	_, _ = _ktype868, _vtype869
+	p.Attributes = make(map[string]Text, _size867)
+	for i := 0; i < _size867; i++ {
+		v874, err875 := iprot.ReadString()
+		if err875 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key872", "", err875)
 		}
-		_key902 := Text(v904)
-		v906, err907 := iprot.ReadBinary()
-		if err907 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val903", "", err907)
+		_key872 := v874
+		v876, err877 := iprot.ReadBinary()
+		if err877 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val873", "", err877)
 		}
-		_val903 := Text(v906)
-		p.Attributes.Set(_key902, _val903)
+		_val873 := Text(v876)
+		p.Attributes[_key872] = _val873
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -15929,28 +14034,24 @@ func (p *GetRowsTsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetRowsTsArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
 func (p *GetRowsTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("getRowsTs_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
@@ -15965,9 +14066,9 @@ func (p *GetRowsTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcep
 	return err
 }
 
-func (p *GetRowsTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsTsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -15983,25 +14084,20 @@ func (p *GetRowsTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *GetRowsTsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *GetRowsTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsTsArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Rows != nil {
 		err = oprot.WriteFieldBegin("rows", thrift.LIST, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "rows", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.BINARY, p.Rows.Len())
+		err = oprot.WriteListBegin(thrift.STRING, len(p.Rows))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter908 := range p.Rows.Iter() {
-			Iter909 := Iter908.(Text)
-			err = oprot.WriteBinary(Iter909)
+		for _, Iter878 := range p.Rows {
+			err = oprot.WriteBinary(Iter878)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Iter909", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Iter878", "", err)
 			}
 		}
 		err = oprot.WriteListEnd()
@@ -16016,11 +14112,7 @@ func (p *GetRowsTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *GetRowsTsArgs) WriteFieldRows(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *GetRowsTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsTsArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("timestamp", thrift.I64, 3)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(3, "timestamp", p.ThriftName(), err)
@@ -16036,29 +14128,24 @@ func (p *GetRowsTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *GetRowsTsArgs) WriteFieldTimestamp(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *GetRowsTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsTsArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 4)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(4, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter910 := range p.Attributes.Iter() {
-			Kiter911, Viter912 := Miter910.Key().(Text), Miter910.Value().(Text)
-			err = oprot.WriteBinary(Kiter911)
+		for Kiter879, Viter880 := range p.Attributes {
+			err = oprot.WriteString(Kiter879)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter911", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter879", "", err)
 			}
-			err = oprot.WriteBinary(Viter912)
+			err = oprot.WriteBinary(Viter880)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter912", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter880", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -16073,34 +14160,12 @@ func (p *GetRowsTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *GetRowsTsArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
 func (p *GetRowsTsArgs) TStructName() string {
 	return "GetRowsTsArgs"
 }
 
 func (p *GetRowsTsArgs) ThriftName() string {
 	return "getRowsTs_args"
-}
-
-func (p *GetRowsTsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowsTsArgs(%+v)", *p)
-}
-
-func (p *GetRowsTsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowsTsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowsTsArgs) AttributeByFieldId(id int) interface{} {
@@ -16121,7 +14186,7 @@ func (p *GetRowsTsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *GetRowsTsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
+		thrift.NewTField("tableName", thrift.STRING, 1),
 		thrift.NewTField("rows", thrift.LIST, 2),
 		thrift.NewTField("timestamp", thrift.I64, 3),
 		thrift.NewTField("attributes", thrift.MAP, 4),
@@ -16134,18 +14199,18 @@ func (p *GetRowsTsArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetRowsTsResult struct {
-	thrift.TStruct
-	Success thrift.TList "success" // 0
-	Io      *IOError     "io"      // 1
+	Success []*TRowResult "success" // 0
+	Io      *IOError      "io"      // 1
 }
 
+var tstructGetRowsTsResult = thrift.NewTStruct("getRowsTs_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetRowsTsResult) GetTStruct() thrift.TStruct { return tstructGetRowsTsResult }
 func NewGetRowsTsResult() *GetRowsTsResult {
-	output := &GetRowsTsResult{
-		TStruct: thrift.NewTStruct("getRowsTs_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetRowsTsResult{}
 	{
 	}
 	return output
@@ -16159,12 +14224,8 @@ func (p *GetRowsTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowsTsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowsTsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -16172,46 +14233,37 @@ func (p *GetRowsTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -16224,19 +14276,20 @@ func (p *GetRowsTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	return err
 }
 
-func (p *GetRowsTsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype918, _size915, err := iprot.ReadListBegin()
+func (p *GetRowsTsResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype886, _size883, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype918, _size915)
-	for _i919 := 0; _i919 < _size915; _i919++ {
-		_elem920 := NewTRowResult()
-		err923 := _elem920.Read(iprot)
-		if err923 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem920TRowResult", err923)
+	_ = _etype886
+	p.Success = make([]*TRowResult, _size883, _size883)
+	for i := 0; i < _size883; i++ {
+		_elem888 := NewTRowResult()
+		err891 := _elem888.Read(iprot)
+		if err891 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem888TRowResult", err891)
 		}
-		p.Success.Push(_elem920)
+		p.Success[i] = _elem888
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -16245,21 +14298,13 @@ func (p *GetRowsTsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *GetRowsTsResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetRowsTsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsTsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err926 := p.Io.Read(iprot)
-	if err926 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err926)
+	err894 := p.Io.Read(iprot)
+	if err894 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err894)
 	}
 	return err
-}
-
-func (p *GetRowsTsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetRowsTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -16269,11 +14314,11 @@ func (p *GetRowsTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -16288,19 +14333,18 @@ func (p *GetRowsTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *GetRowsTsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsTsResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter927 := range p.Success.Iter() {
-			Iter928 := Iter927.(*TRowResult)
-			err = Iter928.Write(oprot)
+		for _, Iter895 := range p.Success {
+			err = Iter895.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TRowResult", err)
 			}
@@ -16317,11 +14361,7 @@ func (p *GetRowsTsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *GetRowsTsResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetRowsTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsTsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -16339,34 +14379,12 @@ func (p *GetRowsTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *GetRowsTsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetRowsTsResult) TStructName() string {
 	return "GetRowsTsResult"
 }
 
 func (p *GetRowsTsResult) ThriftName() string {
 	return "getRowsTs_result"
-}
-
-func (p *GetRowsTsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowsTsResult(%+v)", *p)
-}
-
-func (p *GetRowsTsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowsTsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowsTsResult) AttributeByFieldId(id int) interface{} {
@@ -16397,24 +14415,24 @@ func (p *GetRowsTsResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Get attributes
  */
 type GetRowsWithColumnsTsArgs struct {
-	thrift.TStruct
-	TableName  Text         "tableName"  // 1
-	Rows       thrift.TList "rows"       // 2
-	Columns    thrift.TList "columns"    // 3
-	Timestamp  int64        "timestamp"  // 4
-	Attributes thrift.TMap  "attributes" // 5
+	TableName  Text            "tableName"  // 1
+	Rows       []Text          "rows"       // 2
+	Columns    []Text          "columns"    // 3
+	Timestamp  int64           "timestamp"  // 4
+	Attributes map[string]Text "attributes" // 5
 }
 
+var tstructGetRowsWithColumnsTsArgs = thrift.NewTStruct("getRowsWithColumnsTs_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("rows", thrift.LIST, 2),
+	thrift.NewTField("columns", thrift.LIST, 3),
+	thrift.NewTField("timestamp", thrift.I64, 4),
+	thrift.NewTField("attributes", thrift.MAP, 5),
+})
+
+func (*GetRowsWithColumnsTsArgs) GetTStruct() thrift.TStruct { return tstructGetRowsWithColumnsTsArgs }
 func NewGetRowsWithColumnsTsArgs() *GetRowsWithColumnsTsArgs {
-	output := &GetRowsWithColumnsTsArgs{
-		TStruct: thrift.NewTStruct("getRowsWithColumnsTs_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("rows", thrift.LIST, 2),
-			thrift.NewTField("columns", thrift.LIST, 3),
-			thrift.NewTField("timestamp", thrift.I64, 4),
-			thrift.NewTField("attributes", thrift.MAP, 5),
-		}),
-	}
+	output := &GetRowsWithColumnsTsArgs{}
 	{
 	}
 	return output
@@ -16428,12 +14446,8 @@ func (p *GetRowsWithColumnsTsArgs) Read(iprot thrift.TProtocol) (err thrift.TPro
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowsWithColumnsTsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowsWithColumnsTsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -16441,97 +14455,73 @@ func (p *GetRowsWithColumnsTsArgs) Read(iprot thrift.TProtocol) (err thrift.TPro
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 2 || fieldName == "rows" {
+		case 2: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "columns" {
+		case 3: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "timestamp" {
+		case 4: //i64
 			if fieldTypeId == thrift.I64 {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 5 || fieldName == "attributes" {
+		case 5: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField5(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField5(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField5(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -16544,32 +14534,29 @@ func (p *GetRowsWithColumnsTsArgs) Read(iprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *GetRowsWithColumnsTsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v929, err930 := iprot.ReadBinary()
-	if err930 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err930)
+func (p *GetRowsWithColumnsTsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v896, err897 := iprot.ReadBinary()
+	if err897 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err897)
 	}
-	p.TableName = Text(v929)
+	p.TableName = Text(v896)
 	return err
 }
 
-func (p *GetRowsWithColumnsTsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *GetRowsWithColumnsTsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype936, _size933, err := iprot.ReadListBegin()
+func (p *GetRowsWithColumnsTsArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype903, _size900, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Rows", "", err)
 	}
-	p.Rows = thrift.NewTList(_etype936, _size933)
-	for _i937 := 0; _i937 < _size933; _i937++ {
-		v939, err940 := iprot.ReadBinary()
-		if err940 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_elem938", "", err940)
+	_ = _etype903
+	p.Rows = make([]Text, _size900, _size900)
+	for i := 0; i < _size900; i++ {
+		v906, err907 := iprot.ReadBinary()
+		if err907 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_elem905", "", err907)
 		}
-		_elem938 := Text(v939)
-		p.Rows.Push(_elem938)
+		_elem905 := Text(v906)
+		p.Rows[i] = _elem905
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -16578,23 +14565,20 @@ func (p *GetRowsWithColumnsTsArgs) ReadField2(iprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *GetRowsWithColumnsTsArgs) ReadFieldRows(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *GetRowsWithColumnsTsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype946, _size943, err := iprot.ReadListBegin()
+func (p *GetRowsWithColumnsTsArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype913, _size910, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Columns", "", err)
 	}
-	p.Columns = thrift.NewTList(_etype946, _size943)
-	for _i947 := 0; _i947 < _size943; _i947++ {
-		v949, err950 := iprot.ReadBinary()
-		if err950 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_elem948", "", err950)
+	_ = _etype913
+	p.Columns = make([]Text, _size910, _size910)
+	for i := 0; i < _size910; i++ {
+		v916, err917 := iprot.ReadBinary()
+		if err917 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_elem915", "", err917)
 		}
-		_elem948 := Text(v949)
-		p.Columns.Push(_elem948)
+		_elem915 := Text(v916)
+		p.Columns[i] = _elem915
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -16603,41 +14587,34 @@ func (p *GetRowsWithColumnsTsArgs) ReadField3(iprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *GetRowsWithColumnsTsArgs) ReadFieldColumns(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *GetRowsWithColumnsTsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v951, err952 := iprot.ReadI64()
-	if err952 != nil {
-		return thrift.NewTProtocolExceptionReadField(4, "timestamp", p.ThriftName(), err952)
+func (p *GetRowsWithColumnsTsArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v918, err919 := iprot.ReadI64()
+	if err919 != nil {
+		return thrift.NewTProtocolExceptionReadField(4, "timestamp", p.ThriftName(), err919)
 	}
-	p.Timestamp = v951
+	p.Timestamp = v918
 	return err
 }
 
-func (p *GetRowsWithColumnsTsArgs) ReadFieldTimestamp(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
-func (p *GetRowsWithColumnsTsArgs) ReadField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype956, _vtype957, _size955, err := iprot.ReadMapBegin()
+func (p *GetRowsWithColumnsTsArgs) readField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype923, _vtype924, _size922, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype956, _vtype957, _size955)
-	for _i959 := 0; _i959 < _size955; _i959++ {
-		v962, err963 := iprot.ReadBinary()
-		if err963 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key960", "", err963)
+	_, _ = _ktype923, _vtype924
+	p.Attributes = make(map[string]Text, _size922)
+	for i := 0; i < _size922; i++ {
+		v929, err930 := iprot.ReadString()
+		if err930 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key927", "", err930)
 		}
-		_key960 := Text(v962)
-		v964, err965 := iprot.ReadBinary()
-		if err965 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val961", "", err965)
+		_key927 := v929
+		v931, err932 := iprot.ReadBinary()
+		if err932 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val928", "", err932)
 		}
-		_val961 := Text(v964)
-		p.Attributes.Set(_key960, _val961)
+		_val928 := Text(v931)
+		p.Attributes[_key927] = _val928
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -16646,32 +14623,28 @@ func (p *GetRowsWithColumnsTsArgs) ReadField5(iprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *GetRowsWithColumnsTsArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField5(iprot)
-}
-
 func (p *GetRowsWithColumnsTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("getRowsWithColumnsTs_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField5(oprot)
+	err = p.writeField5(oprot)
 	if err != nil {
 		return err
 	}
@@ -16686,9 +14659,9 @@ func (p *GetRowsWithColumnsTsArgs) Write(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *GetRowsWithColumnsTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsWithColumnsTsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -16704,25 +14677,20 @@ func (p *GetRowsWithColumnsTsArgs) WriteField1(oprot thrift.TProtocol) (err thri
 	return err
 }
 
-func (p *GetRowsWithColumnsTsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *GetRowsWithColumnsTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsWithColumnsTsArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Rows != nil {
 		err = oprot.WriteFieldBegin("rows", thrift.LIST, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "rows", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.BINARY, p.Rows.Len())
+		err = oprot.WriteListBegin(thrift.STRING, len(p.Rows))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter966 := range p.Rows.Iter() {
-			Iter967 := Iter966.(Text)
-			err = oprot.WriteBinary(Iter967)
+		for _, Iter933 := range p.Rows {
+			err = oprot.WriteBinary(Iter933)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Iter967", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Iter933", "", err)
 			}
 		}
 		err = oprot.WriteListEnd()
@@ -16737,25 +14705,20 @@ func (p *GetRowsWithColumnsTsArgs) WriteField2(oprot thrift.TProtocol) (err thri
 	return err
 }
 
-func (p *GetRowsWithColumnsTsArgs) WriteFieldRows(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *GetRowsWithColumnsTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsWithColumnsTsArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Columns != nil {
 		err = oprot.WriteFieldBegin("columns", thrift.LIST, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "columns", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.BINARY, p.Columns.Len())
+		err = oprot.WriteListBegin(thrift.STRING, len(p.Columns))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter968 := range p.Columns.Iter() {
-			Iter969 := Iter968.(Text)
-			err = oprot.WriteBinary(Iter969)
+		for _, Iter934 := range p.Columns {
+			err = oprot.WriteBinary(Iter934)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Iter969", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Iter934", "", err)
 			}
 		}
 		err = oprot.WriteListEnd()
@@ -16770,11 +14733,7 @@ func (p *GetRowsWithColumnsTsArgs) WriteField3(oprot thrift.TProtocol) (err thri
 	return err
 }
 
-func (p *GetRowsWithColumnsTsArgs) WriteFieldColumns(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *GetRowsWithColumnsTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsWithColumnsTsArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("timestamp", thrift.I64, 4)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(4, "timestamp", p.ThriftName(), err)
@@ -16790,29 +14749,24 @@ func (p *GetRowsWithColumnsTsArgs) WriteField4(oprot thrift.TProtocol) (err thri
 	return err
 }
 
-func (p *GetRowsWithColumnsTsArgs) WriteFieldTimestamp(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
-func (p *GetRowsWithColumnsTsArgs) WriteField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsWithColumnsTsArgs) writeField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 5)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(5, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter970 := range p.Attributes.Iter() {
-			Kiter971, Viter972 := Miter970.Key().(Text), Miter970.Value().(Text)
-			err = oprot.WriteBinary(Kiter971)
+		for Kiter935, Viter936 := range p.Attributes {
+			err = oprot.WriteString(Kiter935)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter971", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter935", "", err)
 			}
-			err = oprot.WriteBinary(Viter972)
+			err = oprot.WriteBinary(Viter936)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter972", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter936", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -16827,34 +14781,12 @@ func (p *GetRowsWithColumnsTsArgs) WriteField5(oprot thrift.TProtocol) (err thri
 	return err
 }
 
-func (p *GetRowsWithColumnsTsArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField5(oprot)
-}
-
 func (p *GetRowsWithColumnsTsArgs) TStructName() string {
 	return "GetRowsWithColumnsTsArgs"
 }
 
 func (p *GetRowsWithColumnsTsArgs) ThriftName() string {
 	return "getRowsWithColumnsTs_args"
-}
-
-func (p *GetRowsWithColumnsTsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowsWithColumnsTsArgs(%+v)", *p)
-}
-
-func (p *GetRowsWithColumnsTsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowsWithColumnsTsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowsWithColumnsTsArgs) AttributeByFieldId(id int) interface{} {
@@ -16877,7 +14809,7 @@ func (p *GetRowsWithColumnsTsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *GetRowsWithColumnsTsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
+		thrift.NewTField("tableName", thrift.STRING, 1),
 		thrift.NewTField("rows", thrift.LIST, 2),
 		thrift.NewTField("columns", thrift.LIST, 3),
 		thrift.NewTField("timestamp", thrift.I64, 4),
@@ -16891,18 +14823,20 @@ func (p *GetRowsWithColumnsTsArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetRowsWithColumnsTsResult struct {
-	thrift.TStruct
-	Success thrift.TList "success" // 0
-	Io      *IOError     "io"      // 1
+	Success []*TRowResult "success" // 0
+	Io      *IOError      "io"      // 1
 }
 
+var tstructGetRowsWithColumnsTsResult = thrift.NewTStruct("getRowsWithColumnsTs_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetRowsWithColumnsTsResult) GetTStruct() thrift.TStruct {
+	return tstructGetRowsWithColumnsTsResult
+}
 func NewGetRowsWithColumnsTsResult() *GetRowsWithColumnsTsResult {
-	output := &GetRowsWithColumnsTsResult{
-		TStruct: thrift.NewTStruct("getRowsWithColumnsTs_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetRowsWithColumnsTsResult{}
 	{
 	}
 	return output
@@ -16916,12 +14850,8 @@ func (p *GetRowsWithColumnsTsResult) Read(iprot thrift.TProtocol) (err thrift.TP
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowsWithColumnsTsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowsWithColumnsTsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -16929,46 +14859,37 @@ func (p *GetRowsWithColumnsTsResult) Read(iprot thrift.TProtocol) (err thrift.TP
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -16981,19 +14902,20 @@ func (p *GetRowsWithColumnsTsResult) Read(iprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *GetRowsWithColumnsTsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype978, _size975, err := iprot.ReadListBegin()
+func (p *GetRowsWithColumnsTsResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype942, _size939, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype978, _size975)
-	for _i979 := 0; _i979 < _size975; _i979++ {
-		_elem980 := NewTRowResult()
-		err983 := _elem980.Read(iprot)
-		if err983 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem980TRowResult", err983)
+	_ = _etype942
+	p.Success = make([]*TRowResult, _size939, _size939)
+	for i := 0; i < _size939; i++ {
+		_elem944 := NewTRowResult()
+		err947 := _elem944.Read(iprot)
+		if err947 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem944TRowResult", err947)
 		}
-		p.Success.Push(_elem980)
+		p.Success[i] = _elem944
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -17002,21 +14924,13 @@ func (p *GetRowsWithColumnsTsResult) ReadField0(iprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *GetRowsWithColumnsTsResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetRowsWithColumnsTsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsWithColumnsTsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err986 := p.Io.Read(iprot)
-	if err986 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err986)
+	err950 := p.Io.Read(iprot)
+	if err950 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err950)
 	}
 	return err
-}
-
-func (p *GetRowsWithColumnsTsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetRowsWithColumnsTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -17026,11 +14940,11 @@ func (p *GetRowsWithColumnsTsResult) Write(oprot thrift.TProtocol) (err thrift.T
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -17045,19 +14959,18 @@ func (p *GetRowsWithColumnsTsResult) Write(oprot thrift.TProtocol) (err thrift.T
 	return err
 }
 
-func (p *GetRowsWithColumnsTsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsWithColumnsTsResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter987 := range p.Success.Iter() {
-			Iter988 := Iter987.(*TRowResult)
-			err = Iter988.Write(oprot)
+		for _, Iter951 := range p.Success {
+			err = Iter951.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TRowResult", err)
 			}
@@ -17074,11 +14987,7 @@ func (p *GetRowsWithColumnsTsResult) WriteField0(oprot thrift.TProtocol) (err th
 	return err
 }
 
-func (p *GetRowsWithColumnsTsResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetRowsWithColumnsTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowsWithColumnsTsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -17096,34 +15005,12 @@ func (p *GetRowsWithColumnsTsResult) WriteField1(oprot thrift.TProtocol) (err th
 	return err
 }
 
-func (p *GetRowsWithColumnsTsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetRowsWithColumnsTsResult) TStructName() string {
 	return "GetRowsWithColumnsTsResult"
 }
 
 func (p *GetRowsWithColumnsTsResult) ThriftName() string {
 	return "getRowsWithColumnsTs_result"
-}
-
-func (p *GetRowsWithColumnsTsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowsWithColumnsTsResult(%+v)", *p)
-}
-
-func (p *GetRowsWithColumnsTsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowsWithColumnsTsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowsWithColumnsTsResult) AttributeByFieldId(id int) interface{} {
@@ -17153,22 +15040,22 @@ func (p *GetRowsWithColumnsTsResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Mutation attributes
  */
 type MutateRowArgs struct {
-	thrift.TStruct
-	TableName  Text         "tableName"  // 1
-	Row        Text         "row"        // 2
-	Mutations  thrift.TList "mutations"  // 3
-	Attributes thrift.TMap  "attributes" // 4
+	TableName  Text            "tableName"  // 1
+	Row        Text            "row"        // 2
+	Mutations  []*Mutation     "mutations"  // 3
+	Attributes map[string]Text "attributes" // 4
 }
 
+var tstructMutateRowArgs = thrift.NewTStruct("mutateRow_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("row", thrift.STRING, 2),
+	thrift.NewTField("mutations", thrift.LIST, 3),
+	thrift.NewTField("attributes", thrift.MAP, 4),
+})
+
+func (*MutateRowArgs) GetTStruct() thrift.TStruct { return tstructMutateRowArgs }
 func NewMutateRowArgs() *MutateRowArgs {
-	output := &MutateRowArgs{
-		TStruct: thrift.NewTStruct("mutateRow_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("row", thrift.BINARY, 2),
-			thrift.NewTField("mutations", thrift.LIST, 3),
-			thrift.NewTField("attributes", thrift.MAP, 4),
-		}),
-	}
+	output := &MutateRowArgs{}
 	{
 	}
 	return output
@@ -17182,12 +15069,8 @@ func (p *MutateRowArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructMutateRowArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructMutateRowArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -17195,80 +15078,61 @@ func (p *MutateRowArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "row" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "mutations" {
+		case 3: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "attributes" {
+		case 4: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -17281,45 +15145,38 @@ func (p *MutateRowArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 	return err
 }
 
-func (p *MutateRowArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v989, err990 := iprot.ReadBinary()
-	if err990 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err990)
+func (p *MutateRowArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v952, err953 := iprot.ReadBinary()
+	if err953 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err953)
 	}
-	p.TableName = Text(v989)
+	p.TableName = Text(v952)
 	return err
 }
 
-func (p *MutateRowArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *MutateRowArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v991, err992 := iprot.ReadBinary()
-	if err992 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err992)
+func (p *MutateRowArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v954, err955 := iprot.ReadBinary()
+	if err955 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err955)
 	}
-	p.Row = Text(v991)
+	p.Row = Text(v954)
 	return err
 }
 
-func (p *MutateRowArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *MutateRowArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype998, _size995, err := iprot.ReadListBegin()
+func (p *MutateRowArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype961, _size958, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Mutations", "", err)
 	}
-	p.Mutations = thrift.NewTList(_etype998, _size995)
-	for _i999 := 0; _i999 < _size995; _i999++ {
-		_elem1000 := NewMutation()
-		err1003 := _elem1000.Read(iprot)
-		if err1003 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem1000Mutation", err1003)
+	_ = _etype961
+	p.Mutations = make([]*Mutation, _size958, _size958)
+	for i := 0; i < _size958; i++ {
+		_elem963 := NewMutation()
+		err966 := _elem963.Read(iprot)
+		if err966 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem963Mutation", err966)
 		}
-		p.Mutations.Push(_elem1000)
+		p.Mutations[i] = _elem963
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -17328,28 +15185,25 @@ func (p *MutateRowArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *MutateRowArgs) ReadFieldMutations(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *MutateRowArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype1007, _vtype1008, _size1006, err := iprot.ReadMapBegin()
+func (p *MutateRowArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype970, _vtype971, _size969, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype1007, _vtype1008, _size1006)
-	for _i1010 := 0; _i1010 < _size1006; _i1010++ {
-		v1013, err1014 := iprot.ReadBinary()
-		if err1014 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key1011", "", err1014)
+	_, _ = _ktype970, _vtype971
+	p.Attributes = make(map[string]Text, _size969)
+	for i := 0; i < _size969; i++ {
+		v976, err977 := iprot.ReadString()
+		if err977 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key974", "", err977)
 		}
-		_key1011 := Text(v1013)
-		v1015, err1016 := iprot.ReadBinary()
-		if err1016 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val1012", "", err1016)
+		_key974 := v976
+		v978, err979 := iprot.ReadBinary()
+		if err979 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val975", "", err979)
 		}
-		_val1012 := Text(v1015)
-		p.Attributes.Set(_key1011, _val1012)
+		_val975 := Text(v978)
+		p.Attributes[_key974] = _val975
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -17358,28 +15212,24 @@ func (p *MutateRowArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *MutateRowArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
 func (p *MutateRowArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("mutateRow_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
@@ -17394,9 +15244,9 @@ func (p *MutateRowArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcep
 	return err
 }
 
-func (p *MutateRowArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -17412,13 +15262,9 @@ func (p *MutateRowArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *MutateRowArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *MutateRowArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "row", p.ThriftName(), err)
 		}
@@ -17434,23 +15280,18 @@ func (p *MutateRowArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *MutateRowArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *MutateRowArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Mutations != nil {
 		err = oprot.WriteFieldBegin("mutations", thrift.LIST, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "mutations", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Mutations.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Mutations))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter1017 := range p.Mutations.Iter() {
-			Iter1018 := Iter1017.(*Mutation)
-			err = Iter1018.Write(oprot)
+		for _, Iter980 := range p.Mutations {
+			err = Iter980.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("Mutation", err)
 			}
@@ -17467,29 +15308,24 @@ func (p *MutateRowArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *MutateRowArgs) WriteFieldMutations(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *MutateRowArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 4)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(4, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter1019 := range p.Attributes.Iter() {
-			Kiter1020, Viter1021 := Miter1019.Key().(Text), Miter1019.Value().(Text)
-			err = oprot.WriteBinary(Kiter1020)
+		for Kiter981, Viter982 := range p.Attributes {
+			err = oprot.WriteString(Kiter981)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1020", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter981", "", err)
 			}
-			err = oprot.WriteBinary(Viter1021)
+			err = oprot.WriteBinary(Viter982)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter1021", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter982", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -17504,34 +15340,12 @@ func (p *MutateRowArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *MutateRowArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
 func (p *MutateRowArgs) TStructName() string {
 	return "MutateRowArgs"
 }
 
 func (p *MutateRowArgs) ThriftName() string {
 	return "mutateRow_args"
-}
-
-func (p *MutateRowArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("MutateRowArgs(%+v)", *p)
-}
-
-func (p *MutateRowArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*MutateRowArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *MutateRowArgs) AttributeByFieldId(id int) interface{} {
@@ -17552,8 +15366,8 @@ func (p *MutateRowArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *MutateRowArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("row", thrift.BINARY, 2),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("row", thrift.STRING, 2),
 		thrift.NewTField("mutations", thrift.LIST, 3),
 		thrift.NewTField("attributes", thrift.MAP, 4),
 	})
@@ -17565,18 +15379,18 @@ func (p *MutateRowArgs) TStructFields() thrift.TFieldContainer {
  *  - Ia
  */
 type MutateRowResult struct {
-	thrift.TStruct
 	Io *IOError         "io" // 1
 	Ia *IllegalArgument "ia" // 2
 }
 
+var tstructMutateRowResult = thrift.NewTStruct("mutateRow_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+	thrift.NewTField("ia", thrift.STRUCT, 2),
+})
+
+func (*MutateRowResult) GetTStruct() thrift.TStruct { return tstructMutateRowResult }
 func NewMutateRowResult() *MutateRowResult {
-	output := &MutateRowResult{
-		TStruct: thrift.NewTStruct("mutateRow_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-			thrift.NewTField("ia", thrift.STRUCT, 2),
-		}),
-	}
+	output := &MutateRowResult{}
 	{
 	}
 	return output
@@ -17590,12 +15404,8 @@ func (p *MutateRowResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructMutateRowResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructMutateRowResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -17603,46 +15413,37 @@ func (p *MutateRowResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "ia" {
-			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //IllegalArgument
+			if fieldTypeId == thrift.STRUCT {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -17655,30 +15456,22 @@ func (p *MutateRowResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	return err
 }
 
-func (p *MutateRowResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1024 := p.Io.Read(iprot)
-	if err1024 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1024)
+	err985 := p.Io.Read(iprot)
+	if err985 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err985)
 	}
 	return err
 }
 
-func (p *MutateRowResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *MutateRowResult) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowResult) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Ia = NewIllegalArgument()
-	err1027 := p.Ia.Read(iprot)
-	if err1027 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err1027)
+	err988 := p.Ia.Read(iprot)
+	if err988 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err988)
 	}
 	return err
-}
-
-func (p *MutateRowResult) ReadFieldIa(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
 }
 
 func (p *MutateRowResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -17688,11 +15481,11 @@ func (p *MutateRowResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	}
 	switch {
 	case p.Ia != nil:
-		if err = p.WriteField2(oprot); err != nil {
+		if err = p.writeField2(oprot); err != nil {
 			return err
 		}
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -17707,7 +15500,7 @@ func (p *MutateRowResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *MutateRowResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -17725,11 +15518,7 @@ func (p *MutateRowResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *MutateRowResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *MutateRowResult) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowResult) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Ia != nil {
 		err = oprot.WriteFieldBegin("ia", thrift.STRUCT, 2)
 		if err != nil {
@@ -17747,34 +15536,12 @@ func (p *MutateRowResult) WriteField2(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *MutateRowResult) WriteFieldIa(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
 func (p *MutateRowResult) TStructName() string {
 	return "MutateRowResult"
 }
 
 func (p *MutateRowResult) ThriftName() string {
 	return "mutateRow_result"
-}
-
-func (p *MutateRowResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("MutateRowResult(%+v)", *p)
-}
-
-func (p *MutateRowResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*MutateRowResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *MutateRowResult) AttributeByFieldId(id int) interface{} {
@@ -17805,24 +15572,24 @@ func (p *MutateRowResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Mutation attributes
  */
 type MutateRowTsArgs struct {
-	thrift.TStruct
-	TableName  Text         "tableName"  // 1
-	Row        Text         "row"        // 2
-	Mutations  thrift.TList "mutations"  // 3
-	Timestamp  int64        "timestamp"  // 4
-	Attributes thrift.TMap  "attributes" // 5
+	TableName  Text            "tableName"  // 1
+	Row        Text            "row"        // 2
+	Mutations  []*Mutation     "mutations"  // 3
+	Timestamp  int64           "timestamp"  // 4
+	Attributes map[string]Text "attributes" // 5
 }
 
+var tstructMutateRowTsArgs = thrift.NewTStruct("mutateRowTs_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("row", thrift.STRING, 2),
+	thrift.NewTField("mutations", thrift.LIST, 3),
+	thrift.NewTField("timestamp", thrift.I64, 4),
+	thrift.NewTField("attributes", thrift.MAP, 5),
+})
+
+func (*MutateRowTsArgs) GetTStruct() thrift.TStruct { return tstructMutateRowTsArgs }
 func NewMutateRowTsArgs() *MutateRowTsArgs {
-	output := &MutateRowTsArgs{
-		TStruct: thrift.NewTStruct("mutateRowTs_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("row", thrift.BINARY, 2),
-			thrift.NewTField("mutations", thrift.LIST, 3),
-			thrift.NewTField("timestamp", thrift.I64, 4),
-			thrift.NewTField("attributes", thrift.MAP, 5),
-		}),
-	}
+	output := &MutateRowTsArgs{}
 	{
 	}
 	return output
@@ -17836,12 +15603,8 @@ func (p *MutateRowTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructMutateRowTsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructMutateRowTsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -17849,97 +15612,73 @@ func (p *MutateRowTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "row" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "mutations" {
+		case 3: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "timestamp" {
+		case 4: //i64
 			if fieldTypeId == thrift.I64 {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 5 || fieldName == "attributes" {
+		case 5: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField5(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField5(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField5(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -17952,45 +15691,38 @@ func (p *MutateRowTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	return err
 }
 
-func (p *MutateRowTsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1028, err1029 := iprot.ReadBinary()
-	if err1029 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1029)
+func (p *MutateRowTsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v989, err990 := iprot.ReadBinary()
+	if err990 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err990)
 	}
-	p.TableName = Text(v1028)
+	p.TableName = Text(v989)
 	return err
 }
 
-func (p *MutateRowTsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *MutateRowTsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1030, err1031 := iprot.ReadBinary()
-	if err1031 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err1031)
+func (p *MutateRowTsArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v991, err992 := iprot.ReadBinary()
+	if err992 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err992)
 	}
-	p.Row = Text(v1030)
+	p.Row = Text(v991)
 	return err
 }
 
-func (p *MutateRowTsArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *MutateRowTsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype1037, _size1034, err := iprot.ReadListBegin()
+func (p *MutateRowTsArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype998, _size995, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Mutations", "", err)
 	}
-	p.Mutations = thrift.NewTList(_etype1037, _size1034)
-	for _i1038 := 0; _i1038 < _size1034; _i1038++ {
-		_elem1039 := NewMutation()
-		err1042 := _elem1039.Read(iprot)
-		if err1042 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem1039Mutation", err1042)
+	_ = _etype998
+	p.Mutations = make([]*Mutation, _size995, _size995)
+	for i := 0; i < _size995; i++ {
+		_elem1000 := NewMutation()
+		err1003 := _elem1000.Read(iprot)
+		if err1003 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem1000Mutation", err1003)
 		}
-		p.Mutations.Push(_elem1039)
+		p.Mutations[i] = _elem1000
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -17999,41 +15731,34 @@ func (p *MutateRowTsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *MutateRowTsArgs) ReadFieldMutations(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *MutateRowTsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1043, err1044 := iprot.ReadI64()
-	if err1044 != nil {
-		return thrift.NewTProtocolExceptionReadField(4, "timestamp", p.ThriftName(), err1044)
+func (p *MutateRowTsArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1004, err1005 := iprot.ReadI64()
+	if err1005 != nil {
+		return thrift.NewTProtocolExceptionReadField(4, "timestamp", p.ThriftName(), err1005)
 	}
-	p.Timestamp = v1043
+	p.Timestamp = v1004
 	return err
 }
 
-func (p *MutateRowTsArgs) ReadFieldTimestamp(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
-func (p *MutateRowTsArgs) ReadField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype1048, _vtype1049, _size1047, err := iprot.ReadMapBegin()
+func (p *MutateRowTsArgs) readField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype1009, _vtype1010, _size1008, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype1048, _vtype1049, _size1047)
-	for _i1051 := 0; _i1051 < _size1047; _i1051++ {
-		v1054, err1055 := iprot.ReadBinary()
-		if err1055 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key1052", "", err1055)
+	_, _ = _ktype1009, _vtype1010
+	p.Attributes = make(map[string]Text, _size1008)
+	for i := 0; i < _size1008; i++ {
+		v1015, err1016 := iprot.ReadString()
+		if err1016 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key1013", "", err1016)
 		}
-		_key1052 := Text(v1054)
-		v1056, err1057 := iprot.ReadBinary()
-		if err1057 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val1053", "", err1057)
+		_key1013 := v1015
+		v1017, err1018 := iprot.ReadBinary()
+		if err1018 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val1014", "", err1018)
 		}
-		_val1053 := Text(v1056)
-		p.Attributes.Set(_key1052, _val1053)
+		_val1014 := Text(v1017)
+		p.Attributes[_key1013] = _val1014
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -18042,32 +15767,28 @@ func (p *MutateRowTsArgs) ReadField5(iprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *MutateRowTsArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField5(iprot)
-}
-
 func (p *MutateRowTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("mutateRowTs_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField5(oprot)
+	err = p.writeField5(oprot)
 	if err != nil {
 		return err
 	}
@@ -18082,9 +15803,9 @@ func (p *MutateRowTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *MutateRowTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowTsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -18100,13 +15821,9 @@ func (p *MutateRowTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *MutateRowTsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *MutateRowTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowTsArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "row", p.ThriftName(), err)
 		}
@@ -18122,23 +15839,18 @@ func (p *MutateRowTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *MutateRowTsArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *MutateRowTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowTsArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Mutations != nil {
 		err = oprot.WriteFieldBegin("mutations", thrift.LIST, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "mutations", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Mutations.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Mutations))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter1058 := range p.Mutations.Iter() {
-			Iter1059 := Iter1058.(*Mutation)
-			err = Iter1059.Write(oprot)
+		for _, Iter1019 := range p.Mutations {
+			err = Iter1019.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("Mutation", err)
 			}
@@ -18155,11 +15867,7 @@ func (p *MutateRowTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *MutateRowTsArgs) WriteFieldMutations(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *MutateRowTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowTsArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("timestamp", thrift.I64, 4)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(4, "timestamp", p.ThriftName(), err)
@@ -18175,29 +15883,24 @@ func (p *MutateRowTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *MutateRowTsArgs) WriteFieldTimestamp(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
-func (p *MutateRowTsArgs) WriteField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowTsArgs) writeField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 5)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(5, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter1060 := range p.Attributes.Iter() {
-			Kiter1061, Viter1062 := Miter1060.Key().(Text), Miter1060.Value().(Text)
-			err = oprot.WriteBinary(Kiter1061)
+		for Kiter1020, Viter1021 := range p.Attributes {
+			err = oprot.WriteString(Kiter1020)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1061", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1020", "", err)
 			}
-			err = oprot.WriteBinary(Viter1062)
+			err = oprot.WriteBinary(Viter1021)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter1062", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter1021", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -18212,34 +15915,12 @@ func (p *MutateRowTsArgs) WriteField5(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *MutateRowTsArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField5(oprot)
-}
-
 func (p *MutateRowTsArgs) TStructName() string {
 	return "MutateRowTsArgs"
 }
 
 func (p *MutateRowTsArgs) ThriftName() string {
 	return "mutateRowTs_args"
-}
-
-func (p *MutateRowTsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("MutateRowTsArgs(%+v)", *p)
-}
-
-func (p *MutateRowTsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*MutateRowTsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *MutateRowTsArgs) AttributeByFieldId(id int) interface{} {
@@ -18262,8 +15943,8 @@ func (p *MutateRowTsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *MutateRowTsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("row", thrift.BINARY, 2),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("row", thrift.STRING, 2),
 		thrift.NewTField("mutations", thrift.LIST, 3),
 		thrift.NewTField("timestamp", thrift.I64, 4),
 		thrift.NewTField("attributes", thrift.MAP, 5),
@@ -18276,18 +15957,18 @@ func (p *MutateRowTsArgs) TStructFields() thrift.TFieldContainer {
  *  - Ia
  */
 type MutateRowTsResult struct {
-	thrift.TStruct
 	Io *IOError         "io" // 1
 	Ia *IllegalArgument "ia" // 2
 }
 
+var tstructMutateRowTsResult = thrift.NewTStruct("mutateRowTs_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+	thrift.NewTField("ia", thrift.STRUCT, 2),
+})
+
+func (*MutateRowTsResult) GetTStruct() thrift.TStruct { return tstructMutateRowTsResult }
 func NewMutateRowTsResult() *MutateRowTsResult {
-	output := &MutateRowTsResult{
-		TStruct: thrift.NewTStruct("mutateRowTs_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-			thrift.NewTField("ia", thrift.STRUCT, 2),
-		}),
-	}
+	output := &MutateRowTsResult{}
 	{
 	}
 	return output
@@ -18301,12 +15982,8 @@ func (p *MutateRowTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructMutateRowTsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructMutateRowTsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -18314,46 +15991,37 @@ func (p *MutateRowTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "ia" {
-			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //IllegalArgument
+			if fieldTypeId == thrift.STRUCT {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -18366,30 +16034,22 @@ func (p *MutateRowTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *MutateRowTsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowTsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1065 := p.Io.Read(iprot)
-	if err1065 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1065)
+	err1024 := p.Io.Read(iprot)
+	if err1024 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1024)
 	}
 	return err
 }
 
-func (p *MutateRowTsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *MutateRowTsResult) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowTsResult) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Ia = NewIllegalArgument()
-	err1068 := p.Ia.Read(iprot)
-	if err1068 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err1068)
+	err1027 := p.Ia.Read(iprot)
+	if err1027 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err1027)
 	}
 	return err
-}
-
-func (p *MutateRowTsResult) ReadFieldIa(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
 }
 
 func (p *MutateRowTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -18399,11 +16059,11 @@ func (p *MutateRowTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	}
 	switch {
 	case p.Ia != nil:
-		if err = p.WriteField2(oprot); err != nil {
+		if err = p.writeField2(oprot); err != nil {
 			return err
 		}
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -18418,7 +16078,7 @@ func (p *MutateRowTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *MutateRowTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowTsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -18436,11 +16096,7 @@ func (p *MutateRowTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *MutateRowTsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *MutateRowTsResult) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowTsResult) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Ia != nil {
 		err = oprot.WriteFieldBegin("ia", thrift.STRUCT, 2)
 		if err != nil {
@@ -18458,34 +16114,12 @@ func (p *MutateRowTsResult) WriteField2(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *MutateRowTsResult) WriteFieldIa(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
 func (p *MutateRowTsResult) TStructName() string {
 	return "MutateRowTsResult"
 }
 
 func (p *MutateRowTsResult) ThriftName() string {
 	return "mutateRowTs_result"
-}
-
-func (p *MutateRowTsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("MutateRowTsResult(%+v)", *p)
-}
-
-func (p *MutateRowTsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*MutateRowTsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *MutateRowTsResult) AttributeByFieldId(id int) interface{} {
@@ -18514,20 +16148,20 @@ func (p *MutateRowTsResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Mutation attributes
  */
 type MutateRowsArgs struct {
-	thrift.TStruct
-	TableName  Text         "tableName"  // 1
-	RowBatches thrift.TList "rowBatches" // 2
-	Attributes thrift.TMap  "attributes" // 3
+	TableName  Text             "tableName"  // 1
+	RowBatches []*BatchMutation "rowBatches" // 2
+	Attributes map[string]Text  "attributes" // 3
 }
 
+var tstructMutateRowsArgs = thrift.NewTStruct("mutateRows_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("rowBatches", thrift.LIST, 2),
+	thrift.NewTField("attributes", thrift.MAP, 3),
+})
+
+func (*MutateRowsArgs) GetTStruct() thrift.TStruct { return tstructMutateRowsArgs }
 func NewMutateRowsArgs() *MutateRowsArgs {
-	output := &MutateRowsArgs{
-		TStruct: thrift.NewTStruct("mutateRows_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("rowBatches", thrift.LIST, 2),
-			thrift.NewTField("attributes", thrift.MAP, 3),
-		}),
-	}
+	output := &MutateRowsArgs{}
 	{
 	}
 	return output
@@ -18541,12 +16175,8 @@ func (p *MutateRowsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcep
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructMutateRowsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructMutateRowsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -18554,63 +16184,49 @@ func (p *MutateRowsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcep
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 2 || fieldName == "rowBatches" {
+		case 2: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "attributes" {
+		case 3: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -18623,32 +16239,29 @@ func (p *MutateRowsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcep
 	return err
 }
 
-func (p *MutateRowsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1069, err1070 := iprot.ReadBinary()
-	if err1070 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1070)
+func (p *MutateRowsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1028, err1029 := iprot.ReadBinary()
+	if err1029 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1029)
 	}
-	p.TableName = Text(v1069)
+	p.TableName = Text(v1028)
 	return err
 }
 
-func (p *MutateRowsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *MutateRowsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype1076, _size1073, err := iprot.ReadListBegin()
+func (p *MutateRowsArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype1035, _size1032, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.RowBatches", "", err)
 	}
-	p.RowBatches = thrift.NewTList(_etype1076, _size1073)
-	for _i1077 := 0; _i1077 < _size1073; _i1077++ {
-		_elem1078 := NewBatchMutation()
-		err1081 := _elem1078.Read(iprot)
-		if err1081 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem1078BatchMutation", err1081)
+	_ = _etype1035
+	p.RowBatches = make([]*BatchMutation, _size1032, _size1032)
+	for i := 0; i < _size1032; i++ {
+		_elem1037 := NewBatchMutation()
+		err1040 := _elem1037.Read(iprot)
+		if err1040 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem1037BatchMutation", err1040)
 		}
-		p.RowBatches.Push(_elem1078)
+		p.RowBatches[i] = _elem1037
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -18657,28 +16270,25 @@ func (p *MutateRowsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *MutateRowsArgs) ReadFieldRowBatches(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *MutateRowsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype1085, _vtype1086, _size1084, err := iprot.ReadMapBegin()
+func (p *MutateRowsArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype1044, _vtype1045, _size1043, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype1085, _vtype1086, _size1084)
-	for _i1088 := 0; _i1088 < _size1084; _i1088++ {
-		v1091, err1092 := iprot.ReadBinary()
-		if err1092 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key1089", "", err1092)
+	_, _ = _ktype1044, _vtype1045
+	p.Attributes = make(map[string]Text, _size1043)
+	for i := 0; i < _size1043; i++ {
+		v1050, err1051 := iprot.ReadString()
+		if err1051 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key1048", "", err1051)
 		}
-		_key1089 := Text(v1091)
-		v1093, err1094 := iprot.ReadBinary()
-		if err1094 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val1090", "", err1094)
+		_key1048 := v1050
+		v1052, err1053 := iprot.ReadBinary()
+		if err1053 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val1049", "", err1053)
 		}
-		_val1090 := Text(v1093)
-		p.Attributes.Set(_key1089, _val1090)
+		_val1049 := Text(v1052)
+		p.Attributes[_key1048] = _val1049
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -18687,24 +16297,20 @@ func (p *MutateRowsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *MutateRowsArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
 func (p *MutateRowsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("mutateRows_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
@@ -18719,9 +16325,9 @@ func (p *MutateRowsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExce
 	return err
 }
 
-func (p *MutateRowsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -18737,23 +16343,18 @@ func (p *MutateRowsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *MutateRowsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *MutateRowsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowsArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.RowBatches != nil {
 		err = oprot.WriteFieldBegin("rowBatches", thrift.LIST, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "rowBatches", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.RowBatches.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.RowBatches))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter1095 := range p.RowBatches.Iter() {
-			Iter1096 := Iter1095.(*BatchMutation)
-			err = Iter1096.Write(oprot)
+		for _, Iter1054 := range p.RowBatches {
+			err = Iter1054.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("BatchMutation", err)
 			}
@@ -18770,29 +16371,24 @@ func (p *MutateRowsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *MutateRowsArgs) WriteFieldRowBatches(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *MutateRowsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowsArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter1097 := range p.Attributes.Iter() {
-			Kiter1098, Viter1099 := Miter1097.Key().(Text), Miter1097.Value().(Text)
-			err = oprot.WriteBinary(Kiter1098)
+		for Kiter1055, Viter1056 := range p.Attributes {
+			err = oprot.WriteString(Kiter1055)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1098", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1055", "", err)
 			}
-			err = oprot.WriteBinary(Viter1099)
+			err = oprot.WriteBinary(Viter1056)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter1099", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter1056", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -18807,34 +16403,12 @@ func (p *MutateRowsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *MutateRowsArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
 func (p *MutateRowsArgs) TStructName() string {
 	return "MutateRowsArgs"
 }
 
 func (p *MutateRowsArgs) ThriftName() string {
 	return "mutateRows_args"
-}
-
-func (p *MutateRowsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("MutateRowsArgs(%+v)", *p)
-}
-
-func (p *MutateRowsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*MutateRowsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *MutateRowsArgs) AttributeByFieldId(id int) interface{} {
@@ -18853,7 +16427,7 @@ func (p *MutateRowsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *MutateRowsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
+		thrift.NewTField("tableName", thrift.STRING, 1),
 		thrift.NewTField("rowBatches", thrift.LIST, 2),
 		thrift.NewTField("attributes", thrift.MAP, 3),
 	})
@@ -18865,18 +16439,18 @@ func (p *MutateRowsArgs) TStructFields() thrift.TFieldContainer {
  *  - Ia
  */
 type MutateRowsResult struct {
-	thrift.TStruct
 	Io *IOError         "io" // 1
 	Ia *IllegalArgument "ia" // 2
 }
 
+var tstructMutateRowsResult = thrift.NewTStruct("mutateRows_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+	thrift.NewTField("ia", thrift.STRUCT, 2),
+})
+
+func (*MutateRowsResult) GetTStruct() thrift.TStruct { return tstructMutateRowsResult }
 func NewMutateRowsResult() *MutateRowsResult {
-	output := &MutateRowsResult{
-		TStruct: thrift.NewTStruct("mutateRows_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-			thrift.NewTField("ia", thrift.STRUCT, 2),
-		}),
-	}
+	output := &MutateRowsResult{}
 	{
 	}
 	return output
@@ -18890,12 +16464,8 @@ func (p *MutateRowsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructMutateRowsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructMutateRowsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -18903,46 +16473,37 @@ func (p *MutateRowsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "ia" {
-			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //IllegalArgument
+			if fieldTypeId == thrift.STRUCT {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -18955,30 +16516,22 @@ func (p *MutateRowsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *MutateRowsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1102 := p.Io.Read(iprot)
-	if err1102 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1102)
+	err1059 := p.Io.Read(iprot)
+	if err1059 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1059)
 	}
 	return err
 }
 
-func (p *MutateRowsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *MutateRowsResult) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowsResult) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Ia = NewIllegalArgument()
-	err1105 := p.Ia.Read(iprot)
-	if err1105 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err1105)
+	err1062 := p.Ia.Read(iprot)
+	if err1062 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err1062)
 	}
 	return err
-}
-
-func (p *MutateRowsResult) ReadFieldIa(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
 }
 
 func (p *MutateRowsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -18988,11 +16541,11 @@ func (p *MutateRowsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	}
 	switch {
 	case p.Ia != nil:
-		if err = p.WriteField2(oprot); err != nil {
+		if err = p.writeField2(oprot); err != nil {
 			return err
 		}
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -19007,7 +16560,7 @@ func (p *MutateRowsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *MutateRowsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -19025,11 +16578,7 @@ func (p *MutateRowsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *MutateRowsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *MutateRowsResult) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowsResult) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Ia != nil {
 		err = oprot.WriteFieldBegin("ia", thrift.STRUCT, 2)
 		if err != nil {
@@ -19047,34 +16596,12 @@ func (p *MutateRowsResult) WriteField2(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *MutateRowsResult) WriteFieldIa(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
 func (p *MutateRowsResult) TStructName() string {
 	return "MutateRowsResult"
 }
 
 func (p *MutateRowsResult) ThriftName() string {
 	return "mutateRows_result"
-}
-
-func (p *MutateRowsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("MutateRowsResult(%+v)", *p)
-}
-
-func (p *MutateRowsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*MutateRowsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *MutateRowsResult) AttributeByFieldId(id int) interface{} {
@@ -19104,22 +16631,22 @@ func (p *MutateRowsResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Mutation attributes
  */
 type MutateRowsTsArgs struct {
-	thrift.TStruct
-	TableName  Text         "tableName"  // 1
-	RowBatches thrift.TList "rowBatches" // 2
-	Timestamp  int64        "timestamp"  // 3
-	Attributes thrift.TMap  "attributes" // 4
+	TableName  Text             "tableName"  // 1
+	RowBatches []*BatchMutation "rowBatches" // 2
+	Timestamp  int64            "timestamp"  // 3
+	Attributes map[string]Text  "attributes" // 4
 }
 
+var tstructMutateRowsTsArgs = thrift.NewTStruct("mutateRowsTs_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("rowBatches", thrift.LIST, 2),
+	thrift.NewTField("timestamp", thrift.I64, 3),
+	thrift.NewTField("attributes", thrift.MAP, 4),
+})
+
+func (*MutateRowsTsArgs) GetTStruct() thrift.TStruct { return tstructMutateRowsTsArgs }
 func NewMutateRowsTsArgs() *MutateRowsTsArgs {
-	output := &MutateRowsTsArgs{
-		TStruct: thrift.NewTStruct("mutateRowsTs_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("rowBatches", thrift.LIST, 2),
-			thrift.NewTField("timestamp", thrift.I64, 3),
-			thrift.NewTField("attributes", thrift.MAP, 4),
-		}),
-	}
+	output := &MutateRowsTsArgs{}
 	{
 	}
 	return output
@@ -19133,12 +16660,8 @@ func (p *MutateRowsTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructMutateRowsTsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructMutateRowsTsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -19146,80 +16669,61 @@ func (p *MutateRowsTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 2 || fieldName == "rowBatches" {
+		case 2: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "timestamp" {
+		case 3: //i64
 			if fieldTypeId == thrift.I64 {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "attributes" {
+		case 4: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -19232,32 +16736,29 @@ func (p *MutateRowsTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *MutateRowsTsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1106, err1107 := iprot.ReadBinary()
-	if err1107 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1107)
+func (p *MutateRowsTsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1063, err1064 := iprot.ReadBinary()
+	if err1064 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1064)
 	}
-	p.TableName = Text(v1106)
+	p.TableName = Text(v1063)
 	return err
 }
 
-func (p *MutateRowsTsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *MutateRowsTsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype1113, _size1110, err := iprot.ReadListBegin()
+func (p *MutateRowsTsArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype1070, _size1067, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.RowBatches", "", err)
 	}
-	p.RowBatches = thrift.NewTList(_etype1113, _size1110)
-	for _i1114 := 0; _i1114 < _size1110; _i1114++ {
-		_elem1115 := NewBatchMutation()
-		err1118 := _elem1115.Read(iprot)
-		if err1118 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem1115BatchMutation", err1118)
+	_ = _etype1070
+	p.RowBatches = make([]*BatchMutation, _size1067, _size1067)
+	for i := 0; i < _size1067; i++ {
+		_elem1072 := NewBatchMutation()
+		err1075 := _elem1072.Read(iprot)
+		if err1075 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem1072BatchMutation", err1075)
 		}
-		p.RowBatches.Push(_elem1115)
+		p.RowBatches[i] = _elem1072
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -19266,41 +16767,34 @@ func (p *MutateRowsTsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *MutateRowsTsArgs) ReadFieldRowBatches(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *MutateRowsTsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1119, err1120 := iprot.ReadI64()
-	if err1120 != nil {
-		return thrift.NewTProtocolExceptionReadField(3, "timestamp", p.ThriftName(), err1120)
+func (p *MutateRowsTsArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1076, err1077 := iprot.ReadI64()
+	if err1077 != nil {
+		return thrift.NewTProtocolExceptionReadField(3, "timestamp", p.ThriftName(), err1077)
 	}
-	p.Timestamp = v1119
+	p.Timestamp = v1076
 	return err
 }
 
-func (p *MutateRowsTsArgs) ReadFieldTimestamp(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *MutateRowsTsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype1124, _vtype1125, _size1123, err := iprot.ReadMapBegin()
+func (p *MutateRowsTsArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype1081, _vtype1082, _size1080, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype1124, _vtype1125, _size1123)
-	for _i1127 := 0; _i1127 < _size1123; _i1127++ {
-		v1130, err1131 := iprot.ReadBinary()
-		if err1131 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key1128", "", err1131)
+	_, _ = _ktype1081, _vtype1082
+	p.Attributes = make(map[string]Text, _size1080)
+	for i := 0; i < _size1080; i++ {
+		v1087, err1088 := iprot.ReadString()
+		if err1088 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key1085", "", err1088)
 		}
-		_key1128 := Text(v1130)
-		v1132, err1133 := iprot.ReadBinary()
-		if err1133 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val1129", "", err1133)
+		_key1085 := v1087
+		v1089, err1090 := iprot.ReadBinary()
+		if err1090 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val1086", "", err1090)
 		}
-		_val1129 := Text(v1132)
-		p.Attributes.Set(_key1128, _val1129)
+		_val1086 := Text(v1089)
+		p.Attributes[_key1085] = _val1086
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -19309,28 +16803,24 @@ func (p *MutateRowsTsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *MutateRowsTsArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
 func (p *MutateRowsTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("mutateRowsTs_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
@@ -19345,9 +16835,9 @@ func (p *MutateRowsTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *MutateRowsTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowsTsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -19363,23 +16853,18 @@ func (p *MutateRowsTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *MutateRowsTsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *MutateRowsTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowsTsArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.RowBatches != nil {
 		err = oprot.WriteFieldBegin("rowBatches", thrift.LIST, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "rowBatches", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.RowBatches.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.RowBatches))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter1134 := range p.RowBatches.Iter() {
-			Iter1135 := Iter1134.(*BatchMutation)
-			err = Iter1135.Write(oprot)
+		for _, Iter1091 := range p.RowBatches {
+			err = Iter1091.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("BatchMutation", err)
 			}
@@ -19396,11 +16881,7 @@ func (p *MutateRowsTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *MutateRowsTsArgs) WriteFieldRowBatches(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *MutateRowsTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowsTsArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("timestamp", thrift.I64, 3)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(3, "timestamp", p.ThriftName(), err)
@@ -19416,29 +16897,24 @@ func (p *MutateRowsTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *MutateRowsTsArgs) WriteFieldTimestamp(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *MutateRowsTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowsTsArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 4)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(4, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter1136 := range p.Attributes.Iter() {
-			Kiter1137, Viter1138 := Miter1136.Key().(Text), Miter1136.Value().(Text)
-			err = oprot.WriteBinary(Kiter1137)
+		for Kiter1092, Viter1093 := range p.Attributes {
+			err = oprot.WriteString(Kiter1092)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1137", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1092", "", err)
 			}
-			err = oprot.WriteBinary(Viter1138)
+			err = oprot.WriteBinary(Viter1093)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter1138", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter1093", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -19453,34 +16929,12 @@ func (p *MutateRowsTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *MutateRowsTsArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
 func (p *MutateRowsTsArgs) TStructName() string {
 	return "MutateRowsTsArgs"
 }
 
 func (p *MutateRowsTsArgs) ThriftName() string {
 	return "mutateRowsTs_args"
-}
-
-func (p *MutateRowsTsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("MutateRowsTsArgs(%+v)", *p)
-}
-
-func (p *MutateRowsTsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*MutateRowsTsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *MutateRowsTsArgs) AttributeByFieldId(id int) interface{} {
@@ -19501,7 +16955,7 @@ func (p *MutateRowsTsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *MutateRowsTsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
+		thrift.NewTField("tableName", thrift.STRING, 1),
 		thrift.NewTField("rowBatches", thrift.LIST, 2),
 		thrift.NewTField("timestamp", thrift.I64, 3),
 		thrift.NewTField("attributes", thrift.MAP, 4),
@@ -19514,18 +16968,18 @@ func (p *MutateRowsTsArgs) TStructFields() thrift.TFieldContainer {
  *  - Ia
  */
 type MutateRowsTsResult struct {
-	thrift.TStruct
 	Io *IOError         "io" // 1
 	Ia *IllegalArgument "ia" // 2
 }
 
+var tstructMutateRowsTsResult = thrift.NewTStruct("mutateRowsTs_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+	thrift.NewTField("ia", thrift.STRUCT, 2),
+})
+
+func (*MutateRowsTsResult) GetTStruct() thrift.TStruct { return tstructMutateRowsTsResult }
 func NewMutateRowsTsResult() *MutateRowsTsResult {
-	output := &MutateRowsTsResult{
-		TStruct: thrift.NewTStruct("mutateRowsTs_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-			thrift.NewTField("ia", thrift.STRUCT, 2),
-		}),
-	}
+	output := &MutateRowsTsResult{}
 	{
 	}
 	return output
@@ -19539,12 +16993,8 @@ func (p *MutateRowsTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructMutateRowsTsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructMutateRowsTsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -19552,46 +17002,37 @@ func (p *MutateRowsTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "ia" {
-			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //IllegalArgument
+			if fieldTypeId == thrift.STRUCT {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -19604,30 +17045,22 @@ func (p *MutateRowsTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *MutateRowsTsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowsTsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1141 := p.Io.Read(iprot)
-	if err1141 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1141)
+	err1096 := p.Io.Read(iprot)
+	if err1096 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1096)
 	}
 	return err
 }
 
-func (p *MutateRowsTsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *MutateRowsTsResult) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowsTsResult) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Ia = NewIllegalArgument()
-	err1144 := p.Ia.Read(iprot)
-	if err1144 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err1144)
+	err1099 := p.Ia.Read(iprot)
+	if err1099 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err1099)
 	}
 	return err
-}
-
-func (p *MutateRowsTsResult) ReadFieldIa(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
 }
 
 func (p *MutateRowsTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -19637,11 +17070,11 @@ func (p *MutateRowsTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	}
 	switch {
 	case p.Ia != nil:
-		if err = p.WriteField2(oprot); err != nil {
+		if err = p.writeField2(oprot); err != nil {
 			return err
 		}
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -19656,7 +17089,7 @@ func (p *MutateRowsTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *MutateRowsTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowsTsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -19674,11 +17107,7 @@ func (p *MutateRowsTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *MutateRowsTsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *MutateRowsTsResult) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *MutateRowsTsResult) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Ia != nil {
 		err = oprot.WriteFieldBegin("ia", thrift.STRUCT, 2)
 		if err != nil {
@@ -19696,34 +17125,12 @@ func (p *MutateRowsTsResult) WriteField2(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *MutateRowsTsResult) WriteFieldIa(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
 func (p *MutateRowsTsResult) TStructName() string {
 	return "MutateRowsTsResult"
 }
 
 func (p *MutateRowsTsResult) ThriftName() string {
 	return "mutateRowsTs_result"
-}
-
-func (p *MutateRowsTsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("MutateRowsTsResult(%+v)", *p)
-}
-
-func (p *MutateRowsTsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*MutateRowsTsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *MutateRowsTsResult) AttributeByFieldId(id int) interface{} {
@@ -19753,22 +17160,22 @@ func (p *MutateRowsTsResult) TStructFields() thrift.TFieldContainer {
  *  - Value: amount to increment by
  */
 type AtomicIncrementArgs struct {
-	thrift.TStruct
 	TableName Text  "tableName" // 1
 	Row       Text  "row"       // 2
 	Column    Text  "column"    // 3
 	Value     int64 "value"     // 4
 }
 
+var tstructAtomicIncrementArgs = thrift.NewTStruct("atomicIncrement_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("row", thrift.STRING, 2),
+	thrift.NewTField("column", thrift.STRING, 3),
+	thrift.NewTField("value", thrift.I64, 4),
+})
+
+func (*AtomicIncrementArgs) GetTStruct() thrift.TStruct { return tstructAtomicIncrementArgs }
 func NewAtomicIncrementArgs() *AtomicIncrementArgs {
-	output := &AtomicIncrementArgs{
-		TStruct: thrift.NewTStruct("atomicIncrement_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("row", thrift.BINARY, 2),
-			thrift.NewTField("column", thrift.BINARY, 3),
-			thrift.NewTField("value", thrift.I64, 4),
-		}),
-	}
+	output := &AtomicIncrementArgs{}
 	{
 	}
 	return output
@@ -19782,12 +17189,8 @@ func (p *AtomicIncrementArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructAtomicIncrementArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructAtomicIncrementArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -19795,80 +17198,61 @@ func (p *AtomicIncrementArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "row" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
 			}
-		} else if fieldId == 3 || fieldName == "column" {
+		case 2: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField3(iprot)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else if fieldTypeId == thrift.VOID {
+			} else {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 3: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField3(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "value" {
+		case 4: //i64
 			if fieldTypeId == thrift.I64 {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -19881,56 +17265,40 @@ func (p *AtomicIncrementArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *AtomicIncrementArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1145, err1146 := iprot.ReadBinary()
-	if err1146 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1146)
+func (p *AtomicIncrementArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1100, err1101 := iprot.ReadBinary()
+	if err1101 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1101)
 	}
-	p.TableName = Text(v1145)
+	p.TableName = Text(v1100)
 	return err
 }
 
-func (p *AtomicIncrementArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *AtomicIncrementArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1147, err1148 := iprot.ReadBinary()
-	if err1148 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err1148)
+func (p *AtomicIncrementArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1102, err1103 := iprot.ReadBinary()
+	if err1103 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err1103)
 	}
-	p.Row = Text(v1147)
+	p.Row = Text(v1102)
 	return err
 }
 
-func (p *AtomicIncrementArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *AtomicIncrementArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1149, err1150 := iprot.ReadBinary()
-	if err1150 != nil {
-		return thrift.NewTProtocolExceptionReadField(3, "column", p.ThriftName(), err1150)
+func (p *AtomicIncrementArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1104, err1105 := iprot.ReadBinary()
+	if err1105 != nil {
+		return thrift.NewTProtocolExceptionReadField(3, "column", p.ThriftName(), err1105)
 	}
-	p.Column = Text(v1149)
+	p.Column = Text(v1104)
 	return err
 }
 
-func (p *AtomicIncrementArgs) ReadFieldColumn(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *AtomicIncrementArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1151, err1152 := iprot.ReadI64()
-	if err1152 != nil {
-		return thrift.NewTProtocolExceptionReadField(4, "value", p.ThriftName(), err1152)
+func (p *AtomicIncrementArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1106, err1107 := iprot.ReadI64()
+	if err1107 != nil {
+		return thrift.NewTProtocolExceptionReadField(4, "value", p.ThriftName(), err1107)
 	}
-	p.Value = v1151
+	p.Value = v1106
 	return err
-}
-
-func (p *AtomicIncrementArgs) ReadFieldValue(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
 }
 
 func (p *AtomicIncrementArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -19938,19 +17306,19 @@ func (p *AtomicIncrementArgs) Write(oprot thrift.TProtocol) (err thrift.TProtoco
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
@@ -19965,9 +17333,9 @@ func (p *AtomicIncrementArgs) Write(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *AtomicIncrementArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *AtomicIncrementArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -19983,13 +17351,9 @@ func (p *AtomicIncrementArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *AtomicIncrementArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *AtomicIncrementArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *AtomicIncrementArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "row", p.ThriftName(), err)
 		}
@@ -20005,13 +17369,9 @@ func (p *AtomicIncrementArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *AtomicIncrementArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *AtomicIncrementArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *AtomicIncrementArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Column != nil {
-		err = oprot.WriteFieldBegin("column", thrift.BINARY, 3)
+		err = oprot.WriteFieldBegin("column", thrift.STRING, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "column", p.ThriftName(), err)
 		}
@@ -20027,11 +17387,7 @@ func (p *AtomicIncrementArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *AtomicIncrementArgs) WriteFieldColumn(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *AtomicIncrementArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *AtomicIncrementArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("value", thrift.I64, 4)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(4, "value", p.ThriftName(), err)
@@ -20047,34 +17403,12 @@ func (p *AtomicIncrementArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *AtomicIncrementArgs) WriteFieldValue(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
 func (p *AtomicIncrementArgs) TStructName() string {
 	return "AtomicIncrementArgs"
 }
 
 func (p *AtomicIncrementArgs) ThriftName() string {
 	return "atomicIncrement_args"
-}
-
-func (p *AtomicIncrementArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("AtomicIncrementArgs(%+v)", *p)
-}
-
-func (p *AtomicIncrementArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*AtomicIncrementArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *AtomicIncrementArgs) AttributeByFieldId(id int) interface{} {
@@ -20095,9 +17429,9 @@ func (p *AtomicIncrementArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *AtomicIncrementArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("row", thrift.BINARY, 2),
-		thrift.NewTField("column", thrift.BINARY, 3),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("row", thrift.STRING, 2),
+		thrift.NewTField("column", thrift.STRING, 3),
 		thrift.NewTField("value", thrift.I64, 4),
 	})
 }
@@ -20109,20 +17443,20 @@ func (p *AtomicIncrementArgs) TStructFields() thrift.TFieldContainer {
  *  - Ia
  */
 type AtomicIncrementResult struct {
-	thrift.TStruct
 	Success int64            "success" // 0
 	Io      *IOError         "io"      // 1
 	Ia      *IllegalArgument "ia"      // 2
 }
 
+var tstructAtomicIncrementResult = thrift.NewTStruct("atomicIncrement_result", []thrift.TField{
+	thrift.NewTField("success", thrift.I64, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+	thrift.NewTField("ia", thrift.STRUCT, 2),
+})
+
+func (*AtomicIncrementResult) GetTStruct() thrift.TStruct { return tstructAtomicIncrementResult }
 func NewAtomicIncrementResult() *AtomicIncrementResult {
-	output := &AtomicIncrementResult{
-		TStruct: thrift.NewTStruct("atomicIncrement_result", []thrift.TField{
-			thrift.NewTField("success", thrift.I64, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-			thrift.NewTField("ia", thrift.STRUCT, 2),
-		}),
-	}
+	output := &AtomicIncrementResult{}
 	{
 	}
 	return output
@@ -20136,12 +17470,8 @@ func (p *AtomicIncrementResult) Read(iprot thrift.TProtocol) (err thrift.TProtoc
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructAtomicIncrementResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructAtomicIncrementResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -20149,63 +17479,49 @@ func (p *AtomicIncrementResult) Read(iprot thrift.TProtocol) (err thrift.TProtoc
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //i64
 			if fieldTypeId == thrift.I64 {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 2 || fieldName == "ia" {
+		case 2: //IllegalArgument
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -20218,43 +17534,31 @@ func (p *AtomicIncrementResult) Read(iprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *AtomicIncrementResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1153, err1154 := iprot.ReadI64()
-	if err1154 != nil {
-		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err1154)
+func (p *AtomicIncrementResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1108, err1109 := iprot.ReadI64()
+	if err1109 != nil {
+		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err1109)
 	}
-	p.Success = v1153
+	p.Success = v1108
 	return err
 }
 
-func (p *AtomicIncrementResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *AtomicIncrementResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *AtomicIncrementResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1157 := p.Io.Read(iprot)
-	if err1157 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1157)
+	err1112 := p.Io.Read(iprot)
+	if err1112 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1112)
 	}
 	return err
 }
 
-func (p *AtomicIncrementResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *AtomicIncrementResult) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *AtomicIncrementResult) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Ia = NewIllegalArgument()
-	err1160 := p.Ia.Read(iprot)
-	if err1160 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err1160)
+	err1115 := p.Ia.Read(iprot)
+	if err1115 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err1115)
 	}
 	return err
-}
-
-func (p *AtomicIncrementResult) ReadFieldIa(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
 }
 
 func (p *AtomicIncrementResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -20264,15 +17568,15 @@ func (p *AtomicIncrementResult) Write(oprot thrift.TProtocol) (err thrift.TProto
 	}
 	switch {
 	case p.Ia != nil:
-		if err = p.WriteField2(oprot); err != nil {
+		if err = p.writeField2(oprot); err != nil {
 			return err
 		}
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -20287,7 +17591,7 @@ func (p *AtomicIncrementResult) Write(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *AtomicIncrementResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *AtomicIncrementResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("success", thrift.I64, 0)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
@@ -20303,11 +17607,7 @@ func (p *AtomicIncrementResult) WriteField0(oprot thrift.TProtocol) (err thrift.
 	return err
 }
 
-func (p *AtomicIncrementResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *AtomicIncrementResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *AtomicIncrementResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -20325,11 +17625,7 @@ func (p *AtomicIncrementResult) WriteField1(oprot thrift.TProtocol) (err thrift.
 	return err
 }
 
-func (p *AtomicIncrementResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *AtomicIncrementResult) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *AtomicIncrementResult) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Ia != nil {
 		err = oprot.WriteFieldBegin("ia", thrift.STRUCT, 2)
 		if err != nil {
@@ -20347,34 +17643,12 @@ func (p *AtomicIncrementResult) WriteField2(oprot thrift.TProtocol) (err thrift.
 	return err
 }
 
-func (p *AtomicIncrementResult) WriteFieldIa(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
 func (p *AtomicIncrementResult) TStructName() string {
 	return "AtomicIncrementResult"
 }
 
 func (p *AtomicIncrementResult) ThriftName() string {
 	return "atomicIncrement_result"
-}
-
-func (p *AtomicIncrementResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("AtomicIncrementResult(%+v)", *p)
-}
-
-func (p *AtomicIncrementResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*AtomicIncrementResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *AtomicIncrementResult) AttributeByFieldId(id int) interface{} {
@@ -20407,22 +17681,22 @@ func (p *AtomicIncrementResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Delete attributes
  */
 type DeleteAllArgs struct {
-	thrift.TStruct
-	TableName  Text        "tableName"  // 1
-	Row        Text        "row"        // 2
-	Column     Text        "column"     // 3
-	Attributes thrift.TMap "attributes" // 4
+	TableName  Text            "tableName"  // 1
+	Row        Text            "row"        // 2
+	Column     Text            "column"     // 3
+	Attributes map[string]Text "attributes" // 4
 }
 
+var tstructDeleteAllArgs = thrift.NewTStruct("deleteAll_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("row", thrift.STRING, 2),
+	thrift.NewTField("column", thrift.STRING, 3),
+	thrift.NewTField("attributes", thrift.MAP, 4),
+})
+
+func (*DeleteAllArgs) GetTStruct() thrift.TStruct { return tstructDeleteAllArgs }
 func NewDeleteAllArgs() *DeleteAllArgs {
-	output := &DeleteAllArgs{
-		TStruct: thrift.NewTStruct("deleteAll_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("row", thrift.BINARY, 2),
-			thrift.NewTField("column", thrift.BINARY, 3),
-			thrift.NewTField("attributes", thrift.MAP, 4),
-		}),
-	}
+	output := &DeleteAllArgs{}
 	{
 	}
 	return output
@@ -20436,12 +17710,8 @@ func (p *DeleteAllArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructDeleteAllArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructDeleteAllArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -20449,80 +17719,61 @@ func (p *DeleteAllArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "row" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
 			}
-		} else if fieldId == 3 || fieldName == "column" {
+		case 2: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField3(iprot)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else if fieldTypeId == thrift.VOID {
+			} else {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 3: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField3(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "attributes" {
+		case 4: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -20535,63 +17786,52 @@ func (p *DeleteAllArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 	return err
 }
 
-func (p *DeleteAllArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1161, err1162 := iprot.ReadBinary()
-	if err1162 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1162)
+func (p *DeleteAllArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1116, err1117 := iprot.ReadBinary()
+	if err1117 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1117)
 	}
-	p.TableName = Text(v1161)
+	p.TableName = Text(v1116)
 	return err
 }
 
-func (p *DeleteAllArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *DeleteAllArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1163, err1164 := iprot.ReadBinary()
-	if err1164 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err1164)
+func (p *DeleteAllArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1118, err1119 := iprot.ReadBinary()
+	if err1119 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err1119)
 	}
-	p.Row = Text(v1163)
+	p.Row = Text(v1118)
 	return err
 }
 
-func (p *DeleteAllArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *DeleteAllArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1165, err1166 := iprot.ReadBinary()
-	if err1166 != nil {
-		return thrift.NewTProtocolExceptionReadField(3, "column", p.ThriftName(), err1166)
+func (p *DeleteAllArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1120, err1121 := iprot.ReadBinary()
+	if err1121 != nil {
+		return thrift.NewTProtocolExceptionReadField(3, "column", p.ThriftName(), err1121)
 	}
-	p.Column = Text(v1165)
+	p.Column = Text(v1120)
 	return err
 }
 
-func (p *DeleteAllArgs) ReadFieldColumn(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *DeleteAllArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype1170, _vtype1171, _size1169, err := iprot.ReadMapBegin()
+func (p *DeleteAllArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype1125, _vtype1126, _size1124, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype1170, _vtype1171, _size1169)
-	for _i1173 := 0; _i1173 < _size1169; _i1173++ {
-		v1176, err1177 := iprot.ReadBinary()
-		if err1177 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key1174", "", err1177)
+	_, _ = _ktype1125, _vtype1126
+	p.Attributes = make(map[string]Text, _size1124)
+	for i := 0; i < _size1124; i++ {
+		v1131, err1132 := iprot.ReadString()
+		if err1132 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key1129", "", err1132)
 		}
-		_key1174 := Text(v1176)
-		v1178, err1179 := iprot.ReadBinary()
-		if err1179 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val1175", "", err1179)
+		_key1129 := v1131
+		v1133, err1134 := iprot.ReadBinary()
+		if err1134 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val1130", "", err1134)
 		}
-		_val1175 := Text(v1178)
-		p.Attributes.Set(_key1174, _val1175)
+		_val1130 := Text(v1133)
+		p.Attributes[_key1129] = _val1130
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -20600,28 +17840,24 @@ func (p *DeleteAllArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *DeleteAllArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
 func (p *DeleteAllArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("deleteAll_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
@@ -20636,9 +17872,9 @@ func (p *DeleteAllArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcep
 	return err
 }
 
-func (p *DeleteAllArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -20654,13 +17890,9 @@ func (p *DeleteAllArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *DeleteAllArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *DeleteAllArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "row", p.ThriftName(), err)
 		}
@@ -20676,13 +17908,9 @@ func (p *DeleteAllArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *DeleteAllArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *DeleteAllArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Column != nil {
-		err = oprot.WriteFieldBegin("column", thrift.BINARY, 3)
+		err = oprot.WriteFieldBegin("column", thrift.STRING, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "column", p.ThriftName(), err)
 		}
@@ -20698,29 +17926,24 @@ func (p *DeleteAllArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *DeleteAllArgs) WriteFieldColumn(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *DeleteAllArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 4)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(4, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter1180 := range p.Attributes.Iter() {
-			Kiter1181, Viter1182 := Miter1180.Key().(Text), Miter1180.Value().(Text)
-			err = oprot.WriteBinary(Kiter1181)
+		for Kiter1135, Viter1136 := range p.Attributes {
+			err = oprot.WriteString(Kiter1135)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1181", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1135", "", err)
 			}
-			err = oprot.WriteBinary(Viter1182)
+			err = oprot.WriteBinary(Viter1136)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter1182", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter1136", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -20735,34 +17958,12 @@ func (p *DeleteAllArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *DeleteAllArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
 func (p *DeleteAllArgs) TStructName() string {
 	return "DeleteAllArgs"
 }
 
 func (p *DeleteAllArgs) ThriftName() string {
 	return "deleteAll_args"
-}
-
-func (p *DeleteAllArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("DeleteAllArgs(%+v)", *p)
-}
-
-func (p *DeleteAllArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*DeleteAllArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *DeleteAllArgs) AttributeByFieldId(id int) interface{} {
@@ -20783,9 +17984,9 @@ func (p *DeleteAllArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *DeleteAllArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("row", thrift.BINARY, 2),
-		thrift.NewTField("column", thrift.BINARY, 3),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("row", thrift.STRING, 2),
+		thrift.NewTField("column", thrift.STRING, 3),
 		thrift.NewTField("attributes", thrift.MAP, 4),
 	})
 }
@@ -20795,16 +17996,16 @@ func (p *DeleteAllArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type DeleteAllResult struct {
-	thrift.TStruct
 	Io *IOError "io" // 1
 }
 
+var tstructDeleteAllResult = thrift.NewTStruct("deleteAll_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*DeleteAllResult) GetTStruct() thrift.TStruct { return tstructDeleteAllResult }
 func NewDeleteAllResult() *DeleteAllResult {
-	output := &DeleteAllResult{
-		TStruct: thrift.NewTStruct("deleteAll_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &DeleteAllResult{}
 	{
 	}
 	return output
@@ -20818,12 +18019,8 @@ func (p *DeleteAllResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructDeleteAllResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructDeleteAllResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -20831,29 +18028,25 @@ func (p *DeleteAllResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -20866,17 +18059,13 @@ func (p *DeleteAllResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	return err
 }
 
-func (p *DeleteAllResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1185 := p.Io.Read(iprot)
-	if err1185 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1185)
+	err1139 := p.Io.Read(iprot)
+	if err1139 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1139)
 	}
 	return err
-}
-
-func (p *DeleteAllResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *DeleteAllResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -20886,7 +18075,7 @@ func (p *DeleteAllResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -20901,7 +18090,7 @@ func (p *DeleteAllResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *DeleteAllResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -20919,34 +18108,12 @@ func (p *DeleteAllResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *DeleteAllResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *DeleteAllResult) TStructName() string {
 	return "DeleteAllResult"
 }
 
 func (p *DeleteAllResult) ThriftName() string {
 	return "deleteAll_result"
-}
-
-func (p *DeleteAllResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("DeleteAllResult(%+v)", *p)
-}
-
-func (p *DeleteAllResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*DeleteAllResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *DeleteAllResult) AttributeByFieldId(id int) interface{} {
@@ -20974,24 +18141,24 @@ func (p *DeleteAllResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Delete attributes
  */
 type DeleteAllTsArgs struct {
-	thrift.TStruct
-	TableName  Text        "tableName"  // 1
-	Row        Text        "row"        // 2
-	Column     Text        "column"     // 3
-	Timestamp  int64       "timestamp"  // 4
-	Attributes thrift.TMap "attributes" // 5
+	TableName  Text            "tableName"  // 1
+	Row        Text            "row"        // 2
+	Column     Text            "column"     // 3
+	Timestamp  int64           "timestamp"  // 4
+	Attributes map[string]Text "attributes" // 5
 }
 
+var tstructDeleteAllTsArgs = thrift.NewTStruct("deleteAllTs_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("row", thrift.STRING, 2),
+	thrift.NewTField("column", thrift.STRING, 3),
+	thrift.NewTField("timestamp", thrift.I64, 4),
+	thrift.NewTField("attributes", thrift.MAP, 5),
+})
+
+func (*DeleteAllTsArgs) GetTStruct() thrift.TStruct { return tstructDeleteAllTsArgs }
 func NewDeleteAllTsArgs() *DeleteAllTsArgs {
-	output := &DeleteAllTsArgs{
-		TStruct: thrift.NewTStruct("deleteAllTs_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("row", thrift.BINARY, 2),
-			thrift.NewTField("column", thrift.BINARY, 3),
-			thrift.NewTField("timestamp", thrift.I64, 4),
-			thrift.NewTField("attributes", thrift.MAP, 5),
-		}),
-	}
+	output := &DeleteAllTsArgs{}
 	{
 	}
 	return output
@@ -21005,12 +18172,8 @@ func (p *DeleteAllTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructDeleteAllTsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructDeleteAllTsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -21018,97 +18181,73 @@ func (p *DeleteAllTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "row" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
 			}
-		} else if fieldId == 3 || fieldName == "column" {
+		case 2: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField3(iprot)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else if fieldTypeId == thrift.VOID {
+			} else {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 3: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField3(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "timestamp" {
+		case 4: //i64
 			if fieldTypeId == thrift.I64 {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 5 || fieldName == "attributes" {
+		case 5: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField5(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField5(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField5(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -21121,76 +18260,61 @@ func (p *DeleteAllTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	return err
 }
 
-func (p *DeleteAllTsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1186, err1187 := iprot.ReadBinary()
-	if err1187 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1187)
+func (p *DeleteAllTsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1140, err1141 := iprot.ReadBinary()
+	if err1141 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1141)
 	}
-	p.TableName = Text(v1186)
+	p.TableName = Text(v1140)
 	return err
 }
 
-func (p *DeleteAllTsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *DeleteAllTsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1188, err1189 := iprot.ReadBinary()
-	if err1189 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err1189)
+func (p *DeleteAllTsArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1142, err1143 := iprot.ReadBinary()
+	if err1143 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err1143)
 	}
-	p.Row = Text(v1188)
+	p.Row = Text(v1142)
 	return err
 }
 
-func (p *DeleteAllTsArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *DeleteAllTsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1190, err1191 := iprot.ReadBinary()
-	if err1191 != nil {
-		return thrift.NewTProtocolExceptionReadField(3, "column", p.ThriftName(), err1191)
+func (p *DeleteAllTsArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1144, err1145 := iprot.ReadBinary()
+	if err1145 != nil {
+		return thrift.NewTProtocolExceptionReadField(3, "column", p.ThriftName(), err1145)
 	}
-	p.Column = Text(v1190)
+	p.Column = Text(v1144)
 	return err
 }
 
-func (p *DeleteAllTsArgs) ReadFieldColumn(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *DeleteAllTsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1192, err1193 := iprot.ReadI64()
-	if err1193 != nil {
-		return thrift.NewTProtocolExceptionReadField(4, "timestamp", p.ThriftName(), err1193)
+func (p *DeleteAllTsArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1146, err1147 := iprot.ReadI64()
+	if err1147 != nil {
+		return thrift.NewTProtocolExceptionReadField(4, "timestamp", p.ThriftName(), err1147)
 	}
-	p.Timestamp = v1192
+	p.Timestamp = v1146
 	return err
 }
 
-func (p *DeleteAllTsArgs) ReadFieldTimestamp(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
-func (p *DeleteAllTsArgs) ReadField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype1197, _vtype1198, _size1196, err := iprot.ReadMapBegin()
+func (p *DeleteAllTsArgs) readField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype1151, _vtype1152, _size1150, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype1197, _vtype1198, _size1196)
-	for _i1200 := 0; _i1200 < _size1196; _i1200++ {
-		v1203, err1204 := iprot.ReadBinary()
-		if err1204 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key1201", "", err1204)
+	_, _ = _ktype1151, _vtype1152
+	p.Attributes = make(map[string]Text, _size1150)
+	for i := 0; i < _size1150; i++ {
+		v1157, err1158 := iprot.ReadString()
+		if err1158 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key1155", "", err1158)
 		}
-		_key1201 := Text(v1203)
-		v1205, err1206 := iprot.ReadBinary()
-		if err1206 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val1202", "", err1206)
+		_key1155 := v1157
+		v1159, err1160 := iprot.ReadBinary()
+		if err1160 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val1156", "", err1160)
 		}
-		_val1202 := Text(v1205)
-		p.Attributes.Set(_key1201, _val1202)
+		_val1156 := Text(v1159)
+		p.Attributes[_key1155] = _val1156
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -21199,32 +18323,28 @@ func (p *DeleteAllTsArgs) ReadField5(iprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *DeleteAllTsArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField5(iprot)
-}
-
 func (p *DeleteAllTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("deleteAllTs_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField5(oprot)
+	err = p.writeField5(oprot)
 	if err != nil {
 		return err
 	}
@@ -21239,9 +18359,9 @@ func (p *DeleteAllTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *DeleteAllTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllTsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -21257,13 +18377,9 @@ func (p *DeleteAllTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *DeleteAllTsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *DeleteAllTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllTsArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "row", p.ThriftName(), err)
 		}
@@ -21279,13 +18395,9 @@ func (p *DeleteAllTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *DeleteAllTsArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *DeleteAllTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllTsArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Column != nil {
-		err = oprot.WriteFieldBegin("column", thrift.BINARY, 3)
+		err = oprot.WriteFieldBegin("column", thrift.STRING, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "column", p.ThriftName(), err)
 		}
@@ -21301,11 +18413,7 @@ func (p *DeleteAllTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *DeleteAllTsArgs) WriteFieldColumn(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *DeleteAllTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllTsArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("timestamp", thrift.I64, 4)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(4, "timestamp", p.ThriftName(), err)
@@ -21321,29 +18429,24 @@ func (p *DeleteAllTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *DeleteAllTsArgs) WriteFieldTimestamp(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
-func (p *DeleteAllTsArgs) WriteField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllTsArgs) writeField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 5)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(5, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter1207 := range p.Attributes.Iter() {
-			Kiter1208, Viter1209 := Miter1207.Key().(Text), Miter1207.Value().(Text)
-			err = oprot.WriteBinary(Kiter1208)
+		for Kiter1161, Viter1162 := range p.Attributes {
+			err = oprot.WriteString(Kiter1161)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1208", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1161", "", err)
 			}
-			err = oprot.WriteBinary(Viter1209)
+			err = oprot.WriteBinary(Viter1162)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter1209", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter1162", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -21358,34 +18461,12 @@ func (p *DeleteAllTsArgs) WriteField5(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *DeleteAllTsArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField5(oprot)
-}
-
 func (p *DeleteAllTsArgs) TStructName() string {
 	return "DeleteAllTsArgs"
 }
 
 func (p *DeleteAllTsArgs) ThriftName() string {
 	return "deleteAllTs_args"
-}
-
-func (p *DeleteAllTsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("DeleteAllTsArgs(%+v)", *p)
-}
-
-func (p *DeleteAllTsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*DeleteAllTsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *DeleteAllTsArgs) AttributeByFieldId(id int) interface{} {
@@ -21408,9 +18489,9 @@ func (p *DeleteAllTsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *DeleteAllTsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("row", thrift.BINARY, 2),
-		thrift.NewTField("column", thrift.BINARY, 3),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("row", thrift.STRING, 2),
+		thrift.NewTField("column", thrift.STRING, 3),
 		thrift.NewTField("timestamp", thrift.I64, 4),
 		thrift.NewTField("attributes", thrift.MAP, 5),
 	})
@@ -21421,16 +18502,16 @@ func (p *DeleteAllTsArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type DeleteAllTsResult struct {
-	thrift.TStruct
 	Io *IOError "io" // 1
 }
 
+var tstructDeleteAllTsResult = thrift.NewTStruct("deleteAllTs_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*DeleteAllTsResult) GetTStruct() thrift.TStruct { return tstructDeleteAllTsResult }
 func NewDeleteAllTsResult() *DeleteAllTsResult {
-	output := &DeleteAllTsResult{
-		TStruct: thrift.NewTStruct("deleteAllTs_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &DeleteAllTsResult{}
 	{
 	}
 	return output
@@ -21444,12 +18525,8 @@ func (p *DeleteAllTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructDeleteAllTsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructDeleteAllTsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -21457,29 +18534,25 @@ func (p *DeleteAllTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -21492,17 +18565,13 @@ func (p *DeleteAllTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *DeleteAllTsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllTsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1212 := p.Io.Read(iprot)
-	if err1212 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1212)
+	err1165 := p.Io.Read(iprot)
+	if err1165 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1165)
 	}
 	return err
-}
-
-func (p *DeleteAllTsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *DeleteAllTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -21512,7 +18581,7 @@ func (p *DeleteAllTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -21527,7 +18596,7 @@ func (p *DeleteAllTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *DeleteAllTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllTsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -21545,34 +18614,12 @@ func (p *DeleteAllTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *DeleteAllTsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *DeleteAllTsResult) TStructName() string {
 	return "DeleteAllTsResult"
 }
 
 func (p *DeleteAllTsResult) ThriftName() string {
 	return "deleteAllTs_result"
-}
-
-func (p *DeleteAllTsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("DeleteAllTsResult(%+v)", *p)
-}
-
-func (p *DeleteAllTsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*DeleteAllTsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *DeleteAllTsResult) AttributeByFieldId(id int) interface{} {
@@ -21598,20 +18645,20 @@ func (p *DeleteAllTsResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Delete attributes
  */
 type DeleteAllRowArgs struct {
-	thrift.TStruct
-	TableName  Text        "tableName"  // 1
-	Row        Text        "row"        // 2
-	Attributes thrift.TMap "attributes" // 3
+	TableName  Text            "tableName"  // 1
+	Row        Text            "row"        // 2
+	Attributes map[string]Text "attributes" // 3
 }
 
+var tstructDeleteAllRowArgs = thrift.NewTStruct("deleteAllRow_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("row", thrift.STRING, 2),
+	thrift.NewTField("attributes", thrift.MAP, 3),
+})
+
+func (*DeleteAllRowArgs) GetTStruct() thrift.TStruct { return tstructDeleteAllRowArgs }
 func NewDeleteAllRowArgs() *DeleteAllRowArgs {
-	output := &DeleteAllRowArgs{
-		TStruct: thrift.NewTStruct("deleteAllRow_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("row", thrift.BINARY, 2),
-			thrift.NewTField("attributes", thrift.MAP, 3),
-		}),
-	}
+	output := &DeleteAllRowArgs{}
 	{
 	}
 	return output
@@ -21625,12 +18672,8 @@ func (p *DeleteAllRowArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructDeleteAllRowArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructDeleteAllRowArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -21638,63 +18681,49 @@ func (p *DeleteAllRowArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "row" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "attributes" {
+		case 3: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -21707,50 +18736,43 @@ func (p *DeleteAllRowArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *DeleteAllRowArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1213, err1214 := iprot.ReadBinary()
-	if err1214 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1214)
+func (p *DeleteAllRowArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1166, err1167 := iprot.ReadBinary()
+	if err1167 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1167)
 	}
-	p.TableName = Text(v1213)
+	p.TableName = Text(v1166)
 	return err
 }
 
-func (p *DeleteAllRowArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *DeleteAllRowArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1215, err1216 := iprot.ReadBinary()
-	if err1216 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err1216)
+func (p *DeleteAllRowArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1168, err1169 := iprot.ReadBinary()
+	if err1169 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err1169)
 	}
-	p.Row = Text(v1215)
+	p.Row = Text(v1168)
 	return err
 }
 
-func (p *DeleteAllRowArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *DeleteAllRowArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype1220, _vtype1221, _size1219, err := iprot.ReadMapBegin()
+func (p *DeleteAllRowArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype1173, _vtype1174, _size1172, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype1220, _vtype1221, _size1219)
-	for _i1223 := 0; _i1223 < _size1219; _i1223++ {
-		v1226, err1227 := iprot.ReadBinary()
-		if err1227 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key1224", "", err1227)
+	_, _ = _ktype1173, _vtype1174
+	p.Attributes = make(map[string]Text, _size1172)
+	for i := 0; i < _size1172; i++ {
+		v1179, err1180 := iprot.ReadString()
+		if err1180 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key1177", "", err1180)
 		}
-		_key1224 := Text(v1226)
-		v1228, err1229 := iprot.ReadBinary()
-		if err1229 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val1225", "", err1229)
+		_key1177 := v1179
+		v1181, err1182 := iprot.ReadBinary()
+		if err1182 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val1178", "", err1182)
 		}
-		_val1225 := Text(v1228)
-		p.Attributes.Set(_key1224, _val1225)
+		_val1178 := Text(v1181)
+		p.Attributes[_key1177] = _val1178
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -21759,24 +18781,20 @@ func (p *DeleteAllRowArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *DeleteAllRowArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
 func (p *DeleteAllRowArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("deleteAllRow_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
@@ -21791,9 +18809,9 @@ func (p *DeleteAllRowArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *DeleteAllRowArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllRowArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -21809,13 +18827,9 @@ func (p *DeleteAllRowArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *DeleteAllRowArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *DeleteAllRowArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllRowArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "row", p.ThriftName(), err)
 		}
@@ -21831,29 +18845,24 @@ func (p *DeleteAllRowArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *DeleteAllRowArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *DeleteAllRowArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllRowArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter1230 := range p.Attributes.Iter() {
-			Kiter1231, Viter1232 := Miter1230.Key().(Text), Miter1230.Value().(Text)
-			err = oprot.WriteBinary(Kiter1231)
+		for Kiter1183, Viter1184 := range p.Attributes {
+			err = oprot.WriteString(Kiter1183)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1231", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1183", "", err)
 			}
-			err = oprot.WriteBinary(Viter1232)
+			err = oprot.WriteBinary(Viter1184)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter1232", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter1184", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -21868,34 +18877,12 @@ func (p *DeleteAllRowArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *DeleteAllRowArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
 func (p *DeleteAllRowArgs) TStructName() string {
 	return "DeleteAllRowArgs"
 }
 
 func (p *DeleteAllRowArgs) ThriftName() string {
 	return "deleteAllRow_args"
-}
-
-func (p *DeleteAllRowArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("DeleteAllRowArgs(%+v)", *p)
-}
-
-func (p *DeleteAllRowArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*DeleteAllRowArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *DeleteAllRowArgs) AttributeByFieldId(id int) interface{} {
@@ -21914,8 +18901,8 @@ func (p *DeleteAllRowArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *DeleteAllRowArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("row", thrift.BINARY, 2),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("row", thrift.STRING, 2),
 		thrift.NewTField("attributes", thrift.MAP, 3),
 	})
 }
@@ -21925,16 +18912,16 @@ func (p *DeleteAllRowArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type DeleteAllRowResult struct {
-	thrift.TStruct
 	Io *IOError "io" // 1
 }
 
+var tstructDeleteAllRowResult = thrift.NewTStruct("deleteAllRow_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*DeleteAllRowResult) GetTStruct() thrift.TStruct { return tstructDeleteAllRowResult }
 func NewDeleteAllRowResult() *DeleteAllRowResult {
-	output := &DeleteAllRowResult{
-		TStruct: thrift.NewTStruct("deleteAllRow_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &DeleteAllRowResult{}
 	{
 	}
 	return output
@@ -21948,12 +18935,8 @@ func (p *DeleteAllRowResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructDeleteAllRowResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructDeleteAllRowResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -21961,29 +18944,25 @@ func (p *DeleteAllRowResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -21996,17 +18975,13 @@ func (p *DeleteAllRowResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *DeleteAllRowResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllRowResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1235 := p.Io.Read(iprot)
-	if err1235 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1235)
+	err1187 := p.Io.Read(iprot)
+	if err1187 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1187)
 	}
 	return err
-}
-
-func (p *DeleteAllRowResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *DeleteAllRowResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -22016,7 +18991,7 @@ func (p *DeleteAllRowResult) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -22031,7 +19006,7 @@ func (p *DeleteAllRowResult) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *DeleteAllRowResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllRowResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -22049,34 +19024,12 @@ func (p *DeleteAllRowResult) WriteField1(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *DeleteAllRowResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *DeleteAllRowResult) TStructName() string {
 	return "DeleteAllRowResult"
 }
 
 func (p *DeleteAllRowResult) ThriftName() string {
 	return "deleteAllRow_result"
-}
-
-func (p *DeleteAllRowResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("DeleteAllRowResult(%+v)", *p)
-}
-
-func (p *DeleteAllRowResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*DeleteAllRowResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *DeleteAllRowResult) AttributeByFieldId(id int) interface{} {
@@ -22100,16 +19053,16 @@ func (p *DeleteAllRowResult) TStructFields() thrift.TFieldContainer {
  *  - Increment: The single increment to apply
  */
 type IncrementArgs struct {
-	thrift.TStruct
 	Increment *TIncrement "increment" // 1
 }
 
+var tstructIncrementArgs = thrift.NewTStruct("increment_args", []thrift.TField{
+	thrift.NewTField("increment", thrift.STRUCT, 1),
+})
+
+func (*IncrementArgs) GetTStruct() thrift.TStruct { return tstructIncrementArgs }
 func NewIncrementArgs() *IncrementArgs {
-	output := &IncrementArgs{
-		TStruct: thrift.NewTStruct("increment_args", []thrift.TField{
-			thrift.NewTField("increment", thrift.STRUCT, 1),
-		}),
-	}
+	output := &IncrementArgs{}
 	{
 	}
 	return output
@@ -22123,12 +19076,8 @@ func (p *IncrementArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructIncrementArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructIncrementArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -22136,29 +19085,25 @@ func (p *IncrementArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "increment" {
+		switch fieldId {
+		case 1: //TIncrement
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -22171,17 +19116,13 @@ func (p *IncrementArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcept
 	return err
 }
 
-func (p *IncrementArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *IncrementArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Increment = NewTIncrement()
-	err1238 := p.Increment.Read(iprot)
-	if err1238 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IncrementTIncrement", err1238)
+	err1190 := p.Increment.Read(iprot)
+	if err1190 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IncrementTIncrement", err1190)
 	}
 	return err
-}
-
-func (p *IncrementArgs) ReadFieldIncrement(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *IncrementArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -22189,7 +19130,7 @@ func (p *IncrementArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcep
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
@@ -22204,7 +19145,7 @@ func (p *IncrementArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExcep
 	return err
 }
 
-func (p *IncrementArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *IncrementArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Increment != nil {
 		err = oprot.WriteFieldBegin("increment", thrift.STRUCT, 1)
 		if err != nil {
@@ -22222,34 +19163,12 @@ func (p *IncrementArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *IncrementArgs) WriteFieldIncrement(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *IncrementArgs) TStructName() string {
 	return "IncrementArgs"
 }
 
 func (p *IncrementArgs) ThriftName() string {
 	return "increment_args"
-}
-
-func (p *IncrementArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("IncrementArgs(%+v)", *p)
-}
-
-func (p *IncrementArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*IncrementArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *IncrementArgs) AttributeByFieldId(id int) interface{} {
@@ -22273,16 +19192,16 @@ func (p *IncrementArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type IncrementResult struct {
-	thrift.TStruct
 	Io *IOError "io" // 1
 }
 
+var tstructIncrementResult = thrift.NewTStruct("increment_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*IncrementResult) GetTStruct() thrift.TStruct { return tstructIncrementResult }
 func NewIncrementResult() *IncrementResult {
-	output := &IncrementResult{
-		TStruct: thrift.NewTStruct("increment_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &IncrementResult{}
 	{
 	}
 	return output
@@ -22296,12 +19215,8 @@ func (p *IncrementResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructIncrementResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructIncrementResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -22309,29 +19224,25 @@ func (p *IncrementResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -22344,17 +19255,13 @@ func (p *IncrementResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	return err
 }
 
-func (p *IncrementResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *IncrementResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1241 := p.Io.Read(iprot)
-	if err1241 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1241)
+	err1193 := p.Io.Read(iprot)
+	if err1193 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1193)
 	}
 	return err
-}
-
-func (p *IncrementResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *IncrementResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -22364,7 +19271,7 @@ func (p *IncrementResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -22379,7 +19286,7 @@ func (p *IncrementResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *IncrementResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *IncrementResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -22397,34 +19304,12 @@ func (p *IncrementResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *IncrementResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *IncrementResult) TStructName() string {
 	return "IncrementResult"
 }
 
 func (p *IncrementResult) ThriftName() string {
 	return "increment_result"
-}
-
-func (p *IncrementResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("IncrementResult(%+v)", *p)
-}
-
-func (p *IncrementResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*IncrementResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *IncrementResult) AttributeByFieldId(id int) interface{} {
@@ -22448,16 +19333,16 @@ func (p *IncrementResult) TStructFields() thrift.TFieldContainer {
  *  - Increments: The list of increments
  */
 type IncrementRowsArgs struct {
-	thrift.TStruct
-	Increments thrift.TList "increments" // 1
+	Increments []*TIncrement "increments" // 1
 }
 
+var tstructIncrementRowsArgs = thrift.NewTStruct("incrementRows_args", []thrift.TField{
+	thrift.NewTField("increments", thrift.LIST, 1),
+})
+
+func (*IncrementRowsArgs) GetTStruct() thrift.TStruct { return tstructIncrementRowsArgs }
 func NewIncrementRowsArgs() *IncrementRowsArgs {
-	output := &IncrementRowsArgs{
-		TStruct: thrift.NewTStruct("incrementRows_args", []thrift.TField{
-			thrift.NewTField("increments", thrift.LIST, 1),
-		}),
-	}
+	output := &IncrementRowsArgs{}
 	{
 	}
 	return output
@@ -22471,12 +19356,8 @@ func (p *IncrementRowsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructIncrementRowsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructIncrementRowsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -22484,29 +19365,25 @@ func (p *IncrementRowsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "increments" {
+		switch fieldId {
+		case 1: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -22519,19 +19396,20 @@ func (p *IncrementRowsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *IncrementRowsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype1247, _size1244, err := iprot.ReadListBegin()
+func (p *IncrementRowsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype1199, _size1196, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Increments", "", err)
 	}
-	p.Increments = thrift.NewTList(_etype1247, _size1244)
-	for _i1248 := 0; _i1248 < _size1244; _i1248++ {
-		_elem1249 := NewTIncrement()
-		err1252 := _elem1249.Read(iprot)
-		if err1252 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem1249TIncrement", err1252)
+	_ = _etype1199
+	p.Increments = make([]*TIncrement, _size1196, _size1196)
+	for i := 0; i < _size1196; i++ {
+		_elem1201 := NewTIncrement()
+		err1204 := _elem1201.Read(iprot)
+		if err1204 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem1201TIncrement", err1204)
 		}
-		p.Increments.Push(_elem1249)
+		p.Increments[i] = _elem1201
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -22540,16 +19418,12 @@ func (p *IncrementRowsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *IncrementRowsArgs) ReadFieldIncrements(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
 func (p *IncrementRowsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("incrementRows_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
@@ -22564,19 +19438,18 @@ func (p *IncrementRowsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *IncrementRowsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *IncrementRowsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Increments != nil {
 		err = oprot.WriteFieldBegin("increments", thrift.LIST, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "increments", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Increments.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Increments))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter1253 := range p.Increments.Iter() {
-			Iter1254 := Iter1253.(*TIncrement)
-			err = Iter1254.Write(oprot)
+		for _, Iter1205 := range p.Increments {
+			err = Iter1205.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TIncrement", err)
 			}
@@ -22593,34 +19466,12 @@ func (p *IncrementRowsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *IncrementRowsArgs) WriteFieldIncrements(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *IncrementRowsArgs) TStructName() string {
 	return "IncrementRowsArgs"
 }
 
 func (p *IncrementRowsArgs) ThriftName() string {
 	return "incrementRows_args"
-}
-
-func (p *IncrementRowsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("IncrementRowsArgs(%+v)", *p)
-}
-
-func (p *IncrementRowsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*IncrementRowsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *IncrementRowsArgs) AttributeByFieldId(id int) interface{} {
@@ -22644,16 +19495,16 @@ func (p *IncrementRowsArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type IncrementRowsResult struct {
-	thrift.TStruct
 	Io *IOError "io" // 1
 }
 
+var tstructIncrementRowsResult = thrift.NewTStruct("incrementRows_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*IncrementRowsResult) GetTStruct() thrift.TStruct { return tstructIncrementRowsResult }
 func NewIncrementRowsResult() *IncrementRowsResult {
-	output := &IncrementRowsResult{
-		TStruct: thrift.NewTStruct("incrementRows_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &IncrementRowsResult{}
 	{
 	}
 	return output
@@ -22667,12 +19518,8 @@ func (p *IncrementRowsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructIncrementRowsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructIncrementRowsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -22680,29 +19527,25 @@ func (p *IncrementRowsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -22715,17 +19558,13 @@ func (p *IncrementRowsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *IncrementRowsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *IncrementRowsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1257 := p.Io.Read(iprot)
-	if err1257 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1257)
+	err1208 := p.Io.Read(iprot)
+	if err1208 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1208)
 	}
 	return err
-}
-
-func (p *IncrementRowsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *IncrementRowsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -22735,7 +19574,7 @@ func (p *IncrementRowsResult) Write(oprot thrift.TProtocol) (err thrift.TProtoco
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -22750,7 +19589,7 @@ func (p *IncrementRowsResult) Write(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *IncrementRowsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *IncrementRowsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -22768,34 +19607,12 @@ func (p *IncrementRowsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *IncrementRowsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *IncrementRowsResult) TStructName() string {
 	return "IncrementRowsResult"
 }
 
 func (p *IncrementRowsResult) ThriftName() string {
 	return "incrementRows_result"
-}
-
-func (p *IncrementRowsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("IncrementRowsResult(%+v)", *p)
-}
-
-func (p *IncrementRowsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*IncrementRowsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *IncrementRowsResult) AttributeByFieldId(id int) interface{} {
@@ -22822,22 +19639,22 @@ func (p *IncrementRowsResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Delete attributes
  */
 type DeleteAllRowTsArgs struct {
-	thrift.TStruct
-	TableName  Text        "tableName"  // 1
-	Row        Text        "row"        // 2
-	Timestamp  int64       "timestamp"  // 3
-	Attributes thrift.TMap "attributes" // 4
+	TableName  Text            "tableName"  // 1
+	Row        Text            "row"        // 2
+	Timestamp  int64           "timestamp"  // 3
+	Attributes map[string]Text "attributes" // 4
 }
 
+var tstructDeleteAllRowTsArgs = thrift.NewTStruct("deleteAllRowTs_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("row", thrift.STRING, 2),
+	thrift.NewTField("timestamp", thrift.I64, 3),
+	thrift.NewTField("attributes", thrift.MAP, 4),
+})
+
+func (*DeleteAllRowTsArgs) GetTStruct() thrift.TStruct { return tstructDeleteAllRowTsArgs }
 func NewDeleteAllRowTsArgs() *DeleteAllRowTsArgs {
-	output := &DeleteAllRowTsArgs{
-		TStruct: thrift.NewTStruct("deleteAllRowTs_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("row", thrift.BINARY, 2),
-			thrift.NewTField("timestamp", thrift.I64, 3),
-			thrift.NewTField("attributes", thrift.MAP, 4),
-		}),
-	}
+	output := &DeleteAllRowTsArgs{}
 	{
 	}
 	return output
@@ -22851,12 +19668,8 @@ func (p *DeleteAllRowTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructDeleteAllRowTsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructDeleteAllRowTsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -22864,80 +19677,61 @@ func (p *DeleteAllRowTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "row" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "timestamp" {
+		case 3: //i64
 			if fieldTypeId == thrift.I64 {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "attributes" {
+		case 4: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -22950,63 +19744,52 @@ func (p *DeleteAllRowTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *DeleteAllRowTsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1258, err1259 := iprot.ReadBinary()
-	if err1259 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1259)
+func (p *DeleteAllRowTsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1209, err1210 := iprot.ReadBinary()
+	if err1210 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1210)
 	}
-	p.TableName = Text(v1258)
+	p.TableName = Text(v1209)
 	return err
 }
 
-func (p *DeleteAllRowTsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *DeleteAllRowTsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1260, err1261 := iprot.ReadBinary()
-	if err1261 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err1261)
+func (p *DeleteAllRowTsArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1211, err1212 := iprot.ReadBinary()
+	if err1212 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err1212)
 	}
-	p.Row = Text(v1260)
+	p.Row = Text(v1211)
 	return err
 }
 
-func (p *DeleteAllRowTsArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *DeleteAllRowTsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1262, err1263 := iprot.ReadI64()
-	if err1263 != nil {
-		return thrift.NewTProtocolExceptionReadField(3, "timestamp", p.ThriftName(), err1263)
+func (p *DeleteAllRowTsArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1213, err1214 := iprot.ReadI64()
+	if err1214 != nil {
+		return thrift.NewTProtocolExceptionReadField(3, "timestamp", p.ThriftName(), err1214)
 	}
-	p.Timestamp = v1262
+	p.Timestamp = v1213
 	return err
 }
 
-func (p *DeleteAllRowTsArgs) ReadFieldTimestamp(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *DeleteAllRowTsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype1267, _vtype1268, _size1266, err := iprot.ReadMapBegin()
+func (p *DeleteAllRowTsArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype1218, _vtype1219, _size1217, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype1267, _vtype1268, _size1266)
-	for _i1270 := 0; _i1270 < _size1266; _i1270++ {
-		v1273, err1274 := iprot.ReadBinary()
-		if err1274 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key1271", "", err1274)
+	_, _ = _ktype1218, _vtype1219
+	p.Attributes = make(map[string]Text, _size1217)
+	for i := 0; i < _size1217; i++ {
+		v1224, err1225 := iprot.ReadString()
+		if err1225 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key1222", "", err1225)
 		}
-		_key1271 := Text(v1273)
-		v1275, err1276 := iprot.ReadBinary()
-		if err1276 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val1272", "", err1276)
+		_key1222 := v1224
+		v1226, err1227 := iprot.ReadBinary()
+		if err1227 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val1223", "", err1227)
 		}
-		_val1272 := Text(v1275)
-		p.Attributes.Set(_key1271, _val1272)
+		_val1223 := Text(v1226)
+		p.Attributes[_key1222] = _val1223
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -23015,28 +19798,24 @@ func (p *DeleteAllRowTsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *DeleteAllRowTsArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
 func (p *DeleteAllRowTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("deleteAllRowTs_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
@@ -23051,9 +19830,9 @@ func (p *DeleteAllRowTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *DeleteAllRowTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllRowTsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -23069,13 +19848,9 @@ func (p *DeleteAllRowTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *DeleteAllRowTsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *DeleteAllRowTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllRowTsArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "row", p.ThriftName(), err)
 		}
@@ -23091,11 +19866,7 @@ func (p *DeleteAllRowTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *DeleteAllRowTsArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *DeleteAllRowTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllRowTsArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("timestamp", thrift.I64, 3)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(3, "timestamp", p.ThriftName(), err)
@@ -23111,29 +19882,24 @@ func (p *DeleteAllRowTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *DeleteAllRowTsArgs) WriteFieldTimestamp(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *DeleteAllRowTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllRowTsArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 4)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(4, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter1277 := range p.Attributes.Iter() {
-			Kiter1278, Viter1279 := Miter1277.Key().(Text), Miter1277.Value().(Text)
-			err = oprot.WriteBinary(Kiter1278)
+		for Kiter1228, Viter1229 := range p.Attributes {
+			err = oprot.WriteString(Kiter1228)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1278", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1228", "", err)
 			}
-			err = oprot.WriteBinary(Viter1279)
+			err = oprot.WriteBinary(Viter1229)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter1279", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter1229", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -23148,34 +19914,12 @@ func (p *DeleteAllRowTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *DeleteAllRowTsArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
 func (p *DeleteAllRowTsArgs) TStructName() string {
 	return "DeleteAllRowTsArgs"
 }
 
 func (p *DeleteAllRowTsArgs) ThriftName() string {
 	return "deleteAllRowTs_args"
-}
-
-func (p *DeleteAllRowTsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("DeleteAllRowTsArgs(%+v)", *p)
-}
-
-func (p *DeleteAllRowTsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*DeleteAllRowTsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *DeleteAllRowTsArgs) AttributeByFieldId(id int) interface{} {
@@ -23196,8 +19940,8 @@ func (p *DeleteAllRowTsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *DeleteAllRowTsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("row", thrift.BINARY, 2),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("row", thrift.STRING, 2),
 		thrift.NewTField("timestamp", thrift.I64, 3),
 		thrift.NewTField("attributes", thrift.MAP, 4),
 	})
@@ -23208,16 +19952,16 @@ func (p *DeleteAllRowTsArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type DeleteAllRowTsResult struct {
-	thrift.TStruct
 	Io *IOError "io" // 1
 }
 
+var tstructDeleteAllRowTsResult = thrift.NewTStruct("deleteAllRowTs_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*DeleteAllRowTsResult) GetTStruct() thrift.TStruct { return tstructDeleteAllRowTsResult }
 func NewDeleteAllRowTsResult() *DeleteAllRowTsResult {
-	output := &DeleteAllRowTsResult{
-		TStruct: thrift.NewTStruct("deleteAllRowTs_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &DeleteAllRowTsResult{}
 	{
 	}
 	return output
@@ -23231,12 +19975,8 @@ func (p *DeleteAllRowTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtoco
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructDeleteAllRowTsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructDeleteAllRowTsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -23244,29 +19984,25 @@ func (p *DeleteAllRowTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtoco
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -23279,17 +20015,13 @@ func (p *DeleteAllRowTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *DeleteAllRowTsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllRowTsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1282 := p.Io.Read(iprot)
-	if err1282 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1282)
+	err1232 := p.Io.Read(iprot)
+	if err1232 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1232)
 	}
 	return err
-}
-
-func (p *DeleteAllRowTsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *DeleteAllRowTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -23299,7 +20031,7 @@ func (p *DeleteAllRowTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtoc
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -23314,7 +20046,7 @@ func (p *DeleteAllRowTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *DeleteAllRowTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *DeleteAllRowTsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -23332,34 +20064,12 @@ func (p *DeleteAllRowTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.T
 	return err
 }
 
-func (p *DeleteAllRowTsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *DeleteAllRowTsResult) TStructName() string {
 	return "DeleteAllRowTsResult"
 }
 
 func (p *DeleteAllRowTsResult) ThriftName() string {
 	return "deleteAllRowTs_result"
-}
-
-func (p *DeleteAllRowTsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("DeleteAllRowTsResult(%+v)", *p)
-}
-
-func (p *DeleteAllRowTsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*DeleteAllRowTsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *DeleteAllRowTsResult) AttributeByFieldId(id int) interface{} {
@@ -23385,20 +20095,20 @@ func (p *DeleteAllRowTsResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Scan attributes
  */
 type ScannerOpenWithScanArgs struct {
-	thrift.TStruct
-	TableName  Text        "tableName"  // 1
-	Scan       *TScan      "scan"       // 2
-	Attributes thrift.TMap "attributes" // 3
+	TableName  Text            "tableName"  // 1
+	Scan       *TScan          "scan"       // 2
+	Attributes map[string]Text "attributes" // 3
 }
 
+var tstructScannerOpenWithScanArgs = thrift.NewTStruct("scannerOpenWithScan_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("scan", thrift.STRUCT, 2),
+	thrift.NewTField("attributes", thrift.MAP, 3),
+})
+
+func (*ScannerOpenWithScanArgs) GetTStruct() thrift.TStruct { return tstructScannerOpenWithScanArgs }
 func NewScannerOpenWithScanArgs() *ScannerOpenWithScanArgs {
-	output := &ScannerOpenWithScanArgs{
-		TStruct: thrift.NewTStruct("scannerOpenWithScan_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("scan", thrift.STRUCT, 2),
-			thrift.NewTField("attributes", thrift.MAP, 3),
-		}),
-	}
+	output := &ScannerOpenWithScanArgs{}
 	{
 	}
 	return output
@@ -23412,12 +20122,8 @@ func (p *ScannerOpenWithScanArgs) Read(iprot thrift.TProtocol) (err thrift.TProt
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerOpenWithScanArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerOpenWithScanArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -23425,63 +20131,49 @@ func (p *ScannerOpenWithScanArgs) Read(iprot thrift.TProtocol) (err thrift.TProt
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 2 || fieldName == "scan" {
+		case 2: //TScan
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "attributes" {
+		case 3: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -23494,50 +20186,43 @@ func (p *ScannerOpenWithScanArgs) Read(iprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *ScannerOpenWithScanArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1283, err1284 := iprot.ReadBinary()
-	if err1284 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1284)
+func (p *ScannerOpenWithScanArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1233, err1234 := iprot.ReadBinary()
+	if err1234 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1234)
 	}
-	p.TableName = Text(v1283)
+	p.TableName = Text(v1233)
 	return err
 }
 
-func (p *ScannerOpenWithScanArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *ScannerOpenWithScanArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithScanArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Scan = NewTScan()
-	err1287 := p.Scan.Read(iprot)
-	if err1287 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.ScanTScan", err1287)
+	err1237 := p.Scan.Read(iprot)
+	if err1237 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.ScanTScan", err1237)
 	}
 	return err
 }
 
-func (p *ScannerOpenWithScanArgs) ReadFieldScan(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *ScannerOpenWithScanArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype1291, _vtype1292, _size1290, err := iprot.ReadMapBegin()
+func (p *ScannerOpenWithScanArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype1241, _vtype1242, _size1240, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype1291, _vtype1292, _size1290)
-	for _i1294 := 0; _i1294 < _size1290; _i1294++ {
-		v1297, err1298 := iprot.ReadBinary()
-		if err1298 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key1295", "", err1298)
+	_, _ = _ktype1241, _vtype1242
+	p.Attributes = make(map[string]Text, _size1240)
+	for i := 0; i < _size1240; i++ {
+		v1247, err1248 := iprot.ReadString()
+		if err1248 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key1245", "", err1248)
 		}
-		_key1295 := Text(v1297)
-		v1299, err1300 := iprot.ReadBinary()
-		if err1300 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val1296", "", err1300)
+		_key1245 := v1247
+		v1249, err1250 := iprot.ReadBinary()
+		if err1250 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val1246", "", err1250)
 		}
-		_val1296 := Text(v1299)
-		p.Attributes.Set(_key1295, _val1296)
+		_val1246 := Text(v1249)
+		p.Attributes[_key1245] = _val1246
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -23546,24 +20231,20 @@ func (p *ScannerOpenWithScanArgs) ReadField3(iprot thrift.TProtocol) (err thrift
 	return err
 }
 
-func (p *ScannerOpenWithScanArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
 func (p *ScannerOpenWithScanArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("scannerOpenWithScan_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
@@ -23578,9 +20259,9 @@ func (p *ScannerOpenWithScanArgs) Write(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *ScannerOpenWithScanArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithScanArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -23596,11 +20277,7 @@ func (p *ScannerOpenWithScanArgs) WriteField1(oprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *ScannerOpenWithScanArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *ScannerOpenWithScanArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithScanArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Scan != nil {
 		err = oprot.WriteFieldBegin("scan", thrift.STRUCT, 2)
 		if err != nil {
@@ -23618,29 +20295,24 @@ func (p *ScannerOpenWithScanArgs) WriteField2(oprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *ScannerOpenWithScanArgs) WriteFieldScan(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *ScannerOpenWithScanArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithScanArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter1301 := range p.Attributes.Iter() {
-			Kiter1302, Viter1303 := Miter1301.Key().(Text), Miter1301.Value().(Text)
-			err = oprot.WriteBinary(Kiter1302)
+		for Kiter1251, Viter1252 := range p.Attributes {
+			err = oprot.WriteString(Kiter1251)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1302", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1251", "", err)
 			}
-			err = oprot.WriteBinary(Viter1303)
+			err = oprot.WriteBinary(Viter1252)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter1303", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter1252", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -23655,34 +20327,12 @@ func (p *ScannerOpenWithScanArgs) WriteField3(oprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *ScannerOpenWithScanArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
 func (p *ScannerOpenWithScanArgs) TStructName() string {
 	return "ScannerOpenWithScanArgs"
 }
 
 func (p *ScannerOpenWithScanArgs) ThriftName() string {
 	return "scannerOpenWithScan_args"
-}
-
-func (p *ScannerOpenWithScanArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerOpenWithScanArgs(%+v)", *p)
-}
-
-func (p *ScannerOpenWithScanArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerOpenWithScanArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerOpenWithScanArgs) AttributeByFieldId(id int) interface{} {
@@ -23701,7 +20351,7 @@ func (p *ScannerOpenWithScanArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *ScannerOpenWithScanArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
+		thrift.NewTField("tableName", thrift.STRING, 1),
 		thrift.NewTField("scan", thrift.STRUCT, 2),
 		thrift.NewTField("attributes", thrift.MAP, 3),
 	})
@@ -23713,18 +20363,18 @@ func (p *ScannerOpenWithScanArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type ScannerOpenWithScanResult struct {
-	thrift.TStruct
 	Success ScannerID "success" // 0
 	Io      *IOError  "io"      // 1
 }
 
+var tstructScannerOpenWithScanResult = thrift.NewTStruct("scannerOpenWithScan_result", []thrift.TField{
+	thrift.NewTField("success", thrift.I32, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*ScannerOpenWithScanResult) GetTStruct() thrift.TStruct { return tstructScannerOpenWithScanResult }
 func NewScannerOpenWithScanResult() *ScannerOpenWithScanResult {
-	output := &ScannerOpenWithScanResult{
-		TStruct: thrift.NewTStruct("scannerOpenWithScan_result", []thrift.TField{
-			thrift.NewTField("success", thrift.I32, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &ScannerOpenWithScanResult{}
 	{
 	}
 	return output
@@ -23738,12 +20388,8 @@ func (p *ScannerOpenWithScanResult) Read(iprot thrift.TProtocol) (err thrift.TPr
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerOpenWithScanResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerOpenWithScanResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -23751,46 +20397,37 @@ func (p *ScannerOpenWithScanResult) Read(iprot thrift.TProtocol) (err thrift.TPr
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //ScannerID
 			if fieldTypeId == thrift.I32 {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -23803,30 +20440,22 @@ func (p *ScannerOpenWithScanResult) Read(iprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *ScannerOpenWithScanResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1304, err1305 := iprot.ReadI32()
-	if err1305 != nil {
-		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err1305)
+func (p *ScannerOpenWithScanResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1253, err1254 := iprot.ReadI32()
+	if err1254 != nil {
+		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err1254)
 	}
-	p.Success = ScannerID(v1304)
+	p.Success = ScannerID(v1253)
 	return err
 }
 
-func (p *ScannerOpenWithScanResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *ScannerOpenWithScanResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithScanResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1308 := p.Io.Read(iprot)
-	if err1308 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1308)
+	err1257 := p.Io.Read(iprot)
+	if err1257 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1257)
 	}
 	return err
-}
-
-func (p *ScannerOpenWithScanResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *ScannerOpenWithScanResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -23836,11 +20465,11 @@ func (p *ScannerOpenWithScanResult) Write(oprot thrift.TProtocol) (err thrift.TP
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -23855,7 +20484,7 @@ func (p *ScannerOpenWithScanResult) Write(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *ScannerOpenWithScanResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithScanResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("success", thrift.I32, 0)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
@@ -23871,11 +20500,7 @@ func (p *ScannerOpenWithScanResult) WriteField0(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *ScannerOpenWithScanResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *ScannerOpenWithScanResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithScanResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -23893,34 +20518,12 @@ func (p *ScannerOpenWithScanResult) WriteField1(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *ScannerOpenWithScanResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *ScannerOpenWithScanResult) TStructName() string {
 	return "ScannerOpenWithScanResult"
 }
 
 func (p *ScannerOpenWithScanResult) ThriftName() string {
 	return "scannerOpenWithScan_result"
-}
-
-func (p *ScannerOpenWithScanResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerOpenWithScanResult(%+v)", *p)
-}
-
-func (p *ScannerOpenWithScanResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerOpenWithScanResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerOpenWithScanResult) AttributeByFieldId(id int) interface{} {
@@ -23953,22 +20556,22 @@ func (p *ScannerOpenWithScanResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Scan attributes
  */
 type ScannerOpenArgs struct {
-	thrift.TStruct
-	TableName  Text         "tableName"  // 1
-	StartRow   Text         "startRow"   // 2
-	Columns    thrift.TList "columns"    // 3
-	Attributes thrift.TMap  "attributes" // 4
+	TableName  Text            "tableName"  // 1
+	StartRow   Text            "startRow"   // 2
+	Columns    []Text          "columns"    // 3
+	Attributes map[string]Text "attributes" // 4
 }
 
+var tstructScannerOpenArgs = thrift.NewTStruct("scannerOpen_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("startRow", thrift.STRING, 2),
+	thrift.NewTField("columns", thrift.LIST, 3),
+	thrift.NewTField("attributes", thrift.MAP, 4),
+})
+
+func (*ScannerOpenArgs) GetTStruct() thrift.TStruct { return tstructScannerOpenArgs }
 func NewScannerOpenArgs() *ScannerOpenArgs {
-	output := &ScannerOpenArgs{
-		TStruct: thrift.NewTStruct("scannerOpen_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("startRow", thrift.BINARY, 2),
-			thrift.NewTField("columns", thrift.LIST, 3),
-			thrift.NewTField("attributes", thrift.MAP, 4),
-		}),
-	}
+	output := &ScannerOpenArgs{}
 	{
 	}
 	return output
@@ -23982,12 +20585,8 @@ func (p *ScannerOpenArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerOpenArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerOpenArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -23995,80 +20594,61 @@ func (p *ScannerOpenArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "startRow" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "columns" {
+		case 3: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "attributes" {
+		case 4: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -24081,45 +20661,38 @@ func (p *ScannerOpenArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExce
 	return err
 }
 
-func (p *ScannerOpenArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1309, err1310 := iprot.ReadBinary()
-	if err1310 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1310)
+func (p *ScannerOpenArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1258, err1259 := iprot.ReadBinary()
+	if err1259 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1259)
 	}
-	p.TableName = Text(v1309)
+	p.TableName = Text(v1258)
 	return err
 }
 
-func (p *ScannerOpenArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *ScannerOpenArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1311, err1312 := iprot.ReadBinary()
-	if err1312 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "startRow", p.ThriftName(), err1312)
+func (p *ScannerOpenArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1260, err1261 := iprot.ReadBinary()
+	if err1261 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "startRow", p.ThriftName(), err1261)
 	}
-	p.StartRow = Text(v1311)
+	p.StartRow = Text(v1260)
 	return err
 }
 
-func (p *ScannerOpenArgs) ReadFieldStartRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *ScannerOpenArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype1318, _size1315, err := iprot.ReadListBegin()
+func (p *ScannerOpenArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype1267, _size1264, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Columns", "", err)
 	}
-	p.Columns = thrift.NewTList(_etype1318, _size1315)
-	for _i1319 := 0; _i1319 < _size1315; _i1319++ {
-		v1321, err1322 := iprot.ReadBinary()
-		if err1322 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_elem1320", "", err1322)
+	_ = _etype1267
+	p.Columns = make([]Text, _size1264, _size1264)
+	for i := 0; i < _size1264; i++ {
+		v1270, err1271 := iprot.ReadBinary()
+		if err1271 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_elem1269", "", err1271)
 		}
-		_elem1320 := Text(v1321)
-		p.Columns.Push(_elem1320)
+		_elem1269 := Text(v1270)
+		p.Columns[i] = _elem1269
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -24128,28 +20701,25 @@ func (p *ScannerOpenArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *ScannerOpenArgs) ReadFieldColumns(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *ScannerOpenArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype1326, _vtype1327, _size1325, err := iprot.ReadMapBegin()
+func (p *ScannerOpenArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype1275, _vtype1276, _size1274, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype1326, _vtype1327, _size1325)
-	for _i1329 := 0; _i1329 < _size1325; _i1329++ {
-		v1332, err1333 := iprot.ReadBinary()
-		if err1333 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key1330", "", err1333)
+	_, _ = _ktype1275, _vtype1276
+	p.Attributes = make(map[string]Text, _size1274)
+	for i := 0; i < _size1274; i++ {
+		v1281, err1282 := iprot.ReadString()
+		if err1282 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key1279", "", err1282)
 		}
-		_key1330 := Text(v1332)
-		v1334, err1335 := iprot.ReadBinary()
-		if err1335 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val1331", "", err1335)
+		_key1279 := v1281
+		v1283, err1284 := iprot.ReadBinary()
+		if err1284 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val1280", "", err1284)
 		}
-		_val1331 := Text(v1334)
-		p.Attributes.Set(_key1330, _val1331)
+		_val1280 := Text(v1283)
+		p.Attributes[_key1279] = _val1280
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -24158,28 +20728,24 @@ func (p *ScannerOpenArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *ScannerOpenArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
 func (p *ScannerOpenArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("scannerOpen_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
@@ -24194,9 +20760,9 @@ func (p *ScannerOpenArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *ScannerOpenArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -24212,13 +20778,9 @@ func (p *ScannerOpenArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *ScannerOpenArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *ScannerOpenArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.StartRow != nil {
-		err = oprot.WriteFieldBegin("startRow", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("startRow", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "startRow", p.ThriftName(), err)
 		}
@@ -24234,25 +20796,20 @@ func (p *ScannerOpenArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *ScannerOpenArgs) WriteFieldStartRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *ScannerOpenArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Columns != nil {
 		err = oprot.WriteFieldBegin("columns", thrift.LIST, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "columns", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.BINARY, p.Columns.Len())
+		err = oprot.WriteListBegin(thrift.STRING, len(p.Columns))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter1336 := range p.Columns.Iter() {
-			Iter1337 := Iter1336.(Text)
-			err = oprot.WriteBinary(Iter1337)
+		for _, Iter1285 := range p.Columns {
+			err = oprot.WriteBinary(Iter1285)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Iter1337", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Iter1285", "", err)
 			}
 		}
 		err = oprot.WriteListEnd()
@@ -24267,29 +20824,24 @@ func (p *ScannerOpenArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *ScannerOpenArgs) WriteFieldColumns(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *ScannerOpenArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 4)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(4, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter1338 := range p.Attributes.Iter() {
-			Kiter1339, Viter1340 := Miter1338.Key().(Text), Miter1338.Value().(Text)
-			err = oprot.WriteBinary(Kiter1339)
+		for Kiter1286, Viter1287 := range p.Attributes {
+			err = oprot.WriteString(Kiter1286)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1339", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1286", "", err)
 			}
-			err = oprot.WriteBinary(Viter1340)
+			err = oprot.WriteBinary(Viter1287)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter1340", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter1287", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -24304,34 +20856,12 @@ func (p *ScannerOpenArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *ScannerOpenArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
 func (p *ScannerOpenArgs) TStructName() string {
 	return "ScannerOpenArgs"
 }
 
 func (p *ScannerOpenArgs) ThriftName() string {
 	return "scannerOpen_args"
-}
-
-func (p *ScannerOpenArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerOpenArgs(%+v)", *p)
-}
-
-func (p *ScannerOpenArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerOpenArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerOpenArgs) AttributeByFieldId(id int) interface{} {
@@ -24352,8 +20882,8 @@ func (p *ScannerOpenArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *ScannerOpenArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("startRow", thrift.BINARY, 2),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("startRow", thrift.STRING, 2),
 		thrift.NewTField("columns", thrift.LIST, 3),
 		thrift.NewTField("attributes", thrift.MAP, 4),
 	})
@@ -24365,18 +20895,18 @@ func (p *ScannerOpenArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type ScannerOpenResult struct {
-	thrift.TStruct
 	Success ScannerID "success" // 0
 	Io      *IOError  "io"      // 1
 }
 
+var tstructScannerOpenResult = thrift.NewTStruct("scannerOpen_result", []thrift.TField{
+	thrift.NewTField("success", thrift.I32, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*ScannerOpenResult) GetTStruct() thrift.TStruct { return tstructScannerOpenResult }
 func NewScannerOpenResult() *ScannerOpenResult {
-	output := &ScannerOpenResult{
-		TStruct: thrift.NewTStruct("scannerOpen_result", []thrift.TField{
-			thrift.NewTField("success", thrift.I32, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &ScannerOpenResult{}
 	{
 	}
 	return output
@@ -24390,12 +20920,8 @@ func (p *ScannerOpenResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerOpenResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerOpenResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -24403,46 +20929,37 @@ func (p *ScannerOpenResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //ScannerID
 			if fieldTypeId == thrift.I32 {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -24455,30 +20972,22 @@ func (p *ScannerOpenResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *ScannerOpenResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1341, err1342 := iprot.ReadI32()
-	if err1342 != nil {
-		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err1342)
+func (p *ScannerOpenResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1288, err1289 := iprot.ReadI32()
+	if err1289 != nil {
+		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err1289)
 	}
-	p.Success = ScannerID(v1341)
+	p.Success = ScannerID(v1288)
 	return err
 }
 
-func (p *ScannerOpenResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *ScannerOpenResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1345 := p.Io.Read(iprot)
-	if err1345 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1345)
+	err1292 := p.Io.Read(iprot)
+	if err1292 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1292)
 	}
 	return err
-}
-
-func (p *ScannerOpenResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *ScannerOpenResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -24488,11 +20997,11 @@ func (p *ScannerOpenResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -24507,7 +21016,7 @@ func (p *ScannerOpenResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *ScannerOpenResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("success", thrift.I32, 0)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
@@ -24523,11 +21032,7 @@ func (p *ScannerOpenResult) WriteField0(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *ScannerOpenResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *ScannerOpenResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -24545,34 +21050,12 @@ func (p *ScannerOpenResult) WriteField1(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *ScannerOpenResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *ScannerOpenResult) TStructName() string {
 	return "ScannerOpenResult"
 }
 
 func (p *ScannerOpenResult) ThriftName() string {
 	return "scannerOpen_result"
-}
-
-func (p *ScannerOpenResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerOpenResult(%+v)", *p)
-}
-
-func (p *ScannerOpenResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerOpenResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerOpenResult) AttributeByFieldId(id int) interface{} {
@@ -24607,24 +21090,24 @@ func (p *ScannerOpenResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Scan attributes
  */
 type ScannerOpenWithStopArgs struct {
-	thrift.TStruct
-	TableName  Text         "tableName"  // 1
-	StartRow   Text         "startRow"   // 2
-	StopRow    Text         "stopRow"    // 3
-	Columns    thrift.TList "columns"    // 4
-	Attributes thrift.TMap  "attributes" // 5
+	TableName  Text            "tableName"  // 1
+	StartRow   Text            "startRow"   // 2
+	StopRow    Text            "stopRow"    // 3
+	Columns    []Text          "columns"    // 4
+	Attributes map[string]Text "attributes" // 5
 }
 
+var tstructScannerOpenWithStopArgs = thrift.NewTStruct("scannerOpenWithStop_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("startRow", thrift.STRING, 2),
+	thrift.NewTField("stopRow", thrift.STRING, 3),
+	thrift.NewTField("columns", thrift.LIST, 4),
+	thrift.NewTField("attributes", thrift.MAP, 5),
+})
+
+func (*ScannerOpenWithStopArgs) GetTStruct() thrift.TStruct { return tstructScannerOpenWithStopArgs }
 func NewScannerOpenWithStopArgs() *ScannerOpenWithStopArgs {
-	output := &ScannerOpenWithStopArgs{
-		TStruct: thrift.NewTStruct("scannerOpenWithStop_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("startRow", thrift.BINARY, 2),
-			thrift.NewTField("stopRow", thrift.BINARY, 3),
-			thrift.NewTField("columns", thrift.LIST, 4),
-			thrift.NewTField("attributes", thrift.MAP, 5),
-		}),
-	}
+	output := &ScannerOpenWithStopArgs{}
 	{
 	}
 	return output
@@ -24638,12 +21121,8 @@ func (p *ScannerOpenWithStopArgs) Read(iprot thrift.TProtocol) (err thrift.TProt
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerOpenWithStopArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerOpenWithStopArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -24651,97 +21130,73 @@ func (p *ScannerOpenWithStopArgs) Read(iprot thrift.TProtocol) (err thrift.TProt
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "startRow" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
 			}
-		} else if fieldId == 3 || fieldName == "stopRow" {
+		case 2: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField3(iprot)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else if fieldTypeId == thrift.VOID {
+			} else {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 3: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField3(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "columns" {
+		case 4: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 5 || fieldName == "attributes" {
+		case 5: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField5(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField5(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField5(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -24754,58 +21209,47 @@ func (p *ScannerOpenWithStopArgs) Read(iprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *ScannerOpenWithStopArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1346, err1347 := iprot.ReadBinary()
-	if err1347 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1347)
+func (p *ScannerOpenWithStopArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1293, err1294 := iprot.ReadBinary()
+	if err1294 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1294)
 	}
-	p.TableName = Text(v1346)
+	p.TableName = Text(v1293)
 	return err
 }
 
-func (p *ScannerOpenWithStopArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *ScannerOpenWithStopArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1348, err1349 := iprot.ReadBinary()
-	if err1349 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "startRow", p.ThriftName(), err1349)
+func (p *ScannerOpenWithStopArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1295, err1296 := iprot.ReadBinary()
+	if err1296 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "startRow", p.ThriftName(), err1296)
 	}
-	p.StartRow = Text(v1348)
+	p.StartRow = Text(v1295)
 	return err
 }
 
-func (p *ScannerOpenWithStopArgs) ReadFieldStartRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *ScannerOpenWithStopArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1350, err1351 := iprot.ReadBinary()
-	if err1351 != nil {
-		return thrift.NewTProtocolExceptionReadField(3, "stopRow", p.ThriftName(), err1351)
+func (p *ScannerOpenWithStopArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1297, err1298 := iprot.ReadBinary()
+	if err1298 != nil {
+		return thrift.NewTProtocolExceptionReadField(3, "stopRow", p.ThriftName(), err1298)
 	}
-	p.StopRow = Text(v1350)
+	p.StopRow = Text(v1297)
 	return err
 }
 
-func (p *ScannerOpenWithStopArgs) ReadFieldStopRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *ScannerOpenWithStopArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype1357, _size1354, err := iprot.ReadListBegin()
+func (p *ScannerOpenWithStopArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype1304, _size1301, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Columns", "", err)
 	}
-	p.Columns = thrift.NewTList(_etype1357, _size1354)
-	for _i1358 := 0; _i1358 < _size1354; _i1358++ {
-		v1360, err1361 := iprot.ReadBinary()
-		if err1361 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_elem1359", "", err1361)
+	_ = _etype1304
+	p.Columns = make([]Text, _size1301, _size1301)
+	for i := 0; i < _size1301; i++ {
+		v1307, err1308 := iprot.ReadBinary()
+		if err1308 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_elem1306", "", err1308)
 		}
-		_elem1359 := Text(v1360)
-		p.Columns.Push(_elem1359)
+		_elem1306 := Text(v1307)
+		p.Columns[i] = _elem1306
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -24814,28 +21258,25 @@ func (p *ScannerOpenWithStopArgs) ReadField4(iprot thrift.TProtocol) (err thrift
 	return err
 }
 
-func (p *ScannerOpenWithStopArgs) ReadFieldColumns(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
-func (p *ScannerOpenWithStopArgs) ReadField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype1365, _vtype1366, _size1364, err := iprot.ReadMapBegin()
+func (p *ScannerOpenWithStopArgs) readField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype1312, _vtype1313, _size1311, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype1365, _vtype1366, _size1364)
-	for _i1368 := 0; _i1368 < _size1364; _i1368++ {
-		v1371, err1372 := iprot.ReadBinary()
-		if err1372 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key1369", "", err1372)
+	_, _ = _ktype1312, _vtype1313
+	p.Attributes = make(map[string]Text, _size1311)
+	for i := 0; i < _size1311; i++ {
+		v1318, err1319 := iprot.ReadString()
+		if err1319 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key1316", "", err1319)
 		}
-		_key1369 := Text(v1371)
-		v1373, err1374 := iprot.ReadBinary()
-		if err1374 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val1370", "", err1374)
+		_key1316 := v1318
+		v1320, err1321 := iprot.ReadBinary()
+		if err1321 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val1317", "", err1321)
 		}
-		_val1370 := Text(v1373)
-		p.Attributes.Set(_key1369, _val1370)
+		_val1317 := Text(v1320)
+		p.Attributes[_key1316] = _val1317
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -24844,32 +21285,28 @@ func (p *ScannerOpenWithStopArgs) ReadField5(iprot thrift.TProtocol) (err thrift
 	return err
 }
 
-func (p *ScannerOpenWithStopArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField5(iprot)
-}
-
 func (p *ScannerOpenWithStopArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("scannerOpenWithStop_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField5(oprot)
+	err = p.writeField5(oprot)
 	if err != nil {
 		return err
 	}
@@ -24884,9 +21321,9 @@ func (p *ScannerOpenWithStopArgs) Write(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *ScannerOpenWithStopArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -24902,13 +21339,9 @@ func (p *ScannerOpenWithStopArgs) WriteField1(oprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *ScannerOpenWithStopArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *ScannerOpenWithStopArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.StartRow != nil {
-		err = oprot.WriteFieldBegin("startRow", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("startRow", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "startRow", p.ThriftName(), err)
 		}
@@ -24924,13 +21357,9 @@ func (p *ScannerOpenWithStopArgs) WriteField2(oprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *ScannerOpenWithStopArgs) WriteFieldStartRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *ScannerOpenWithStopArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.StopRow != nil {
-		err = oprot.WriteFieldBegin("stopRow", thrift.BINARY, 3)
+		err = oprot.WriteFieldBegin("stopRow", thrift.STRING, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "stopRow", p.ThriftName(), err)
 		}
@@ -24946,25 +21375,20 @@ func (p *ScannerOpenWithStopArgs) WriteField3(oprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *ScannerOpenWithStopArgs) WriteFieldStopRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *ScannerOpenWithStopArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Columns != nil {
 		err = oprot.WriteFieldBegin("columns", thrift.LIST, 4)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(4, "columns", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.BINARY, p.Columns.Len())
+		err = oprot.WriteListBegin(thrift.STRING, len(p.Columns))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter1375 := range p.Columns.Iter() {
-			Iter1376 := Iter1375.(Text)
-			err = oprot.WriteBinary(Iter1376)
+		for _, Iter1322 := range p.Columns {
+			err = oprot.WriteBinary(Iter1322)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Iter1376", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Iter1322", "", err)
 			}
 		}
 		err = oprot.WriteListEnd()
@@ -24979,29 +21403,24 @@ func (p *ScannerOpenWithStopArgs) WriteField4(oprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *ScannerOpenWithStopArgs) WriteFieldColumns(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
-func (p *ScannerOpenWithStopArgs) WriteField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopArgs) writeField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 5)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(5, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter1377 := range p.Attributes.Iter() {
-			Kiter1378, Viter1379 := Miter1377.Key().(Text), Miter1377.Value().(Text)
-			err = oprot.WriteBinary(Kiter1378)
+		for Kiter1323, Viter1324 := range p.Attributes {
+			err = oprot.WriteString(Kiter1323)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1378", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1323", "", err)
 			}
-			err = oprot.WriteBinary(Viter1379)
+			err = oprot.WriteBinary(Viter1324)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter1379", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter1324", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -25016,34 +21435,12 @@ func (p *ScannerOpenWithStopArgs) WriteField5(oprot thrift.TProtocol) (err thrif
 	return err
 }
 
-func (p *ScannerOpenWithStopArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField5(oprot)
-}
-
 func (p *ScannerOpenWithStopArgs) TStructName() string {
 	return "ScannerOpenWithStopArgs"
 }
 
 func (p *ScannerOpenWithStopArgs) ThriftName() string {
 	return "scannerOpenWithStop_args"
-}
-
-func (p *ScannerOpenWithStopArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerOpenWithStopArgs(%+v)", *p)
-}
-
-func (p *ScannerOpenWithStopArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerOpenWithStopArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerOpenWithStopArgs) AttributeByFieldId(id int) interface{} {
@@ -25066,9 +21463,9 @@ func (p *ScannerOpenWithStopArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *ScannerOpenWithStopArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("startRow", thrift.BINARY, 2),
-		thrift.NewTField("stopRow", thrift.BINARY, 3),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("startRow", thrift.STRING, 2),
+		thrift.NewTField("stopRow", thrift.STRING, 3),
 		thrift.NewTField("columns", thrift.LIST, 4),
 		thrift.NewTField("attributes", thrift.MAP, 5),
 	})
@@ -25080,18 +21477,18 @@ func (p *ScannerOpenWithStopArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type ScannerOpenWithStopResult struct {
-	thrift.TStruct
 	Success ScannerID "success" // 0
 	Io      *IOError  "io"      // 1
 }
 
+var tstructScannerOpenWithStopResult = thrift.NewTStruct("scannerOpenWithStop_result", []thrift.TField{
+	thrift.NewTField("success", thrift.I32, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*ScannerOpenWithStopResult) GetTStruct() thrift.TStruct { return tstructScannerOpenWithStopResult }
 func NewScannerOpenWithStopResult() *ScannerOpenWithStopResult {
-	output := &ScannerOpenWithStopResult{
-		TStruct: thrift.NewTStruct("scannerOpenWithStop_result", []thrift.TField{
-			thrift.NewTField("success", thrift.I32, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &ScannerOpenWithStopResult{}
 	{
 	}
 	return output
@@ -25105,12 +21502,8 @@ func (p *ScannerOpenWithStopResult) Read(iprot thrift.TProtocol) (err thrift.TPr
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerOpenWithStopResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerOpenWithStopResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -25118,46 +21511,37 @@ func (p *ScannerOpenWithStopResult) Read(iprot thrift.TProtocol) (err thrift.TPr
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //ScannerID
 			if fieldTypeId == thrift.I32 {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -25170,30 +21554,22 @@ func (p *ScannerOpenWithStopResult) Read(iprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *ScannerOpenWithStopResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1380, err1381 := iprot.ReadI32()
-	if err1381 != nil {
-		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err1381)
+func (p *ScannerOpenWithStopResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1325, err1326 := iprot.ReadI32()
+	if err1326 != nil {
+		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err1326)
 	}
-	p.Success = ScannerID(v1380)
+	p.Success = ScannerID(v1325)
 	return err
 }
 
-func (p *ScannerOpenWithStopResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *ScannerOpenWithStopResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1384 := p.Io.Read(iprot)
-	if err1384 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1384)
+	err1329 := p.Io.Read(iprot)
+	if err1329 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1329)
 	}
 	return err
-}
-
-func (p *ScannerOpenWithStopResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *ScannerOpenWithStopResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -25203,11 +21579,11 @@ func (p *ScannerOpenWithStopResult) Write(oprot thrift.TProtocol) (err thrift.TP
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -25222,7 +21598,7 @@ func (p *ScannerOpenWithStopResult) Write(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *ScannerOpenWithStopResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("success", thrift.I32, 0)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
@@ -25238,11 +21614,7 @@ func (p *ScannerOpenWithStopResult) WriteField0(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *ScannerOpenWithStopResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *ScannerOpenWithStopResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -25260,34 +21632,12 @@ func (p *ScannerOpenWithStopResult) WriteField1(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *ScannerOpenWithStopResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *ScannerOpenWithStopResult) TStructName() string {
 	return "ScannerOpenWithStopResult"
 }
 
 func (p *ScannerOpenWithStopResult) ThriftName() string {
 	return "scannerOpenWithStop_result"
-}
-
-func (p *ScannerOpenWithStopResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerOpenWithStopResult(%+v)", *p)
-}
-
-func (p *ScannerOpenWithStopResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerOpenWithStopResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerOpenWithStopResult) AttributeByFieldId(id int) interface{} {
@@ -25317,22 +21667,22 @@ func (p *ScannerOpenWithStopResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Scan attributes
  */
 type ScannerOpenWithPrefixArgs struct {
-	thrift.TStruct
-	TableName      Text         "tableName"      // 1
-	StartAndPrefix Text         "startAndPrefix" // 2
-	Columns        thrift.TList "columns"        // 3
-	Attributes     thrift.TMap  "attributes"     // 4
+	TableName      Text            "tableName"      // 1
+	StartAndPrefix Text            "startAndPrefix" // 2
+	Columns        []Text          "columns"        // 3
+	Attributes     map[string]Text "attributes"     // 4
 }
 
+var tstructScannerOpenWithPrefixArgs = thrift.NewTStruct("scannerOpenWithPrefix_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("startAndPrefix", thrift.STRING, 2),
+	thrift.NewTField("columns", thrift.LIST, 3),
+	thrift.NewTField("attributes", thrift.MAP, 4),
+})
+
+func (*ScannerOpenWithPrefixArgs) GetTStruct() thrift.TStruct { return tstructScannerOpenWithPrefixArgs }
 func NewScannerOpenWithPrefixArgs() *ScannerOpenWithPrefixArgs {
-	output := &ScannerOpenWithPrefixArgs{
-		TStruct: thrift.NewTStruct("scannerOpenWithPrefix_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("startAndPrefix", thrift.BINARY, 2),
-			thrift.NewTField("columns", thrift.LIST, 3),
-			thrift.NewTField("attributes", thrift.MAP, 4),
-		}),
-	}
+	output := &ScannerOpenWithPrefixArgs{}
 	{
 	}
 	return output
@@ -25346,12 +21696,8 @@ func (p *ScannerOpenWithPrefixArgs) Read(iprot thrift.TProtocol) (err thrift.TPr
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerOpenWithPrefixArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerOpenWithPrefixArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -25359,80 +21705,61 @@ func (p *ScannerOpenWithPrefixArgs) Read(iprot thrift.TProtocol) (err thrift.TPr
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "startAndPrefix" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "columns" {
+		case 3: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "attributes" {
+		case 4: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -25445,45 +21772,38 @@ func (p *ScannerOpenWithPrefixArgs) Read(iprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *ScannerOpenWithPrefixArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1385, err1386 := iprot.ReadBinary()
-	if err1386 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1386)
+func (p *ScannerOpenWithPrefixArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1330, err1331 := iprot.ReadBinary()
+	if err1331 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1331)
 	}
-	p.TableName = Text(v1385)
+	p.TableName = Text(v1330)
 	return err
 }
 
-func (p *ScannerOpenWithPrefixArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *ScannerOpenWithPrefixArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1387, err1388 := iprot.ReadBinary()
-	if err1388 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "startAndPrefix", p.ThriftName(), err1388)
+func (p *ScannerOpenWithPrefixArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1332, err1333 := iprot.ReadBinary()
+	if err1333 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "startAndPrefix", p.ThriftName(), err1333)
 	}
-	p.StartAndPrefix = Text(v1387)
+	p.StartAndPrefix = Text(v1332)
 	return err
 }
 
-func (p *ScannerOpenWithPrefixArgs) ReadFieldStartAndPrefix(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *ScannerOpenWithPrefixArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype1394, _size1391, err := iprot.ReadListBegin()
+func (p *ScannerOpenWithPrefixArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype1339, _size1336, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Columns", "", err)
 	}
-	p.Columns = thrift.NewTList(_etype1394, _size1391)
-	for _i1395 := 0; _i1395 < _size1391; _i1395++ {
-		v1397, err1398 := iprot.ReadBinary()
-		if err1398 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_elem1396", "", err1398)
+	_ = _etype1339
+	p.Columns = make([]Text, _size1336, _size1336)
+	for i := 0; i < _size1336; i++ {
+		v1342, err1343 := iprot.ReadBinary()
+		if err1343 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_elem1341", "", err1343)
 		}
-		_elem1396 := Text(v1397)
-		p.Columns.Push(_elem1396)
+		_elem1341 := Text(v1342)
+		p.Columns[i] = _elem1341
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -25492,28 +21812,25 @@ func (p *ScannerOpenWithPrefixArgs) ReadField3(iprot thrift.TProtocol) (err thri
 	return err
 }
 
-func (p *ScannerOpenWithPrefixArgs) ReadFieldColumns(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *ScannerOpenWithPrefixArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype1402, _vtype1403, _size1401, err := iprot.ReadMapBegin()
+func (p *ScannerOpenWithPrefixArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype1347, _vtype1348, _size1346, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype1402, _vtype1403, _size1401)
-	for _i1405 := 0; _i1405 < _size1401; _i1405++ {
-		v1408, err1409 := iprot.ReadBinary()
-		if err1409 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key1406", "", err1409)
+	_, _ = _ktype1347, _vtype1348
+	p.Attributes = make(map[string]Text, _size1346)
+	for i := 0; i < _size1346; i++ {
+		v1353, err1354 := iprot.ReadString()
+		if err1354 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key1351", "", err1354)
 		}
-		_key1406 := Text(v1408)
-		v1410, err1411 := iprot.ReadBinary()
-		if err1411 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val1407", "", err1411)
+		_key1351 := v1353
+		v1355, err1356 := iprot.ReadBinary()
+		if err1356 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val1352", "", err1356)
 		}
-		_val1407 := Text(v1410)
-		p.Attributes.Set(_key1406, _val1407)
+		_val1352 := Text(v1355)
+		p.Attributes[_key1351] = _val1352
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -25522,28 +21839,24 @@ func (p *ScannerOpenWithPrefixArgs) ReadField4(iprot thrift.TProtocol) (err thri
 	return err
 }
 
-func (p *ScannerOpenWithPrefixArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
 func (p *ScannerOpenWithPrefixArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("scannerOpenWithPrefix_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
@@ -25558,9 +21871,9 @@ func (p *ScannerOpenWithPrefixArgs) Write(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *ScannerOpenWithPrefixArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithPrefixArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -25576,13 +21889,9 @@ func (p *ScannerOpenWithPrefixArgs) WriteField1(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *ScannerOpenWithPrefixArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *ScannerOpenWithPrefixArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithPrefixArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.StartAndPrefix != nil {
-		err = oprot.WriteFieldBegin("startAndPrefix", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("startAndPrefix", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "startAndPrefix", p.ThriftName(), err)
 		}
@@ -25598,25 +21907,20 @@ func (p *ScannerOpenWithPrefixArgs) WriteField2(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *ScannerOpenWithPrefixArgs) WriteFieldStartAndPrefix(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *ScannerOpenWithPrefixArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithPrefixArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Columns != nil {
 		err = oprot.WriteFieldBegin("columns", thrift.LIST, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "columns", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.BINARY, p.Columns.Len())
+		err = oprot.WriteListBegin(thrift.STRING, len(p.Columns))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter1412 := range p.Columns.Iter() {
-			Iter1413 := Iter1412.(Text)
-			err = oprot.WriteBinary(Iter1413)
+		for _, Iter1357 := range p.Columns {
+			err = oprot.WriteBinary(Iter1357)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Iter1413", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Iter1357", "", err)
 			}
 		}
 		err = oprot.WriteListEnd()
@@ -25631,29 +21935,24 @@ func (p *ScannerOpenWithPrefixArgs) WriteField3(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *ScannerOpenWithPrefixArgs) WriteFieldColumns(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *ScannerOpenWithPrefixArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithPrefixArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 4)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(4, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter1414 := range p.Attributes.Iter() {
-			Kiter1415, Viter1416 := Miter1414.Key().(Text), Miter1414.Value().(Text)
-			err = oprot.WriteBinary(Kiter1415)
+		for Kiter1358, Viter1359 := range p.Attributes {
+			err = oprot.WriteString(Kiter1358)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1415", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1358", "", err)
 			}
-			err = oprot.WriteBinary(Viter1416)
+			err = oprot.WriteBinary(Viter1359)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter1416", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter1359", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -25668,34 +21967,12 @@ func (p *ScannerOpenWithPrefixArgs) WriteField4(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *ScannerOpenWithPrefixArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
 func (p *ScannerOpenWithPrefixArgs) TStructName() string {
 	return "ScannerOpenWithPrefixArgs"
 }
 
 func (p *ScannerOpenWithPrefixArgs) ThriftName() string {
 	return "scannerOpenWithPrefix_args"
-}
-
-func (p *ScannerOpenWithPrefixArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerOpenWithPrefixArgs(%+v)", *p)
-}
-
-func (p *ScannerOpenWithPrefixArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerOpenWithPrefixArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerOpenWithPrefixArgs) AttributeByFieldId(id int) interface{} {
@@ -25716,8 +21993,8 @@ func (p *ScannerOpenWithPrefixArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *ScannerOpenWithPrefixArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("startAndPrefix", thrift.BINARY, 2),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("startAndPrefix", thrift.STRING, 2),
 		thrift.NewTField("columns", thrift.LIST, 3),
 		thrift.NewTField("attributes", thrift.MAP, 4),
 	})
@@ -25729,18 +22006,20 @@ func (p *ScannerOpenWithPrefixArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type ScannerOpenWithPrefixResult struct {
-	thrift.TStruct
 	Success ScannerID "success" // 0
 	Io      *IOError  "io"      // 1
 }
 
+var tstructScannerOpenWithPrefixResult = thrift.NewTStruct("scannerOpenWithPrefix_result", []thrift.TField{
+	thrift.NewTField("success", thrift.I32, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*ScannerOpenWithPrefixResult) GetTStruct() thrift.TStruct {
+	return tstructScannerOpenWithPrefixResult
+}
 func NewScannerOpenWithPrefixResult() *ScannerOpenWithPrefixResult {
-	output := &ScannerOpenWithPrefixResult{
-		TStruct: thrift.NewTStruct("scannerOpenWithPrefix_result", []thrift.TField{
-			thrift.NewTField("success", thrift.I32, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &ScannerOpenWithPrefixResult{}
 	{
 	}
 	return output
@@ -25754,12 +22033,8 @@ func (p *ScannerOpenWithPrefixResult) Read(iprot thrift.TProtocol) (err thrift.T
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerOpenWithPrefixResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerOpenWithPrefixResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -25767,46 +22042,37 @@ func (p *ScannerOpenWithPrefixResult) Read(iprot thrift.TProtocol) (err thrift.T
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //ScannerID
 			if fieldTypeId == thrift.I32 {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -25819,30 +22085,22 @@ func (p *ScannerOpenWithPrefixResult) Read(iprot thrift.TProtocol) (err thrift.T
 	return err
 }
 
-func (p *ScannerOpenWithPrefixResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1417, err1418 := iprot.ReadI32()
-	if err1418 != nil {
-		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err1418)
+func (p *ScannerOpenWithPrefixResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1360, err1361 := iprot.ReadI32()
+	if err1361 != nil {
+		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err1361)
 	}
-	p.Success = ScannerID(v1417)
+	p.Success = ScannerID(v1360)
 	return err
 }
 
-func (p *ScannerOpenWithPrefixResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *ScannerOpenWithPrefixResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithPrefixResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1421 := p.Io.Read(iprot)
-	if err1421 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1421)
+	err1364 := p.Io.Read(iprot)
+	if err1364 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1364)
 	}
 	return err
-}
-
-func (p *ScannerOpenWithPrefixResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *ScannerOpenWithPrefixResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -25852,11 +22110,11 @@ func (p *ScannerOpenWithPrefixResult) Write(oprot thrift.TProtocol) (err thrift.
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -25871,7 +22129,7 @@ func (p *ScannerOpenWithPrefixResult) Write(oprot thrift.TProtocol) (err thrift.
 	return err
 }
 
-func (p *ScannerOpenWithPrefixResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithPrefixResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("success", thrift.I32, 0)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
@@ -25887,11 +22145,7 @@ func (p *ScannerOpenWithPrefixResult) WriteField0(oprot thrift.TProtocol) (err t
 	return err
 }
 
-func (p *ScannerOpenWithPrefixResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *ScannerOpenWithPrefixResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithPrefixResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -25909,34 +22163,12 @@ func (p *ScannerOpenWithPrefixResult) WriteField1(oprot thrift.TProtocol) (err t
 	return err
 }
 
-func (p *ScannerOpenWithPrefixResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *ScannerOpenWithPrefixResult) TStructName() string {
 	return "ScannerOpenWithPrefixResult"
 }
 
 func (p *ScannerOpenWithPrefixResult) ThriftName() string {
 	return "scannerOpenWithPrefix_result"
-}
-
-func (p *ScannerOpenWithPrefixResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerOpenWithPrefixResult(%+v)", *p)
-}
-
-func (p *ScannerOpenWithPrefixResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerOpenWithPrefixResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerOpenWithPrefixResult) AttributeByFieldId(id int) interface{} {
@@ -25970,24 +22202,24 @@ func (p *ScannerOpenWithPrefixResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Scan attributes
  */
 type ScannerOpenTsArgs struct {
-	thrift.TStruct
-	TableName  Text         "tableName"  // 1
-	StartRow   Text         "startRow"   // 2
-	Columns    thrift.TList "columns"    // 3
-	Timestamp  int64        "timestamp"  // 4
-	Attributes thrift.TMap  "attributes" // 5
+	TableName  Text            "tableName"  // 1
+	StartRow   Text            "startRow"   // 2
+	Columns    []Text          "columns"    // 3
+	Timestamp  int64           "timestamp"  // 4
+	Attributes map[string]Text "attributes" // 5
 }
 
+var tstructScannerOpenTsArgs = thrift.NewTStruct("scannerOpenTs_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("startRow", thrift.STRING, 2),
+	thrift.NewTField("columns", thrift.LIST, 3),
+	thrift.NewTField("timestamp", thrift.I64, 4),
+	thrift.NewTField("attributes", thrift.MAP, 5),
+})
+
+func (*ScannerOpenTsArgs) GetTStruct() thrift.TStruct { return tstructScannerOpenTsArgs }
 func NewScannerOpenTsArgs() *ScannerOpenTsArgs {
-	output := &ScannerOpenTsArgs{
-		TStruct: thrift.NewTStruct("scannerOpenTs_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("startRow", thrift.BINARY, 2),
-			thrift.NewTField("columns", thrift.LIST, 3),
-			thrift.NewTField("timestamp", thrift.I64, 4),
-			thrift.NewTField("attributes", thrift.MAP, 5),
-		}),
-	}
+	output := &ScannerOpenTsArgs{}
 	{
 	}
 	return output
@@ -26001,12 +22233,8 @@ func (p *ScannerOpenTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerOpenTsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerOpenTsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -26014,97 +22242,73 @@ func (p *ScannerOpenTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "startRow" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 3 || fieldName == "columns" {
+		case 3: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField3(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField3(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "timestamp" {
+		case 4: //i64
 			if fieldTypeId == thrift.I64 {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 5 || fieldName == "attributes" {
+		case 5: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField5(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField5(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField5(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -26117,45 +22321,38 @@ func (p *ScannerOpenTsArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *ScannerOpenTsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1422, err1423 := iprot.ReadBinary()
-	if err1423 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1423)
+func (p *ScannerOpenTsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1365, err1366 := iprot.ReadBinary()
+	if err1366 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1366)
 	}
-	p.TableName = Text(v1422)
+	p.TableName = Text(v1365)
 	return err
 }
 
-func (p *ScannerOpenTsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *ScannerOpenTsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1424, err1425 := iprot.ReadBinary()
-	if err1425 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "startRow", p.ThriftName(), err1425)
+func (p *ScannerOpenTsArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1367, err1368 := iprot.ReadBinary()
+	if err1368 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "startRow", p.ThriftName(), err1368)
 	}
-	p.StartRow = Text(v1424)
+	p.StartRow = Text(v1367)
 	return err
 }
 
-func (p *ScannerOpenTsArgs) ReadFieldStartRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *ScannerOpenTsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype1431, _size1428, err := iprot.ReadListBegin()
+func (p *ScannerOpenTsArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype1374, _size1371, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Columns", "", err)
 	}
-	p.Columns = thrift.NewTList(_etype1431, _size1428)
-	for _i1432 := 0; _i1432 < _size1428; _i1432++ {
-		v1434, err1435 := iprot.ReadBinary()
-		if err1435 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_elem1433", "", err1435)
+	_ = _etype1374
+	p.Columns = make([]Text, _size1371, _size1371)
+	for i := 0; i < _size1371; i++ {
+		v1377, err1378 := iprot.ReadBinary()
+		if err1378 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_elem1376", "", err1378)
 		}
-		_elem1433 := Text(v1434)
-		p.Columns.Push(_elem1433)
+		_elem1376 := Text(v1377)
+		p.Columns[i] = _elem1376
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -26164,41 +22361,34 @@ func (p *ScannerOpenTsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *ScannerOpenTsArgs) ReadFieldColumns(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *ScannerOpenTsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1436, err1437 := iprot.ReadI64()
-	if err1437 != nil {
-		return thrift.NewTProtocolExceptionReadField(4, "timestamp", p.ThriftName(), err1437)
+func (p *ScannerOpenTsArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1379, err1380 := iprot.ReadI64()
+	if err1380 != nil {
+		return thrift.NewTProtocolExceptionReadField(4, "timestamp", p.ThriftName(), err1380)
 	}
-	p.Timestamp = v1436
+	p.Timestamp = v1379
 	return err
 }
 
-func (p *ScannerOpenTsArgs) ReadFieldTimestamp(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
-func (p *ScannerOpenTsArgs) ReadField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype1441, _vtype1442, _size1440, err := iprot.ReadMapBegin()
+func (p *ScannerOpenTsArgs) readField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype1384, _vtype1385, _size1383, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype1441, _vtype1442, _size1440)
-	for _i1444 := 0; _i1444 < _size1440; _i1444++ {
-		v1447, err1448 := iprot.ReadBinary()
-		if err1448 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key1445", "", err1448)
+	_, _ = _ktype1384, _vtype1385
+	p.Attributes = make(map[string]Text, _size1383)
+	for i := 0; i < _size1383; i++ {
+		v1390, err1391 := iprot.ReadString()
+		if err1391 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key1388", "", err1391)
 		}
-		_key1445 := Text(v1447)
-		v1449, err1450 := iprot.ReadBinary()
-		if err1450 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val1446", "", err1450)
+		_key1388 := v1390
+		v1392, err1393 := iprot.ReadBinary()
+		if err1393 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val1389", "", err1393)
 		}
-		_val1446 := Text(v1449)
-		p.Attributes.Set(_key1445, _val1446)
+		_val1389 := Text(v1392)
+		p.Attributes[_key1388] = _val1389
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -26207,32 +22397,28 @@ func (p *ScannerOpenTsArgs) ReadField5(iprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *ScannerOpenTsArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField5(iprot)
-}
-
 func (p *ScannerOpenTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("scannerOpenTs_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField5(oprot)
+	err = p.writeField5(oprot)
 	if err != nil {
 		return err
 	}
@@ -26247,9 +22433,9 @@ func (p *ScannerOpenTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *ScannerOpenTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenTsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -26265,13 +22451,9 @@ func (p *ScannerOpenTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *ScannerOpenTsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *ScannerOpenTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenTsArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.StartRow != nil {
-		err = oprot.WriteFieldBegin("startRow", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("startRow", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "startRow", p.ThriftName(), err)
 		}
@@ -26287,25 +22469,20 @@ func (p *ScannerOpenTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *ScannerOpenTsArgs) WriteFieldStartRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *ScannerOpenTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenTsArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Columns != nil {
 		err = oprot.WriteFieldBegin("columns", thrift.LIST, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "columns", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.BINARY, p.Columns.Len())
+		err = oprot.WriteListBegin(thrift.STRING, len(p.Columns))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter1451 := range p.Columns.Iter() {
-			Iter1452 := Iter1451.(Text)
-			err = oprot.WriteBinary(Iter1452)
+		for _, Iter1394 := range p.Columns {
+			err = oprot.WriteBinary(Iter1394)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Iter1452", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Iter1394", "", err)
 			}
 		}
 		err = oprot.WriteListEnd()
@@ -26320,11 +22497,7 @@ func (p *ScannerOpenTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *ScannerOpenTsArgs) WriteFieldColumns(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *ScannerOpenTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenTsArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("timestamp", thrift.I64, 4)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(4, "timestamp", p.ThriftName(), err)
@@ -26340,29 +22513,24 @@ func (p *ScannerOpenTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *ScannerOpenTsArgs) WriteFieldTimestamp(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
-func (p *ScannerOpenTsArgs) WriteField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenTsArgs) writeField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 5)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(5, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter1453 := range p.Attributes.Iter() {
-			Kiter1454, Viter1455 := Miter1453.Key().(Text), Miter1453.Value().(Text)
-			err = oprot.WriteBinary(Kiter1454)
+		for Kiter1395, Viter1396 := range p.Attributes {
+			err = oprot.WriteString(Kiter1395)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1454", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1395", "", err)
 			}
-			err = oprot.WriteBinary(Viter1455)
+			err = oprot.WriteBinary(Viter1396)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter1455", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter1396", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -26377,34 +22545,12 @@ func (p *ScannerOpenTsArgs) WriteField5(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *ScannerOpenTsArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField5(oprot)
-}
-
 func (p *ScannerOpenTsArgs) TStructName() string {
 	return "ScannerOpenTsArgs"
 }
 
 func (p *ScannerOpenTsArgs) ThriftName() string {
 	return "scannerOpenTs_args"
-}
-
-func (p *ScannerOpenTsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerOpenTsArgs(%+v)", *p)
-}
-
-func (p *ScannerOpenTsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerOpenTsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerOpenTsArgs) AttributeByFieldId(id int) interface{} {
@@ -26427,8 +22573,8 @@ func (p *ScannerOpenTsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *ScannerOpenTsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("startRow", thrift.BINARY, 2),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("startRow", thrift.STRING, 2),
 		thrift.NewTField("columns", thrift.LIST, 3),
 		thrift.NewTField("timestamp", thrift.I64, 4),
 		thrift.NewTField("attributes", thrift.MAP, 5),
@@ -26441,18 +22587,18 @@ func (p *ScannerOpenTsArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type ScannerOpenTsResult struct {
-	thrift.TStruct
 	Success ScannerID "success" // 0
 	Io      *IOError  "io"      // 1
 }
 
+var tstructScannerOpenTsResult = thrift.NewTStruct("scannerOpenTs_result", []thrift.TField{
+	thrift.NewTField("success", thrift.I32, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*ScannerOpenTsResult) GetTStruct() thrift.TStruct { return tstructScannerOpenTsResult }
 func NewScannerOpenTsResult() *ScannerOpenTsResult {
-	output := &ScannerOpenTsResult{
-		TStruct: thrift.NewTStruct("scannerOpenTs_result", []thrift.TField{
-			thrift.NewTField("success", thrift.I32, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &ScannerOpenTsResult{}
 	{
 	}
 	return output
@@ -26466,12 +22612,8 @@ func (p *ScannerOpenTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerOpenTsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerOpenTsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -26479,46 +22621,37 @@ func (p *ScannerOpenTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //ScannerID
 			if fieldTypeId == thrift.I32 {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -26531,30 +22664,22 @@ func (p *ScannerOpenTsResult) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *ScannerOpenTsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1456, err1457 := iprot.ReadI32()
-	if err1457 != nil {
-		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err1457)
+func (p *ScannerOpenTsResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1397, err1398 := iprot.ReadI32()
+	if err1398 != nil {
+		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err1398)
 	}
-	p.Success = ScannerID(v1456)
+	p.Success = ScannerID(v1397)
 	return err
 }
 
-func (p *ScannerOpenTsResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *ScannerOpenTsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenTsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1460 := p.Io.Read(iprot)
-	if err1460 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1460)
+	err1401 := p.Io.Read(iprot)
+	if err1401 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1401)
 	}
 	return err
-}
-
-func (p *ScannerOpenTsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *ScannerOpenTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -26564,11 +22689,11 @@ func (p *ScannerOpenTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtoco
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -26583,7 +22708,7 @@ func (p *ScannerOpenTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *ScannerOpenTsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenTsResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("success", thrift.I32, 0)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
@@ -26599,11 +22724,7 @@ func (p *ScannerOpenTsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *ScannerOpenTsResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *ScannerOpenTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenTsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -26621,34 +22742,12 @@ func (p *ScannerOpenTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *ScannerOpenTsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *ScannerOpenTsResult) TStructName() string {
 	return "ScannerOpenTsResult"
 }
 
 func (p *ScannerOpenTsResult) ThriftName() string {
 	return "scannerOpenTs_result"
-}
-
-func (p *ScannerOpenTsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerOpenTsResult(%+v)", *p)
-}
-
-func (p *ScannerOpenTsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerOpenTsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerOpenTsResult) AttributeByFieldId(id int) interface{} {
@@ -26684,26 +22783,26 @@ func (p *ScannerOpenTsResult) TStructFields() thrift.TFieldContainer {
  *  - Attributes: Scan attributes
  */
 type ScannerOpenWithStopTsArgs struct {
-	thrift.TStruct
-	TableName  Text         "tableName"  // 1
-	StartRow   Text         "startRow"   // 2
-	StopRow    Text         "stopRow"    // 3
-	Columns    thrift.TList "columns"    // 4
-	Timestamp  int64        "timestamp"  // 5
-	Attributes thrift.TMap  "attributes" // 6
+	TableName  Text            "tableName"  // 1
+	StartRow   Text            "startRow"   // 2
+	StopRow    Text            "stopRow"    // 3
+	Columns    []Text          "columns"    // 4
+	Timestamp  int64           "timestamp"  // 5
+	Attributes map[string]Text "attributes" // 6
 }
 
+var tstructScannerOpenWithStopTsArgs = thrift.NewTStruct("scannerOpenWithStopTs_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("startRow", thrift.STRING, 2),
+	thrift.NewTField("stopRow", thrift.STRING, 3),
+	thrift.NewTField("columns", thrift.LIST, 4),
+	thrift.NewTField("timestamp", thrift.I64, 5),
+	thrift.NewTField("attributes", thrift.MAP, 6),
+})
+
+func (*ScannerOpenWithStopTsArgs) GetTStruct() thrift.TStruct { return tstructScannerOpenWithStopTsArgs }
 func NewScannerOpenWithStopTsArgs() *ScannerOpenWithStopTsArgs {
-	output := &ScannerOpenWithStopTsArgs{
-		TStruct: thrift.NewTStruct("scannerOpenWithStopTs_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("startRow", thrift.BINARY, 2),
-			thrift.NewTField("stopRow", thrift.BINARY, 3),
-			thrift.NewTField("columns", thrift.LIST, 4),
-			thrift.NewTField("timestamp", thrift.I64, 5),
-			thrift.NewTField("attributes", thrift.MAP, 6),
-		}),
-	}
+	output := &ScannerOpenWithStopTsArgs{}
 	{
 	}
 	return output
@@ -26717,12 +22816,8 @@ func (p *ScannerOpenWithStopTsArgs) Read(iprot thrift.TProtocol) (err thrift.TPr
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerOpenWithStopTsArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerOpenWithStopTsArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -26730,114 +22825,85 @@ func (p *ScannerOpenWithStopTsArgs) Read(iprot thrift.TProtocol) (err thrift.TPr
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "startRow" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
 			}
-		} else if fieldId == 3 || fieldName == "stopRow" {
+		case 2: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField3(iprot)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else if fieldTypeId == thrift.VOID {
+			} else {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 3: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField3(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 4 || fieldName == "columns" {
+		case 4: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField4(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField4(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField4(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 5 || fieldName == "timestamp" {
+		case 5: //i64
 			if fieldTypeId == thrift.I64 {
-				err = p.ReadField5(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField5(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField5(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 6 || fieldName == "attributes" {
+		case 6: //
 			if fieldTypeId == thrift.MAP {
-				err = p.ReadField6(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField6(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField6(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -26850,58 +22916,47 @@ func (p *ScannerOpenWithStopTsArgs) Read(iprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *ScannerOpenWithStopTsArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1461, err1462 := iprot.ReadBinary()
-	if err1462 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1462)
+func (p *ScannerOpenWithStopTsArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1402, err1403 := iprot.ReadBinary()
+	if err1403 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1403)
 	}
-	p.TableName = Text(v1461)
+	p.TableName = Text(v1402)
 	return err
 }
 
-func (p *ScannerOpenWithStopTsArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *ScannerOpenWithStopTsArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1463, err1464 := iprot.ReadBinary()
-	if err1464 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "startRow", p.ThriftName(), err1464)
+func (p *ScannerOpenWithStopTsArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1404, err1405 := iprot.ReadBinary()
+	if err1405 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "startRow", p.ThriftName(), err1405)
 	}
-	p.StartRow = Text(v1463)
+	p.StartRow = Text(v1404)
 	return err
 }
 
-func (p *ScannerOpenWithStopTsArgs) ReadFieldStartRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *ScannerOpenWithStopTsArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1465, err1466 := iprot.ReadBinary()
-	if err1466 != nil {
-		return thrift.NewTProtocolExceptionReadField(3, "stopRow", p.ThriftName(), err1466)
+func (p *ScannerOpenWithStopTsArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1406, err1407 := iprot.ReadBinary()
+	if err1407 != nil {
+		return thrift.NewTProtocolExceptionReadField(3, "stopRow", p.ThriftName(), err1407)
 	}
-	p.StopRow = Text(v1465)
+	p.StopRow = Text(v1406)
 	return err
 }
 
-func (p *ScannerOpenWithStopTsArgs) ReadFieldStopRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
-}
-
-func (p *ScannerOpenWithStopTsArgs) ReadField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype1472, _size1469, err := iprot.ReadListBegin()
+func (p *ScannerOpenWithStopTsArgs) readField4(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype1413, _size1410, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Columns", "", err)
 	}
-	p.Columns = thrift.NewTList(_etype1472, _size1469)
-	for _i1473 := 0; _i1473 < _size1469; _i1473++ {
-		v1475, err1476 := iprot.ReadBinary()
-		if err1476 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_elem1474", "", err1476)
+	_ = _etype1413
+	p.Columns = make([]Text, _size1410, _size1410)
+	for i := 0; i < _size1410; i++ {
+		v1416, err1417 := iprot.ReadBinary()
+		if err1417 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_elem1415", "", err1417)
 		}
-		_elem1474 := Text(v1475)
-		p.Columns.Push(_elem1474)
+		_elem1415 := Text(v1416)
+		p.Columns[i] = _elem1415
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -26910,41 +22965,34 @@ func (p *ScannerOpenWithStopTsArgs) ReadField4(iprot thrift.TProtocol) (err thri
 	return err
 }
 
-func (p *ScannerOpenWithStopTsArgs) ReadFieldColumns(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField4(iprot)
-}
-
-func (p *ScannerOpenWithStopTsArgs) ReadField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1477, err1478 := iprot.ReadI64()
-	if err1478 != nil {
-		return thrift.NewTProtocolExceptionReadField(5, "timestamp", p.ThriftName(), err1478)
+func (p *ScannerOpenWithStopTsArgs) readField5(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1418, err1419 := iprot.ReadI64()
+	if err1419 != nil {
+		return thrift.NewTProtocolExceptionReadField(5, "timestamp", p.ThriftName(), err1419)
 	}
-	p.Timestamp = v1477
+	p.Timestamp = v1418
 	return err
 }
 
-func (p *ScannerOpenWithStopTsArgs) ReadFieldTimestamp(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField5(iprot)
-}
-
-func (p *ScannerOpenWithStopTsArgs) ReadField6(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_ktype1482, _vtype1483, _size1481, err := iprot.ReadMapBegin()
+func (p *ScannerOpenWithStopTsArgs) readField6(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_ktype1423, _vtype1424, _size1422, err := iprot.ReadMapBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Attributes", "", err)
 	}
-	p.Attributes = thrift.NewTMap(_ktype1482, _vtype1483, _size1481)
-	for _i1485 := 0; _i1485 < _size1481; _i1485++ {
-		v1488, err1489 := iprot.ReadBinary()
-		if err1489 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_key1486", "", err1489)
+	_, _ = _ktype1423, _vtype1424
+	p.Attributes = make(map[string]Text, _size1422)
+	for i := 0; i < _size1422; i++ {
+		v1429, err1430 := iprot.ReadString()
+		if err1430 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_key1427", "", err1430)
 		}
-		_key1486 := Text(v1488)
-		v1490, err1491 := iprot.ReadBinary()
-		if err1491 != nil {
-			return thrift.NewTProtocolExceptionReadField(0, "_val1487", "", err1491)
+		_key1427 := v1429
+		v1431, err1432 := iprot.ReadBinary()
+		if err1432 != nil {
+			return thrift.NewTProtocolExceptionReadField(0, "_val1428", "", err1432)
 		}
-		_val1487 := Text(v1490)
-		p.Attributes.Set(_key1486, _val1487)
+		_val1428 := Text(v1431)
+		p.Attributes[_key1427] = _val1428
 	}
 	err = iprot.ReadMapEnd()
 	if err != nil {
@@ -26953,36 +23001,32 @@ func (p *ScannerOpenWithStopTsArgs) ReadField6(iprot thrift.TProtocol) (err thri
 	return err
 }
 
-func (p *ScannerOpenWithStopTsArgs) ReadFieldAttributes(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField6(iprot)
-}
-
 func (p *ScannerOpenWithStopTsArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteStructBegin("scannerOpenWithStopTs_args")
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField4(oprot)
+	err = p.writeField4(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField5(oprot)
+	err = p.writeField5(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField6(oprot)
+	err = p.writeField6(oprot)
 	if err != nil {
 		return err
 	}
@@ -26997,9 +23041,9 @@ func (p *ScannerOpenWithStopTsArgs) Write(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *ScannerOpenWithStopTsArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopTsArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -27015,13 +23059,9 @@ func (p *ScannerOpenWithStopTsArgs) WriteField1(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *ScannerOpenWithStopTsArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *ScannerOpenWithStopTsArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopTsArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.StartRow != nil {
-		err = oprot.WriteFieldBegin("startRow", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("startRow", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "startRow", p.ThriftName(), err)
 		}
@@ -27037,13 +23077,9 @@ func (p *ScannerOpenWithStopTsArgs) WriteField2(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *ScannerOpenWithStopTsArgs) WriteFieldStartRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *ScannerOpenWithStopTsArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopTsArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.StopRow != nil {
-		err = oprot.WriteFieldBegin("stopRow", thrift.BINARY, 3)
+		err = oprot.WriteFieldBegin("stopRow", thrift.STRING, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "stopRow", p.ThriftName(), err)
 		}
@@ -27059,25 +23095,20 @@ func (p *ScannerOpenWithStopTsArgs) WriteField3(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *ScannerOpenWithStopTsArgs) WriteFieldStopRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
-func (p *ScannerOpenWithStopTsArgs) WriteField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopTsArgs) writeField4(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Columns != nil {
 		err = oprot.WriteFieldBegin("columns", thrift.LIST, 4)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(4, "columns", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.BINARY, p.Columns.Len())
+		err = oprot.WriteListBegin(thrift.STRING, len(p.Columns))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter1492 := range p.Columns.Iter() {
-			Iter1493 := Iter1492.(Text)
-			err = oprot.WriteBinary(Iter1493)
+		for _, Iter1433 := range p.Columns {
+			err = oprot.WriteBinary(Iter1433)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Iter1493", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Iter1433", "", err)
 			}
 		}
 		err = oprot.WriteListEnd()
@@ -27092,11 +23123,7 @@ func (p *ScannerOpenWithStopTsArgs) WriteField4(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *ScannerOpenWithStopTsArgs) WriteFieldColumns(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField4(oprot)
-}
-
-func (p *ScannerOpenWithStopTsArgs) WriteField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopTsArgs) writeField5(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("timestamp", thrift.I64, 5)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(5, "timestamp", p.ThriftName(), err)
@@ -27112,29 +23139,24 @@ func (p *ScannerOpenWithStopTsArgs) WriteField5(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *ScannerOpenWithStopTsArgs) WriteFieldTimestamp(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField5(oprot)
-}
-
-func (p *ScannerOpenWithStopTsArgs) WriteField6(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopTsArgs) writeField6(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Attributes != nil {
 		err = oprot.WriteFieldBegin("attributes", thrift.MAP, 6)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(6, "attributes", p.ThriftName(), err)
 		}
-		err = oprot.WriteMapBegin(thrift.BINARY, thrift.BINARY, p.Attributes.Len())
+		err = oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Attributes))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "map", err)
 		}
-		for Miter1494 := range p.Attributes.Iter() {
-			Kiter1495, Viter1496 := Miter1494.Key().(Text), Miter1494.Value().(Text)
-			err = oprot.WriteBinary(Kiter1495)
+		for Kiter1434, Viter1435 := range p.Attributes {
+			err = oprot.WriteString(Kiter1434)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1495", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Kiter1434", "", err)
 			}
-			err = oprot.WriteBinary(Viter1496)
+			err = oprot.WriteBinary(Viter1435)
 			if err != nil {
-				return thrift.NewTProtocolExceptionWriteField(0, "Viter1496", "", err)
+				return thrift.NewTProtocolExceptionWriteField(0, "Viter1435", "", err)
 			}
 		}
 		err = oprot.WriteMapEnd()
@@ -27149,34 +23171,12 @@ func (p *ScannerOpenWithStopTsArgs) WriteField6(oprot thrift.TProtocol) (err thr
 	return err
 }
 
-func (p *ScannerOpenWithStopTsArgs) WriteFieldAttributes(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField6(oprot)
-}
-
 func (p *ScannerOpenWithStopTsArgs) TStructName() string {
 	return "ScannerOpenWithStopTsArgs"
 }
 
 func (p *ScannerOpenWithStopTsArgs) ThriftName() string {
 	return "scannerOpenWithStopTs_args"
-}
-
-func (p *ScannerOpenWithStopTsArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerOpenWithStopTsArgs(%+v)", *p)
-}
-
-func (p *ScannerOpenWithStopTsArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerOpenWithStopTsArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerOpenWithStopTsArgs) AttributeByFieldId(id int) interface{} {
@@ -27201,9 +23201,9 @@ func (p *ScannerOpenWithStopTsArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *ScannerOpenWithStopTsArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("startRow", thrift.BINARY, 2),
-		thrift.NewTField("stopRow", thrift.BINARY, 3),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("startRow", thrift.STRING, 2),
+		thrift.NewTField("stopRow", thrift.STRING, 3),
 		thrift.NewTField("columns", thrift.LIST, 4),
 		thrift.NewTField("timestamp", thrift.I64, 5),
 		thrift.NewTField("attributes", thrift.MAP, 6),
@@ -27216,18 +23216,20 @@ func (p *ScannerOpenWithStopTsArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type ScannerOpenWithStopTsResult struct {
-	thrift.TStruct
 	Success ScannerID "success" // 0
 	Io      *IOError  "io"      // 1
 }
 
+var tstructScannerOpenWithStopTsResult = thrift.NewTStruct("scannerOpenWithStopTs_result", []thrift.TField{
+	thrift.NewTField("success", thrift.I32, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*ScannerOpenWithStopTsResult) GetTStruct() thrift.TStruct {
+	return tstructScannerOpenWithStopTsResult
+}
 func NewScannerOpenWithStopTsResult() *ScannerOpenWithStopTsResult {
-	output := &ScannerOpenWithStopTsResult{
-		TStruct: thrift.NewTStruct("scannerOpenWithStopTs_result", []thrift.TField{
-			thrift.NewTField("success", thrift.I32, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &ScannerOpenWithStopTsResult{}
 	{
 	}
 	return output
@@ -27241,12 +23243,8 @@ func (p *ScannerOpenWithStopTsResult) Read(iprot thrift.TProtocol) (err thrift.T
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerOpenWithStopTsResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerOpenWithStopTsResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -27254,46 +23252,37 @@ func (p *ScannerOpenWithStopTsResult) Read(iprot thrift.TProtocol) (err thrift.T
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //ScannerID
 			if fieldTypeId == thrift.I32 {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -27306,30 +23295,22 @@ func (p *ScannerOpenWithStopTsResult) Read(iprot thrift.TProtocol) (err thrift.T
 	return err
 }
 
-func (p *ScannerOpenWithStopTsResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1497, err1498 := iprot.ReadI32()
-	if err1498 != nil {
-		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err1498)
+func (p *ScannerOpenWithStopTsResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1436, err1437 := iprot.ReadI32()
+	if err1437 != nil {
+		return thrift.NewTProtocolExceptionReadField(0, "success", p.ThriftName(), err1437)
 	}
-	p.Success = ScannerID(v1497)
+	p.Success = ScannerID(v1436)
 	return err
 }
 
-func (p *ScannerOpenWithStopTsResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *ScannerOpenWithStopTsResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopTsResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1501 := p.Io.Read(iprot)
-	if err1501 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1501)
+	err1440 := p.Io.Read(iprot)
+	if err1440 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1440)
 	}
 	return err
-}
-
-func (p *ScannerOpenWithStopTsResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *ScannerOpenWithStopTsResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -27339,11 +23320,11 @@ func (p *ScannerOpenWithStopTsResult) Write(oprot thrift.TProtocol) (err thrift.
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -27358,7 +23339,7 @@ func (p *ScannerOpenWithStopTsResult) Write(oprot thrift.TProtocol) (err thrift.
 	return err
 }
 
-func (p *ScannerOpenWithStopTsResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopTsResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("success", thrift.I32, 0)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
@@ -27374,11 +23355,7 @@ func (p *ScannerOpenWithStopTsResult) WriteField0(oprot thrift.TProtocol) (err t
 	return err
 }
 
-func (p *ScannerOpenWithStopTsResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *ScannerOpenWithStopTsResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerOpenWithStopTsResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -27396,34 +23373,12 @@ func (p *ScannerOpenWithStopTsResult) WriteField1(oprot thrift.TProtocol) (err t
 	return err
 }
 
-func (p *ScannerOpenWithStopTsResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *ScannerOpenWithStopTsResult) TStructName() string {
 	return "ScannerOpenWithStopTsResult"
 }
 
 func (p *ScannerOpenWithStopTsResult) ThriftName() string {
 	return "scannerOpenWithStopTs_result"
-}
-
-func (p *ScannerOpenWithStopTsResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerOpenWithStopTsResult(%+v)", *p)
-}
-
-func (p *ScannerOpenWithStopTsResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerOpenWithStopTsResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerOpenWithStopTsResult) AttributeByFieldId(id int) interface{} {
@@ -27450,16 +23405,16 @@ func (p *ScannerOpenWithStopTsResult) TStructFields() thrift.TFieldContainer {
  *  - Id: id of a scanner returned by scannerOpen
  */
 type ScannerGetArgs struct {
-	thrift.TStruct
 	Id ScannerID "id" // 1
 }
 
+var tstructScannerGetArgs = thrift.NewTStruct("scannerGet_args", []thrift.TField{
+	thrift.NewTField("id", thrift.I32, 1),
+})
+
+func (*ScannerGetArgs) GetTStruct() thrift.TStruct { return tstructScannerGetArgs }
 func NewScannerGetArgs() *ScannerGetArgs {
-	output := &ScannerGetArgs{
-		TStruct: thrift.NewTStruct("scannerGet_args", []thrift.TField{
-			thrift.NewTField("id", thrift.I32, 1),
-		}),
-	}
+	output := &ScannerGetArgs{}
 	{
 	}
 	return output
@@ -27473,12 +23428,8 @@ func (p *ScannerGetArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcep
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerGetArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerGetArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -27486,29 +23437,25 @@ func (p *ScannerGetArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcep
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "id" {
+		switch fieldId {
+		case 1: //ScannerID
 			if fieldTypeId == thrift.I32 {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -27521,17 +23468,13 @@ func (p *ScannerGetArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExcep
 	return err
 }
 
-func (p *ScannerGetArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1502, err1503 := iprot.ReadI32()
-	if err1503 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "id", p.ThriftName(), err1503)
+func (p *ScannerGetArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1441, err1442 := iprot.ReadI32()
+	if err1442 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "id", p.ThriftName(), err1442)
 	}
-	p.Id = ScannerID(v1502)
+	p.Id = ScannerID(v1441)
 	return err
-}
-
-func (p *ScannerGetArgs) ReadFieldId(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *ScannerGetArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -27539,7 +23482,7 @@ func (p *ScannerGetArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExce
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
@@ -27554,7 +23497,7 @@ func (p *ScannerGetArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolExce
 	return err
 }
 
-func (p *ScannerGetArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerGetArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("id", thrift.I32, 1)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(1, "id", p.ThriftName(), err)
@@ -27570,34 +23513,12 @@ func (p *ScannerGetArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *ScannerGetArgs) WriteFieldId(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *ScannerGetArgs) TStructName() string {
 	return "ScannerGetArgs"
 }
 
 func (p *ScannerGetArgs) ThriftName() string {
 	return "scannerGet_args"
-}
-
-func (p *ScannerGetArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerGetArgs(%+v)", *p)
-}
-
-func (p *ScannerGetArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerGetArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerGetArgs) AttributeByFieldId(id int) interface{} {
@@ -27623,20 +23544,20 @@ func (p *ScannerGetArgs) TStructFields() thrift.TFieldContainer {
  *  - Ia
  */
 type ScannerGetResult struct {
-	thrift.TStruct
-	Success thrift.TList     "success" // 0
+	Success []*TRowResult    "success" // 0
 	Io      *IOError         "io"      // 1
 	Ia      *IllegalArgument "ia"      // 2
 }
 
+var tstructScannerGetResult = thrift.NewTStruct("scannerGet_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+	thrift.NewTField("ia", thrift.STRUCT, 2),
+})
+
+func (*ScannerGetResult) GetTStruct() thrift.TStruct { return tstructScannerGetResult }
 func NewScannerGetResult() *ScannerGetResult {
-	output := &ScannerGetResult{
-		TStruct: thrift.NewTStruct("scannerGet_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-			thrift.NewTField("ia", thrift.STRUCT, 2),
-		}),
-	}
+	output := &ScannerGetResult{}
 	{
 	}
 	return output
@@ -27650,12 +23571,8 @@ func (p *ScannerGetResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerGetResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerGetResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -27663,63 +23580,49 @@ func (p *ScannerGetResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 2 || fieldName == "ia" {
+		case 2: //IllegalArgument
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -27732,19 +23635,20 @@ func (p *ScannerGetResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *ScannerGetResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype1509, _size1506, err := iprot.ReadListBegin()
+func (p *ScannerGetResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype1448, _size1445, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype1509, _size1506)
-	for _i1510 := 0; _i1510 < _size1506; _i1510++ {
-		_elem1511 := NewTRowResult()
-		err1514 := _elem1511.Read(iprot)
-		if err1514 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem1511TRowResult", err1514)
+	_ = _etype1448
+	p.Success = make([]*TRowResult, _size1445, _size1445)
+	for i := 0; i < _size1445; i++ {
+		_elem1450 := NewTRowResult()
+		err1453 := _elem1450.Read(iprot)
+		if err1453 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem1450TRowResult", err1453)
 		}
-		p.Success.Push(_elem1511)
+		p.Success[i] = _elem1450
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -27753,34 +23657,22 @@ func (p *ScannerGetResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProto
 	return err
 }
 
-func (p *ScannerGetResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *ScannerGetResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerGetResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1517 := p.Io.Read(iprot)
-	if err1517 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1517)
+	err1456 := p.Io.Read(iprot)
+	if err1456 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1456)
 	}
 	return err
 }
 
-func (p *ScannerGetResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *ScannerGetResult) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerGetResult) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Ia = NewIllegalArgument()
-	err1520 := p.Ia.Read(iprot)
-	if err1520 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err1520)
+	err1459 := p.Ia.Read(iprot)
+	if err1459 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err1459)
 	}
 	return err
-}
-
-func (p *ScannerGetResult) ReadFieldIa(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
 }
 
 func (p *ScannerGetResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -27790,15 +23682,15 @@ func (p *ScannerGetResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	}
 	switch {
 	case p.Ia != nil:
-		if err = p.WriteField2(oprot); err != nil {
+		if err = p.writeField2(oprot); err != nil {
 			return err
 		}
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -27813,19 +23705,18 @@ func (p *ScannerGetResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *ScannerGetResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerGetResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter1521 := range p.Success.Iter() {
-			Iter1522 := Iter1521.(*TRowResult)
-			err = Iter1522.Write(oprot)
+		for _, Iter1460 := range p.Success {
+			err = Iter1460.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TRowResult", err)
 			}
@@ -27842,11 +23733,7 @@ func (p *ScannerGetResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *ScannerGetResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *ScannerGetResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerGetResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -27864,11 +23751,7 @@ func (p *ScannerGetResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *ScannerGetResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *ScannerGetResult) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerGetResult) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Ia != nil {
 		err = oprot.WriteFieldBegin("ia", thrift.STRUCT, 2)
 		if err != nil {
@@ -27886,34 +23769,12 @@ func (p *ScannerGetResult) WriteField2(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *ScannerGetResult) WriteFieldIa(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
 func (p *ScannerGetResult) TStructName() string {
 	return "ScannerGetResult"
 }
 
 func (p *ScannerGetResult) ThriftName() string {
 	return "scannerGet_result"
-}
-
-func (p *ScannerGetResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerGetResult(%+v)", *p)
-}
-
-func (p *ScannerGetResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerGetResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerGetResult) AttributeByFieldId(id int) interface{} {
@@ -27944,18 +23805,18 @@ func (p *ScannerGetResult) TStructFields() thrift.TFieldContainer {
  *  - NbRows: number of results to return
  */
 type ScannerGetListArgs struct {
-	thrift.TStruct
 	Id     ScannerID "id"     // 1
 	NbRows int32     "nbRows" // 2
 }
 
+var tstructScannerGetListArgs = thrift.NewTStruct("scannerGetList_args", []thrift.TField{
+	thrift.NewTField("id", thrift.I32, 1),
+	thrift.NewTField("nbRows", thrift.I32, 2),
+})
+
+func (*ScannerGetListArgs) GetTStruct() thrift.TStruct { return tstructScannerGetListArgs }
 func NewScannerGetListArgs() *ScannerGetListArgs {
-	output := &ScannerGetListArgs{
-		TStruct: thrift.NewTStruct("scannerGetList_args", []thrift.TField{
-			thrift.NewTField("id", thrift.I32, 1),
-			thrift.NewTField("nbRows", thrift.I32, 2),
-		}),
-	}
+	output := &ScannerGetListArgs{}
 	{
 	}
 	return output
@@ -27969,12 +23830,8 @@ func (p *ScannerGetListArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerGetListArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerGetListArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -27982,46 +23839,37 @@ func (p *ScannerGetListArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "id" {
+		switch fieldId {
+		case 1: //ScannerID
 			if fieldTypeId == thrift.I32 {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "nbRows" {
-			if fieldTypeId == thrift.I32 {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //i32
+			if fieldTypeId == thrift.I32 {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -28034,30 +23882,22 @@ func (p *ScannerGetListArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *ScannerGetListArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1523, err1524 := iprot.ReadI32()
-	if err1524 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "id", p.ThriftName(), err1524)
+func (p *ScannerGetListArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1461, err1462 := iprot.ReadI32()
+	if err1462 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "id", p.ThriftName(), err1462)
 	}
-	p.Id = ScannerID(v1523)
+	p.Id = ScannerID(v1461)
 	return err
 }
 
-func (p *ScannerGetListArgs) ReadFieldId(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *ScannerGetListArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1525, err1526 := iprot.ReadI32()
-	if err1526 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "nbRows", p.ThriftName(), err1526)
+func (p *ScannerGetListArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1463, err1464 := iprot.ReadI32()
+	if err1464 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "nbRows", p.ThriftName(), err1464)
 	}
-	p.NbRows = v1525
+	p.NbRows = v1463
 	return err
-}
-
-func (p *ScannerGetListArgs) ReadFieldNbRows(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
 }
 
 func (p *ScannerGetListArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -28065,11 +23905,11 @@ func (p *ScannerGetListArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
@@ -28084,7 +23924,7 @@ func (p *ScannerGetListArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *ScannerGetListArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerGetListArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("id", thrift.I32, 1)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(1, "id", p.ThriftName(), err)
@@ -28100,11 +23940,7 @@ func (p *ScannerGetListArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *ScannerGetListArgs) WriteFieldId(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *ScannerGetListArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerGetListArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("nbRows", thrift.I32, 2)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(2, "nbRows", p.ThriftName(), err)
@@ -28120,34 +23956,12 @@ func (p *ScannerGetListArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *ScannerGetListArgs) WriteFieldNbRows(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
 func (p *ScannerGetListArgs) TStructName() string {
 	return "ScannerGetListArgs"
 }
 
 func (p *ScannerGetListArgs) ThriftName() string {
 	return "scannerGetList_args"
-}
-
-func (p *ScannerGetListArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerGetListArgs(%+v)", *p)
-}
-
-func (p *ScannerGetListArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerGetListArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerGetListArgs) AttributeByFieldId(id int) interface{} {
@@ -28176,20 +23990,20 @@ func (p *ScannerGetListArgs) TStructFields() thrift.TFieldContainer {
  *  - Ia
  */
 type ScannerGetListResult struct {
-	thrift.TStruct
-	Success thrift.TList     "success" // 0
+	Success []*TRowResult    "success" // 0
 	Io      *IOError         "io"      // 1
 	Ia      *IllegalArgument "ia"      // 2
 }
 
+var tstructScannerGetListResult = thrift.NewTStruct("scannerGetList_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+	thrift.NewTField("ia", thrift.STRUCT, 2),
+})
+
+func (*ScannerGetListResult) GetTStruct() thrift.TStruct { return tstructScannerGetListResult }
 func NewScannerGetListResult() *ScannerGetListResult {
-	output := &ScannerGetListResult{
-		TStruct: thrift.NewTStruct("scannerGetList_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-			thrift.NewTField("ia", thrift.STRUCT, 2),
-		}),
-	}
+	output := &ScannerGetListResult{}
 	{
 	}
 	return output
@@ -28203,12 +24017,8 @@ func (p *ScannerGetListResult) Read(iprot thrift.TProtocol) (err thrift.TProtoco
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerGetListResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerGetListResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -28216,63 +24026,49 @@ func (p *ScannerGetListResult) Read(iprot thrift.TProtocol) (err thrift.TProtoco
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 2 || fieldName == "ia" {
+		case 2: //IllegalArgument
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -28285,19 +24081,20 @@ func (p *ScannerGetListResult) Read(iprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *ScannerGetListResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype1532, _size1529, err := iprot.ReadListBegin()
+func (p *ScannerGetListResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype1470, _size1467, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype1532, _size1529)
-	for _i1533 := 0; _i1533 < _size1529; _i1533++ {
-		_elem1534 := NewTRowResult()
-		err1537 := _elem1534.Read(iprot)
-		if err1537 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem1534TRowResult", err1537)
+	_ = _etype1470
+	p.Success = make([]*TRowResult, _size1467, _size1467)
+	for i := 0; i < _size1467; i++ {
+		_elem1472 := NewTRowResult()
+		err1475 := _elem1472.Read(iprot)
+		if err1475 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem1472TRowResult", err1475)
 		}
-		p.Success.Push(_elem1534)
+		p.Success[i] = _elem1472
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -28306,34 +24103,22 @@ func (p *ScannerGetListResult) ReadField0(iprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *ScannerGetListResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *ScannerGetListResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerGetListResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1540 := p.Io.Read(iprot)
-	if err1540 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1540)
+	err1478 := p.Io.Read(iprot)
+	if err1478 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1478)
 	}
 	return err
 }
 
-func (p *ScannerGetListResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *ScannerGetListResult) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerGetListResult) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Ia = NewIllegalArgument()
-	err1543 := p.Ia.Read(iprot)
-	if err1543 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err1543)
+	err1481 := p.Ia.Read(iprot)
+	if err1481 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err1481)
 	}
 	return err
-}
-
-func (p *ScannerGetListResult) ReadFieldIa(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
 }
 
 func (p *ScannerGetListResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -28343,15 +24128,15 @@ func (p *ScannerGetListResult) Write(oprot thrift.TProtocol) (err thrift.TProtoc
 	}
 	switch {
 	case p.Ia != nil:
-		if err = p.WriteField2(oprot); err != nil {
+		if err = p.writeField2(oprot); err != nil {
 			return err
 		}
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -28366,19 +24151,18 @@ func (p *ScannerGetListResult) Write(oprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *ScannerGetListResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerGetListResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter1544 := range p.Success.Iter() {
-			Iter1545 := Iter1544.(*TRowResult)
-			err = Iter1545.Write(oprot)
+		for _, Iter1482 := range p.Success {
+			err = Iter1482.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TRowResult", err)
 			}
@@ -28395,11 +24179,7 @@ func (p *ScannerGetListResult) WriteField0(oprot thrift.TProtocol) (err thrift.T
 	return err
 }
 
-func (p *ScannerGetListResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *ScannerGetListResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerGetListResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -28417,11 +24197,7 @@ func (p *ScannerGetListResult) WriteField1(oprot thrift.TProtocol) (err thrift.T
 	return err
 }
 
-func (p *ScannerGetListResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *ScannerGetListResult) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerGetListResult) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Ia != nil {
 		err = oprot.WriteFieldBegin("ia", thrift.STRUCT, 2)
 		if err != nil {
@@ -28439,34 +24215,12 @@ func (p *ScannerGetListResult) WriteField2(oprot thrift.TProtocol) (err thrift.T
 	return err
 }
 
-func (p *ScannerGetListResult) WriteFieldIa(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
 func (p *ScannerGetListResult) TStructName() string {
 	return "ScannerGetListResult"
 }
 
 func (p *ScannerGetListResult) ThriftName() string {
 	return "scannerGetList_result"
-}
-
-func (p *ScannerGetListResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerGetListResult(%+v)", *p)
-}
-
-func (p *ScannerGetListResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerGetListResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerGetListResult) AttributeByFieldId(id int) interface{} {
@@ -28496,16 +24250,16 @@ func (p *ScannerGetListResult) TStructFields() thrift.TFieldContainer {
  *  - Id: id of a scanner returned by scannerOpen
  */
 type ScannerCloseArgs struct {
-	thrift.TStruct
 	Id ScannerID "id" // 1
 }
 
+var tstructScannerCloseArgs = thrift.NewTStruct("scannerClose_args", []thrift.TField{
+	thrift.NewTField("id", thrift.I32, 1),
+})
+
+func (*ScannerCloseArgs) GetTStruct() thrift.TStruct { return tstructScannerCloseArgs }
 func NewScannerCloseArgs() *ScannerCloseArgs {
-	output := &ScannerCloseArgs{
-		TStruct: thrift.NewTStruct("scannerClose_args", []thrift.TField{
-			thrift.NewTField("id", thrift.I32, 1),
-		}),
-	}
+	output := &ScannerCloseArgs{}
 	{
 	}
 	return output
@@ -28519,12 +24273,8 @@ func (p *ScannerCloseArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerCloseArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerCloseArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -28532,29 +24282,25 @@ func (p *ScannerCloseArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "id" {
+		switch fieldId {
+		case 1: //ScannerID
 			if fieldTypeId == thrift.I32 {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -28567,17 +24313,13 @@ func (p *ScannerCloseArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolExc
 	return err
 }
 
-func (p *ScannerCloseArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1546, err1547 := iprot.ReadI32()
-	if err1547 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "id", p.ThriftName(), err1547)
+func (p *ScannerCloseArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1483, err1484 := iprot.ReadI32()
+	if err1484 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "id", p.ThriftName(), err1484)
 	}
-	p.Id = ScannerID(v1546)
+	p.Id = ScannerID(v1483)
 	return err
-}
-
-func (p *ScannerCloseArgs) ReadFieldId(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *ScannerCloseArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -28585,7 +24327,7 @@ func (p *ScannerCloseArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
@@ -28600,7 +24342,7 @@ func (p *ScannerCloseArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *ScannerCloseArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerCloseArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	err = oprot.WriteFieldBegin("id", thrift.I32, 1)
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteField(1, "id", p.ThriftName(), err)
@@ -28616,34 +24358,12 @@ func (p *ScannerCloseArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProt
 	return err
 }
 
-func (p *ScannerCloseArgs) WriteFieldId(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *ScannerCloseArgs) TStructName() string {
 	return "ScannerCloseArgs"
 }
 
 func (p *ScannerCloseArgs) ThriftName() string {
 	return "scannerClose_args"
-}
-
-func (p *ScannerCloseArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerCloseArgs(%+v)", *p)
-}
-
-func (p *ScannerCloseArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerCloseArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerCloseArgs) AttributeByFieldId(id int) interface{} {
@@ -28668,18 +24388,18 @@ func (p *ScannerCloseArgs) TStructFields() thrift.TFieldContainer {
  *  - Ia
  */
 type ScannerCloseResult struct {
-	thrift.TStruct
 	Io *IOError         "io" // 1
 	Ia *IllegalArgument "ia" // 2
 }
 
+var tstructScannerCloseResult = thrift.NewTStruct("scannerClose_result", []thrift.TField{
+	thrift.NewTField("io", thrift.STRUCT, 1),
+	thrift.NewTField("ia", thrift.STRUCT, 2),
+})
+
+func (*ScannerCloseResult) GetTStruct() thrift.TStruct { return tstructScannerCloseResult }
 func NewScannerCloseResult() *ScannerCloseResult {
-	output := &ScannerCloseResult{
-		TStruct: thrift.NewTStruct("scannerClose_result", []thrift.TField{
-			thrift.NewTField("io", thrift.STRUCT, 1),
-			thrift.NewTField("ia", thrift.STRUCT, 2),
-		}),
-	}
+	output := &ScannerCloseResult{}
 	{
 	}
 	return output
@@ -28693,12 +24413,8 @@ func (p *ScannerCloseResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructScannerCloseResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructScannerCloseResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -28706,46 +24422,37 @@ func (p *ScannerCloseResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "io" {
+		switch fieldId {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "ia" {
-			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 2: //IllegalArgument
+			if fieldTypeId == thrift.STRUCT {
+				err = p.readField2(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField2(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -28758,30 +24465,22 @@ func (p *ScannerCloseResult) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *ScannerCloseResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerCloseResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1550 := p.Io.Read(iprot)
-	if err1550 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1550)
+	err1487 := p.Io.Read(iprot)
+	if err1487 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1487)
 	}
 	return err
 }
 
-func (p *ScannerCloseResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *ScannerCloseResult) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerCloseResult) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Ia = NewIllegalArgument()
-	err1553 := p.Ia.Read(iprot)
-	if err1553 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err1553)
+	err1490 := p.Ia.Read(iprot)
+	if err1490 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IaIllegalArgument", err1490)
 	}
 	return err
-}
-
-func (p *ScannerCloseResult) ReadFieldIa(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
 }
 
 func (p *ScannerCloseResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -28791,11 +24490,11 @@ func (p *ScannerCloseResult) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	}
 	switch {
 	case p.Ia != nil:
-		if err = p.WriteField2(oprot); err != nil {
+		if err = p.writeField2(oprot); err != nil {
 			return err
 		}
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	}
@@ -28810,7 +24509,7 @@ func (p *ScannerCloseResult) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *ScannerCloseResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerCloseResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -28828,11 +24527,7 @@ func (p *ScannerCloseResult) WriteField1(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *ScannerCloseResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *ScannerCloseResult) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *ScannerCloseResult) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Ia != nil {
 		err = oprot.WriteFieldBegin("ia", thrift.STRUCT, 2)
 		if err != nil {
@@ -28850,34 +24545,12 @@ func (p *ScannerCloseResult) WriteField2(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *ScannerCloseResult) WriteFieldIa(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
 func (p *ScannerCloseResult) TStructName() string {
 	return "ScannerCloseResult"
 }
 
 func (p *ScannerCloseResult) ThriftName() string {
 	return "scannerClose_result"
-}
-
-func (p *ScannerCloseResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("ScannerCloseResult(%+v)", *p)
-}
-
-func (p *ScannerCloseResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*ScannerCloseResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *ScannerCloseResult) AttributeByFieldId(id int) interface{} {
@@ -28906,20 +24579,20 @@ func (p *ScannerCloseResult) TStructFields() thrift.TFieldContainer {
  *  - Family: column name
  */
 type GetRowOrBeforeArgs struct {
-	thrift.TStruct
 	TableName Text "tableName" // 1
 	Row       Text "row"       // 2
 	Family    Text "family"    // 3
 }
 
+var tstructGetRowOrBeforeArgs = thrift.NewTStruct("getRowOrBefore_args", []thrift.TField{
+	thrift.NewTField("tableName", thrift.STRING, 1),
+	thrift.NewTField("row", thrift.STRING, 2),
+	thrift.NewTField("family", thrift.STRING, 3),
+})
+
+func (*GetRowOrBeforeArgs) GetTStruct() thrift.TStruct { return tstructGetRowOrBeforeArgs }
 func NewGetRowOrBeforeArgs() *GetRowOrBeforeArgs {
-	output := &GetRowOrBeforeArgs{
-		TStruct: thrift.NewTStruct("getRowOrBefore_args", []thrift.TField{
-			thrift.NewTField("tableName", thrift.BINARY, 1),
-			thrift.NewTField("row", thrift.BINARY, 2),
-			thrift.NewTField("family", thrift.BINARY, 3),
-		}),
-	}
+	output := &GetRowOrBeforeArgs{}
 	{
 	}
 	return output
@@ -28933,12 +24606,8 @@ func (p *GetRowOrBeforeArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowOrBeforeArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowOrBeforeArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -28946,63 +24615,49 @@ func (p *GetRowOrBeforeArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "tableName" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 2 || fieldName == "row" {
-			if fieldTypeId == thrift.STRING {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else {
-				err = p.ReadField2(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
 			}
-		} else if fieldId == 3 || fieldName == "family" {
+		case 2: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField3(iprot)
+				err = p.readField2(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
-			} else if fieldTypeId == thrift.VOID {
+			} else {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 3: //Text
+			if fieldTypeId == thrift.STRING {
+				err = p.readField3(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField3(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -29015,43 +24670,31 @@ func (p *GetRowOrBeforeArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *GetRowOrBeforeArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1554, err1555 := iprot.ReadBinary()
-	if err1555 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1555)
+func (p *GetRowOrBeforeArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1491, err1492 := iprot.ReadBinary()
+	if err1492 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "tableName", p.ThriftName(), err1492)
 	}
-	p.TableName = Text(v1554)
+	p.TableName = Text(v1491)
 	return err
 }
 
-func (p *GetRowOrBeforeArgs) ReadFieldTableName(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
-}
-
-func (p *GetRowOrBeforeArgs) ReadField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1556, err1557 := iprot.ReadBinary()
-	if err1557 != nil {
-		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err1557)
+func (p *GetRowOrBeforeArgs) readField2(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1493, err1494 := iprot.ReadBinary()
+	if err1494 != nil {
+		return thrift.NewTProtocolExceptionReadField(2, "row", p.ThriftName(), err1494)
 	}
-	p.Row = Text(v1556)
+	p.Row = Text(v1493)
 	return err
 }
 
-func (p *GetRowOrBeforeArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField2(iprot)
-}
-
-func (p *GetRowOrBeforeArgs) ReadField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1558, err1559 := iprot.ReadBinary()
-	if err1559 != nil {
-		return thrift.NewTProtocolExceptionReadField(3, "family", p.ThriftName(), err1559)
+func (p *GetRowOrBeforeArgs) readField3(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1495, err1496 := iprot.ReadBinary()
+	if err1496 != nil {
+		return thrift.NewTProtocolExceptionReadField(3, "family", p.ThriftName(), err1496)
 	}
-	p.Family = Text(v1558)
+	p.Family = Text(v1495)
 	return err
-}
-
-func (p *GetRowOrBeforeArgs) ReadFieldFamily(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField3(iprot)
 }
 
 func (p *GetRowOrBeforeArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -29059,15 +24702,15 @@ func (p *GetRowOrBeforeArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField2(oprot)
+	err = p.writeField2(oprot)
 	if err != nil {
 		return err
 	}
-	err = p.WriteField3(oprot)
+	err = p.writeField3(oprot)
 	if err != nil {
 		return err
 	}
@@ -29082,9 +24725,9 @@ func (p *GetRowOrBeforeArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetRowOrBeforeArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowOrBeforeArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.TableName != nil {
-		err = oprot.WriteFieldBegin("tableName", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("tableName", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "tableName", p.ThriftName(), err)
 		}
@@ -29100,13 +24743,9 @@ func (p *GetRowOrBeforeArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *GetRowOrBeforeArgs) WriteFieldTableName(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
-func (p *GetRowOrBeforeArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowOrBeforeArgs) writeField2(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 2)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 2)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(2, "row", p.ThriftName(), err)
 		}
@@ -29122,13 +24761,9 @@ func (p *GetRowOrBeforeArgs) WriteField2(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *GetRowOrBeforeArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField2(oprot)
-}
-
-func (p *GetRowOrBeforeArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowOrBeforeArgs) writeField3(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Family != nil {
-		err = oprot.WriteFieldBegin("family", thrift.BINARY, 3)
+		err = oprot.WriteFieldBegin("family", thrift.STRING, 3)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(3, "family", p.ThriftName(), err)
 		}
@@ -29144,34 +24779,12 @@ func (p *GetRowOrBeforeArgs) WriteField3(oprot thrift.TProtocol) (err thrift.TPr
 	return err
 }
 
-func (p *GetRowOrBeforeArgs) WriteFieldFamily(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField3(oprot)
-}
-
 func (p *GetRowOrBeforeArgs) TStructName() string {
 	return "GetRowOrBeforeArgs"
 }
 
 func (p *GetRowOrBeforeArgs) ThriftName() string {
 	return "getRowOrBefore_args"
-}
-
-func (p *GetRowOrBeforeArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowOrBeforeArgs(%+v)", *p)
-}
-
-func (p *GetRowOrBeforeArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowOrBeforeArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowOrBeforeArgs) AttributeByFieldId(id int) interface{} {
@@ -29190,9 +24803,9 @@ func (p *GetRowOrBeforeArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *GetRowOrBeforeArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("tableName", thrift.BINARY, 1),
-		thrift.NewTField("row", thrift.BINARY, 2),
-		thrift.NewTField("family", thrift.BINARY, 3),
+		thrift.NewTField("tableName", thrift.STRING, 1),
+		thrift.NewTField("row", thrift.STRING, 2),
+		thrift.NewTField("family", thrift.STRING, 3),
 	})
 }
 
@@ -29202,18 +24815,18 @@ func (p *GetRowOrBeforeArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetRowOrBeforeResult struct {
-	thrift.TStruct
-	Success thrift.TList "success" // 0
-	Io      *IOError     "io"      // 1
+	Success []*TCell "success" // 0
+	Io      *IOError "io"      // 1
 }
 
+var tstructGetRowOrBeforeResult = thrift.NewTStruct("getRowOrBefore_result", []thrift.TField{
+	thrift.NewTField("success", thrift.LIST, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetRowOrBeforeResult) GetTStruct() thrift.TStruct { return tstructGetRowOrBeforeResult }
 func NewGetRowOrBeforeResult() *GetRowOrBeforeResult {
-	output := &GetRowOrBeforeResult{
-		TStruct: thrift.NewTStruct("getRowOrBefore_result", []thrift.TField{
-			thrift.NewTField("success", thrift.LIST, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetRowOrBeforeResult{}
 	{
 	}
 	return output
@@ -29227,12 +24840,8 @@ func (p *GetRowOrBeforeResult) Read(iprot thrift.TProtocol) (err thrift.TProtoco
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRowOrBeforeResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRowOrBeforeResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -29240,46 +24849,37 @@ func (p *GetRowOrBeforeResult) Read(iprot thrift.TProtocol) (err thrift.TProtoco
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //
 			if fieldTypeId == thrift.LIST {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else if fieldId == 1 || fieldName == "io" {
+		case 1: //IOError
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -29292,19 +24892,20 @@ func (p *GetRowOrBeforeResult) Read(iprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *GetRowOrBeforeResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	_etype1565, _size1562, err := iprot.ReadListBegin()
+func (p *GetRowOrBeforeResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	_etype1502, _size1499, err := iprot.ReadListBegin()
 	if err != nil {
 		return thrift.NewTProtocolExceptionReadField(-1, "p.Success", "", err)
 	}
-	p.Success = thrift.NewTList(_etype1565, _size1562)
-	for _i1566 := 0; _i1566 < _size1562; _i1566++ {
-		_elem1567 := NewTCell()
-		err1570 := _elem1567.Read(iprot)
-		if err1570 != nil {
-			return thrift.NewTProtocolExceptionReadStruct("_elem1567TCell", err1570)
+	_ = _etype1502
+	p.Success = make([]*TCell, _size1499, _size1499)
+	for i := 0; i < _size1499; i++ {
+		_elem1504 := NewTCell()
+		err1507 := _elem1504.Read(iprot)
+		if err1507 != nil {
+			return thrift.NewTProtocolExceptionReadStruct("_elem1504TCell", err1507)
 		}
-		p.Success.Push(_elem1567)
+		p.Success[i] = _elem1504
 	}
 	err = iprot.ReadListEnd()
 	if err != nil {
@@ -29313,21 +24914,13 @@ func (p *GetRowOrBeforeResult) ReadField0(iprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *GetRowOrBeforeResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetRowOrBeforeResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowOrBeforeResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1573 := p.Io.Read(iprot)
-	if err1573 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1573)
+	err1510 := p.Io.Read(iprot)
+	if err1510 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1510)
 	}
 	return err
-}
-
-func (p *GetRowOrBeforeResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetRowOrBeforeResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -29337,11 +24930,11 @@ func (p *GetRowOrBeforeResult) Write(oprot thrift.TProtocol) (err thrift.TProtoc
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -29356,19 +24949,18 @@ func (p *GetRowOrBeforeResult) Write(oprot thrift.TProtocol) (err thrift.TProtoc
 	return err
 }
 
-func (p *GetRowOrBeforeResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowOrBeforeResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.LIST, 0)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(0, "success", p.ThriftName(), err)
 		}
-		err = oprot.WriteListBegin(thrift.STRUCT, p.Success.Len())
+		err = oprot.WriteListBegin(thrift.STRUCT, len(p.Success))
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(-1, "", "list", err)
 		}
-		for Iter1574 := range p.Success.Iter() {
-			Iter1575 := Iter1574.(*TCell)
-			err = Iter1575.Write(oprot)
+		for _, Iter1511 := range p.Success {
+			err = Iter1511.Write(oprot)
 			if err != nil {
 				return thrift.NewTProtocolExceptionWriteStruct("TCell", err)
 			}
@@ -29385,11 +24977,7 @@ func (p *GetRowOrBeforeResult) WriteField0(oprot thrift.TProtocol) (err thrift.T
 	return err
 }
 
-func (p *GetRowOrBeforeResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetRowOrBeforeResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRowOrBeforeResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -29407,34 +24995,12 @@ func (p *GetRowOrBeforeResult) WriteField1(oprot thrift.TProtocol) (err thrift.T
 	return err
 }
 
-func (p *GetRowOrBeforeResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetRowOrBeforeResult) TStructName() string {
 	return "GetRowOrBeforeResult"
 }
 
 func (p *GetRowOrBeforeResult) ThriftName() string {
 	return "getRowOrBefore_result"
-}
-
-func (p *GetRowOrBeforeResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRowOrBeforeResult(%+v)", *p)
-}
-
-func (p *GetRowOrBeforeResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRowOrBeforeResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRowOrBeforeResult) AttributeByFieldId(id int) interface{} {
@@ -29461,16 +25027,16 @@ func (p *GetRowOrBeforeResult) TStructFields() thrift.TFieldContainer {
  *  - Row: row key
  */
 type GetRegionInfoArgs struct {
-	thrift.TStruct
 	Row Text "row" // 1
 }
 
+var tstructGetRegionInfoArgs = thrift.NewTStruct("getRegionInfo_args", []thrift.TField{
+	thrift.NewTField("row", thrift.STRING, 1),
+})
+
+func (*GetRegionInfoArgs) GetTStruct() thrift.TStruct { return tstructGetRegionInfoArgs }
 func NewGetRegionInfoArgs() *GetRegionInfoArgs {
-	output := &GetRegionInfoArgs{
-		TStruct: thrift.NewTStruct("getRegionInfo_args", []thrift.TField{
-			thrift.NewTField("row", thrift.BINARY, 1),
-		}),
-	}
+	output := &GetRegionInfoArgs{}
 	{
 	}
 	return output
@@ -29484,12 +25050,8 @@ func (p *GetRegionInfoArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRegionInfoArgs.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRegionInfoArgs.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -29497,29 +25059,25 @@ func (p *GetRegionInfoArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 1 || fieldName == "row" {
+		switch fieldId {
+		case 1: //Text
 			if fieldTypeId == thrift.STRING {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField1(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -29532,17 +25090,13 @@ func (p *GetRegionInfoArgs) Read(iprot thrift.TProtocol) (err thrift.TProtocolEx
 	return err
 }
 
-func (p *GetRegionInfoArgs) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
-	v1576, err1577 := iprot.ReadBinary()
-	if err1577 != nil {
-		return thrift.NewTProtocolExceptionReadField(1, "row", p.ThriftName(), err1577)
+func (p *GetRegionInfoArgs) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+	v1512, err1513 := iprot.ReadBinary()
+	if err1513 != nil {
+		return thrift.NewTProtocolExceptionReadField(1, "row", p.ThriftName(), err1513)
 	}
-	p.Row = Text(v1576)
+	p.Row = Text(v1512)
 	return err
-}
-
-func (p *GetRegionInfoArgs) ReadFieldRow(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetRegionInfoArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -29550,7 +25104,7 @@ func (p *GetRegionInfoArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	if err != nil {
 		return thrift.NewTProtocolExceptionWriteStruct(p.ThriftName(), err)
 	}
-	err = p.WriteField1(oprot)
+	err = p.writeField1(oprot)
 	if err != nil {
 		return err
 	}
@@ -29565,9 +25119,9 @@ func (p *GetRegionInfoArgs) Write(oprot thrift.TProtocol) (err thrift.TProtocolE
 	return err
 }
 
-func (p *GetRegionInfoArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRegionInfoArgs) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Row != nil {
-		err = oprot.WriteFieldBegin("row", thrift.BINARY, 1)
+		err = oprot.WriteFieldBegin("row", thrift.STRING, 1)
 		if err != nil {
 			return thrift.NewTProtocolExceptionWriteField(1, "row", p.ThriftName(), err)
 		}
@@ -29583,34 +25137,12 @@ func (p *GetRegionInfoArgs) WriteField1(oprot thrift.TProtocol) (err thrift.TPro
 	return err
 }
 
-func (p *GetRegionInfoArgs) WriteFieldRow(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetRegionInfoArgs) TStructName() string {
 	return "GetRegionInfoArgs"
 }
 
 func (p *GetRegionInfoArgs) ThriftName() string {
 	return "getRegionInfo_args"
-}
-
-func (p *GetRegionInfoArgs) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRegionInfoArgs(%+v)", *p)
-}
-
-func (p *GetRegionInfoArgs) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRegionInfoArgs)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRegionInfoArgs) AttributeByFieldId(id int) interface{} {
@@ -29625,7 +25157,7 @@ func (p *GetRegionInfoArgs) AttributeByFieldId(id int) interface{} {
 
 func (p *GetRegionInfoArgs) TStructFields() thrift.TFieldContainer {
 	return thrift.NewTFieldContainer([]thrift.TField{
-		thrift.NewTField("row", thrift.BINARY, 1),
+		thrift.NewTField("row", thrift.STRING, 1),
 	})
 }
 
@@ -29635,18 +25167,18 @@ func (p *GetRegionInfoArgs) TStructFields() thrift.TFieldContainer {
  *  - Io
  */
 type GetRegionInfoResult struct {
-	thrift.TStruct
 	Success *TRegionInfo "success" // 0
 	Io      *IOError     "io"      // 1
 }
 
+var tstructGetRegionInfoResult = thrift.NewTStruct("getRegionInfo_result", []thrift.TField{
+	thrift.NewTField("success", thrift.STRUCT, 0),
+	thrift.NewTField("io", thrift.STRUCT, 1),
+})
+
+func (*GetRegionInfoResult) GetTStruct() thrift.TStruct { return tstructGetRegionInfoResult }
 func NewGetRegionInfoResult() *GetRegionInfoResult {
-	output := &GetRegionInfoResult{
-		TStruct: thrift.NewTStruct("getRegionInfo_result", []thrift.TField{
-			thrift.NewTField("success", thrift.STRUCT, 0),
-			thrift.NewTField("io", thrift.STRUCT, 1),
-		}),
-	}
+	output := &GetRegionInfoResult{}
 	{
 	}
 	return output
@@ -29660,12 +25192,8 @@ func (p *GetRegionInfoResult) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 	for {
 		fieldName, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
 		if fieldId < 0 {
-			fieldId = int16(p.FieldIdFromFieldName(fieldName))
-		} else if fieldName == "" {
-			fieldName = p.FieldNameFromFieldId(int(fieldId))
-		}
-		if fieldTypeId == thrift.GENERIC {
-			fieldTypeId = p.FieldFromFieldId(int(fieldId)).TypeId()
+			fieldId = int16(tstructGetRegionInfoResult.FieldIdFromFieldName(fieldName))
+			fieldTypeId = tstructGetRegionInfoResult.FieldFromFieldName(fieldName).TypeId()
 		}
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -29673,46 +25201,37 @@ func (p *GetRegionInfoResult) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		if fieldId == 0 || fieldName == "success" {
+		switch fieldId {
+		case 0: //TRegionInfo
 			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
-				err = iprot.Skip(fieldTypeId)
+				err = p.readField0(iprot)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			} else {
-				err = p.ReadField0(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			}
-		} else if fieldId == 1 || fieldName == "io" {
-			if fieldTypeId == thrift.STRUCT {
-				err = p.ReadField1(iprot)
-				if err != nil {
-					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
-				}
-			} else if fieldTypeId == thrift.VOID {
 				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
+			}
+		case 1: //IOError
+			if fieldTypeId == thrift.STRUCT {
+				err = p.readField1(iprot)
+				if err != nil {
+					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
+				}
 			} else {
-				err = p.ReadField1(iprot)
+				err = iprot.Skip(fieldTypeId)
 				if err != nil {
 					return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 				}
 			}
-		} else {
+		default:
 			err = iprot.Skip(fieldTypeId)
 			if err != nil {
 				return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
 			}
-		}
+		} //switch
 		err = iprot.ReadFieldEnd()
 		if err != nil {
 			return thrift.NewTProtocolExceptionReadField(int(fieldId), fieldName, p.ThriftName(), err)
@@ -29725,30 +25244,22 @@ func (p *GetRegionInfoResult) Read(iprot thrift.TProtocol) (err thrift.TProtocol
 	return err
 }
 
-func (p *GetRegionInfoResult) ReadField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRegionInfoResult) readField0(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Success = NewTRegionInfo()
-	err1580 := p.Success.Read(iprot)
-	if err1580 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.SuccessTRegionInfo", err1580)
+	err1516 := p.Success.Read(iprot)
+	if err1516 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.SuccessTRegionInfo", err1516)
 	}
 	return err
 }
 
-func (p *GetRegionInfoResult) ReadFieldSuccess(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField0(iprot)
-}
-
-func (p *GetRegionInfoResult) ReadField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRegionInfoResult) readField1(iprot thrift.TProtocol) (err thrift.TProtocolException) {
 	p.Io = NewIOError()
-	err1583 := p.Io.Read(iprot)
-	if err1583 != nil {
-		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1583)
+	err1519 := p.Io.Read(iprot)
+	if err1519 != nil {
+		return thrift.NewTProtocolExceptionReadStruct("p.IoIOError", err1519)
 	}
 	return err
-}
-
-func (p *GetRegionInfoResult) ReadFieldIo(iprot thrift.TProtocol) thrift.TProtocolException {
-	return p.ReadField1(iprot)
 }
 
 func (p *GetRegionInfoResult) Write(oprot thrift.TProtocol) (err thrift.TProtocolException) {
@@ -29758,11 +25269,11 @@ func (p *GetRegionInfoResult) Write(oprot thrift.TProtocol) (err thrift.TProtoco
 	}
 	switch {
 	case p.Io != nil:
-		if err = p.WriteField1(oprot); err != nil {
+		if err = p.writeField1(oprot); err != nil {
 			return err
 		}
 	default:
-		if err = p.WriteField0(oprot); err != nil {
+		if err = p.writeField0(oprot); err != nil {
 			return err
 		}
 	}
@@ -29777,7 +25288,7 @@ func (p *GetRegionInfoResult) Write(oprot thrift.TProtocol) (err thrift.TProtoco
 	return err
 }
 
-func (p *GetRegionInfoResult) WriteField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRegionInfoResult) writeField0(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Success != nil {
 		err = oprot.WriteFieldBegin("success", thrift.STRUCT, 0)
 		if err != nil {
@@ -29795,11 +25306,7 @@ func (p *GetRegionInfoResult) WriteField0(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *GetRegionInfoResult) WriteFieldSuccess(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField0(oprot)
-}
-
-func (p *GetRegionInfoResult) WriteField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
+func (p *GetRegionInfoResult) writeField1(oprot thrift.TProtocol) (err thrift.TProtocolException) {
 	if p.Io != nil {
 		err = oprot.WriteFieldBegin("io", thrift.STRUCT, 1)
 		if err != nil {
@@ -29817,34 +25324,12 @@ func (p *GetRegionInfoResult) WriteField1(oprot thrift.TProtocol) (err thrift.TP
 	return err
 }
 
-func (p *GetRegionInfoResult) WriteFieldIo(oprot thrift.TProtocol) thrift.TProtocolException {
-	return p.WriteField1(oprot)
-}
-
 func (p *GetRegionInfoResult) TStructName() string {
 	return "GetRegionInfoResult"
 }
 
 func (p *GetRegionInfoResult) ThriftName() string {
 	return "getRegionInfo_result"
-}
-
-func (p *GetRegionInfoResult) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetRegionInfoResult(%+v)", *p)
-}
-
-func (p *GetRegionInfoResult) CompareTo(other interface{}) (int, bool) {
-	if other == nil {
-		return 1, true
-	}
-	data, ok := other.(*GetRegionInfoResult)
-	if !ok {
-		return 0, false
-	}
-	return thrift.TType(thrift.STRUCT).Compare(p, data)
 }
 
 func (p *GetRegionInfoResult) AttributeByFieldId(id int) interface{} {

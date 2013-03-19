@@ -8,10 +8,66 @@ package goh
 import (
 	"fmt"
 	"github.com/sdming/goh/Hbase"
-	"thrift"
 )
 
-type ScannerID int32
+//type Text []byte
+
+func textListToStr(list []Hbase.Text) []string {
+	if list == nil {
+		return nil
+	}
+
+	l := len(list)
+	data := make([]string, l)
+	for i := 0; i < l; i++ {
+		data[i] = string(list[i])
+	}
+
+	return data
+}
+
+func toHbaseTextList(list []string) []Hbase.Text {
+	if list == nil {
+		return nil
+	}
+
+	l := len(list)
+	data := make([]Hbase.Text, l)
+	for i := 0; i < l; i++ {
+		data[i] = Hbase.Text(list[i])
+	}
+	return data
+}
+
+func toHbaseTextListFromByte(list [][]byte) []Hbase.Text {
+	if list == nil {
+		return nil
+	}
+
+	l := len(list)
+	data := make([]Hbase.Text, l)
+	for i := 0; i < l; i++ {
+		data[i] = Hbase.Text(list[i])
+	}
+	return data
+}
+
+func toHbaseTextMap(source map[string]string) map[string]Hbase.Text {
+	if source == nil {
+		return nil
+	}
+
+	data := make(map[string]Hbase.Text, len(source))
+	for k, v := range source {
+		data[k] = Hbase.Text(v)
+	}
+
+	return data
+}
+
+//type Bytes []byte
+
+//type ScannerID int32
 
 /**
  * An HColumnDescriptor contains information about a column family
@@ -41,17 +97,73 @@ type ColumnDescriptor struct {
 	TimeToLive            int32  "timeToLive"            // 9
 }
 
+func toColumn(col *Hbase.ColumnDescriptor) *ColumnDescriptor {
+	return &ColumnDescriptor{
+		Name:                  string(col.Name),
+		MaxVersions:           col.MaxVersions,
+		Compression:           col.Compression,
+		InMemory:              col.InMemory,
+		BloomFilterType:       col.BloomFilterType,
+		BloomFilterVectorSize: col.BloomFilterVectorSize,
+		BloomFilterNbHashes:   col.BloomFilterNbHashes,
+		BlockCacheEnabled:     col.BlockCacheEnabled,
+		TimeToLive:            col.TimeToLive,
+	}
+
+}
+
+func toColMap(cols map[string]*Hbase.ColumnDescriptor) map[string]*ColumnDescriptor {
+	if cols == nil {
+		return nil
+	}
+	data := make(map[string]*ColumnDescriptor, len(cols))
+	for k, v := range cols {
+		data[k] = toColumn(v)
+	}
+	return data
+}
+
+func toHbaseColumn(col *ColumnDescriptor) *Hbase.ColumnDescriptor {
+	return &Hbase.ColumnDescriptor{
+		Name:                  Hbase.Text(col.Name),
+		MaxVersions:           col.MaxVersions,
+		Compression:           col.Compression,
+		InMemory:              col.InMemory,
+		BloomFilterType:       col.BloomFilterType,
+		BloomFilterVectorSize: col.BloomFilterVectorSize,
+		BloomFilterNbHashes:   col.BloomFilterNbHashes,
+		BlockCacheEnabled:     col.BlockCacheEnabled,
+		TimeToLive:            col.TimeToLive,
+	}
+
+}
+
+func toHbaseColList(cols []*ColumnDescriptor) []*Hbase.ColumnDescriptor {
+	if cols == nil {
+		return nil
+	}
+
+	l := len(cols)
+	data := make([]*Hbase.ColumnDescriptor, l)
+	for i := 0; i < l; i++ {
+		data[i] = toHbaseColumn(cols[i])
+	}
+	return data
+}
+
 func NewColumnDescriptorDefault(name string) *ColumnDescriptor {
-	output := &ColumnDescriptor{}
-	output.MaxVersions = 3
-	output.Compression = "NONE"
-	output.InMemory = false
-	output.BloomFilterType = "NONE"
-	output.BloomFilterVectorSize = 0
-	output.BloomFilterNbHashes = 0
-	output.BlockCacheEnabled = false
-	output.TimeToLive = -1
-	output.Name = name
+	output := &ColumnDescriptor{
+		MaxVersions:           3,
+		Compression:           "NONE",
+		InMemory:              false,
+		BloomFilterType:       "NONE",
+		BloomFilterVectorSize: 0,
+		BloomFilterNbHashes:   0,
+		BlockCacheEnabled:     false,
+		TimeToLive:            -1,
+		Name:                  name,
+	}
+
 	return output
 }
 
@@ -72,62 +184,109 @@ type TRegionInfo struct {
 	EndKey     string "endKey"     // 2
 	Id         int64  "id"         // 3
 	Name       string "name"       // 4
-	Version    byte   "version"    // 5
+	Version    int8   "version"    // 5
 	ServerName string "serverName" // 6
 	Port       int32  "port"       // 7
 }
 
-/**
- * A Mutation object is used to either update or delete a column-value.
- * 
- * Attributes:
- *  - IsDelete
- *  - Column
- *  - Value
- *  - WriteToWAL
- */
-type Mutation struct {
-	IsDelete   bool   "isDelete"   // 1
-	Column     string "column"     // 2
-	Value      string "value"      // 3
-	WriteToWAL bool   "writeToWAL" // 4
+func toRegion(region *Hbase.TRegionInfo) *TRegionInfo {
+	return &TRegionInfo{
+		StartKey:   string(region.StartKey),
+		EndKey:     string(region.EndKey),
+		Id:         region.Id,
+		Name:       string(region.Name),
+		Version:    region.Version,
+		ServerName: string(region.ServerName),
+		Port:       region.Port,
+	}
+
 }
 
-func NewMutation() *Mutation {
-	output := &Mutation{}
-	output.IsDelete = false
-	output.WriteToWAL = true
+func toRegionList(regions []*Hbase.TRegionInfo) []*TRegionInfo {
 
-	return output
+	if regions == nil {
+		return nil
+	}
+
+	l := len(regions)
+	data := make([]*TRegionInfo, l)
+	for i := 0; i < l; i++ {
+		data[i] = toRegion(regions[i])
+	}
+
+	return data
 }
 
-/**
- * A BatchMutation object is used to apply a number of Mutations to a single row.
- * 
- * Attributes:
- *  - Row
- *  - Mutations
- */
-type BatchMutation struct {
-	Row       string     "row"       // 1
-	Mutations []Mutation "mutations" // 2
+// /**
+//  * A Mutation object is used to either update or delete a column-value.
+//  * 
+//  * Attributes:
+//  *  - IsDelete
+//  *  - Column
+//  *  - Value
+//  *  - WriteToWAL
+//  */
+// type Mutation struct {
+// 	IsDelete   bool   "isDelete"   // 1
+// 	Column     []byte "column"     // 2
+// 	Value      []byte "value"      // 3
+// 	WriteToWAL bool   "writeToWAL" // 4
+// }
+
+func NewMutation(column string, value []byte) *Hbase.Mutation {
+	return &Hbase.Mutation{
+		IsDelete:   false,
+		WriteToWAL: true,
+		Column:     Hbase.Text(column),
+		Value:      Hbase.Text(value),
+	}
+
 }
 
-/**
- * For increments that are not incrementColumnValue
- * equivalents.
- * 
- * Attributes:
- *  - Table
- *  - Row
- *  - Column
- *  - Ammount
- */
-type TIncrement struct {
-	Table   string "table"   // 1
-	Row     string "row"     // 2
-	Column  string "column"  // 3
-	Ammount int64  "ammount" // 4
+// /**
+//  * A BatchMutation object is used to apply a number of Mutations to a single row.
+//  * 
+//  * Attributes:
+//  *  - Row
+//  *  - Mutations
+//  */
+// type BatchMutation struct {
+// 	Row       []byte      "row"       // 1
+// 	Mutations []*Mutation "mutations" // 2
+// }
+
+func NewBatchMutation(row []byte, mutations []*Hbase.Mutation) *Hbase.BatchMutation {
+	return &Hbase.BatchMutation{
+		Row:       []byte(row),
+		Mutations: mutations,
+	}
+
+}
+
+// /**
+//  * For increments that are not incrementColumnValue
+//  * equivalents.
+//  * 
+//  * Attributes:
+//  *  - Table
+//  *  - Row
+//  *  - Column
+//  *  - Ammount
+//  */
+// type TIncrement struct {
+// 	Table   []byte "table"   // 1
+// 	Row     []byte "row"     // 2
+// 	Column  []byte "column"  // 3
+// 	Ammount int64  "ammount" // 4
+// }
+
+func NewTIncrement(table string, row []byte, column string, ammount int64) *Hbase.TIncrement {
+	return &Hbase.TIncrement{
+		Table:   Hbase.Text(table),
+		Row:     Hbase.Text(row),
+		Column:  Hbase.Text(column),
+		Ammount: ammount,
+	}
 }
 
 /**
@@ -137,10 +296,10 @@ type TIncrement struct {
  *  - Row
  *  - Columns
  */
-type TRowResult struct {
-	Row     string            "row"     // 1
-	Columns map[string]*TCell "columns" // 2
-}
+// type TRowResult struct {
+// 	Row     string            "row"     // 1
+// 	Columns map[string]*TCell "columns" // 2
+// }
 
 /**
  * A Scan object is used to specify scanner parameters when opening a scanner.
@@ -154,284 +313,96 @@ type TRowResult struct {
  *  - FilterString
  */
 type TScan struct {
-	StartRow     string   "startRow"     // 1
-	StopRow      string   "stopRow"      // 2
+	StartRow     []byte   "startRow"     // 1
+	StopRow      []byte   "stopRow"      // 2
 	Timestamp    int64    "timestamp"    // 3
 	Columns      []string "columns"      // 4
 	Caching      int32    "caching"      // 5
 	FilterString string   "filterString" // 6
 }
 
-//type Text []byte
-
-//type Bytes []byte
-
-//type ScannerID int32
-
-/**
- * TCell - Used to transport a cell value (byte[]) and the timestamp it was
- * stored with together as a result for get and getRow methods. This promotes
- * the timestamp of a cell to a first-class value, making it easy to take
- * note of temporal data. Cell is used all the way from HStore up to HTable.
- * 
- * Attributes:
- *  - Value
- *  - Timestamp
- */
-type TCell struct {
-	Value     []byte "value"     // 1
-	Timestamp int64  "timestamp" // 2
-}
-
-/**
- * An IOError exception signals that an error occurred communicating
- * to the Hbase master or an Hbase region server.  Also used to return
- * more general Hbase error conditions.
- * 
- * Attributes:
- *  - Message
- */
-type IOError struct {
-	Message string "message" // 1
-}
-
-/**
- * An IllegalArgument exception indicates an illegal or invalid
- * argument was passed into a procedure.
- * 
- * Attributes:
- *  - Message
- */
-type IllegalArgument struct {
-	Message string "message" // 1
-}
-
-/**
- * An AlreadyExists exceptions signals that a table with the specified
- * name already exists
- * 
- * Attributes:
- *  - Message
- */
-type AlreadyExists struct {
-	Message string "message" // 1
-}
-
-func (t *AlreadyExists) String() string {
-	if t == nil {
-		return "<nil>"
-	}
-	return t.Message
-}
-
-/*
-convert
-*/
-
-func fromListStr(list []string) thrift.TList {
-	if list == nil {
+func toHbaseTScan(scan *TScan) *Hbase.TScan {
+	if scan == nil {
 		return nil
 	}
 
-	l := len(list)
-	data := thrift.NewTList(thrift.STRING, l)
-	for i := 0; i < l; i++ {
-		//data.Set(i, Hbase.Text(list[i]))
-		data.Push(Hbase.Text(list[i]))
-	}
-
-	return data
-}
-
-func toListStr(list thrift.TList) []string {
-	if list == nil {
-		return make([]string, 0)
-	}
-
-	l := list.Len()
-	data := make([]string, l)
-	for i := 0; i < l; i++ {
-		data[i] = list.At(i).(string)
-	}
-
-	return data
-}
-
-func toColumnsMap(hbaseColumns thrift.TMap) map[string]*ColumnDescriptor {
-	if hbaseColumns == nil {
-		return nil
-	}
-
-	l := hbaseColumns.Len()
-	columns := make(map[string]*ColumnDescriptor, l)
-	//fmt.Println("KeyType", hbaseColumns.KeyType())
-	//fmt.Println("ValueType", hbaseColumns.ValueType())
-	//fmt.Println("len", l)
-
-	keys := hbaseColumns.Keys()
-	for i := 0; i < l; i++ {
-		key := keys[i]
-		value, ok := hbaseColumns.Get(key)
-
-		if !ok {
-			continue
-		}
-
-		column := toColumn(value.(*Hbase.ColumnDescriptor))
-		columns[column.Name] = column
-	}
-
-	return columns
-}
-
-func toColumn(hbaseColumn *Hbase.ColumnDescriptor) *ColumnDescriptor {
-	column := &ColumnDescriptor{
-		Name:                  string(hbaseColumn.Name),
-		MaxVersions:           hbaseColumn.MaxVersions,
-		Compression:           hbaseColumn.Compression,
-		InMemory:              hbaseColumn.InMemory,
-		BloomFilterType:       hbaseColumn.BloomFilterType,
-		BloomFilterVectorSize: hbaseColumn.BloomFilterVectorSize,
-		BloomFilterNbHashes:   hbaseColumn.BloomFilterNbHashes,
-		BlockCacheEnabled:     hbaseColumn.BlockCacheEnabled,
-		TimeToLive:            hbaseColumn.TimeToLive,
-	}
-	return column
-}
-
-func fromColumns(columnFamilies []*ColumnDescriptor) thrift.TList {
-	l := len(columnFamilies)
-	columns := thrift.NewTListDefault()
-	for i := 0; i < l; i++ {
-		col := columnFamilies[i]
-		hbaseColumn := &Hbase.ColumnDescriptor{
-			Name:                  Hbase.Text(col.Name),
-			MaxVersions:           col.MaxVersions,
-			Compression:           col.Compression,
-			InMemory:              col.InMemory,
-			BloomFilterType:       col.BloomFilterType,
-			BloomFilterVectorSize: col.BloomFilterVectorSize,
-			BloomFilterNbHashes:   col.BloomFilterNbHashes,
-			BlockCacheEnabled:     col.BlockCacheEnabled,
-			TimeToLive:            col.TimeToLive,
-		}
-		columns.Push(hbaseColumn)
-	}
-	return columns
-}
-
-func toRegion(hbaseRegion *Hbase.TRegionInfo) *TRegionInfo {
-	region := &TRegionInfo{
-		StartKey:   string(hbaseRegion.StartKey),
-		EndKey:     string(hbaseRegion.EndKey),
-		Id:         hbaseRegion.Id,
-		Name:       string(hbaseRegion.Name),
-		Version:    hbaseRegion.Version,
-		ServerName: string(hbaseRegion.ServerName),
-		Port:       hbaseRegion.Port,
-	}
-	return region
-}
-
-func toRegionsList(list thrift.TList) []*TRegionInfo {
-	l := list.Len()
-	regions := make([]*TRegionInfo, l)
-	//fmt.Println("ElemType", ret.ElemType())
-	//fmt.Println("len", l)
-
-	for i := 0; i < l; i++ {
-		value := list.At(i)
-		regions[i] = toRegion(value.(*Hbase.TRegionInfo))
-	}
-
-	return regions
-}
-
-func toAlreadyExists(exist *Hbase.AlreadyExists) *AlreadyExists {
-	if exist == nil {
-		return nil
-	}
-
-	return &AlreadyExists{
-		Message: exist.Message,
-	}
-
-}
-
-func toCell(hbaseCell *Hbase.TCell) *TCell {
-	cell := &TCell{
-		Value:     hbaseCell.Value,
-		Timestamp: hbaseCell.Timestamp,
-	}
-	return cell
-}
-
-func toListCell(list thrift.TList) []*TCell {
-	if list == nil {
-		return nil
-	}
-
-	l := list.Len()
-	data := make([]*TCell, l)
-
-	for i := 0; i < l; i++ {
-		value := list.At(i)
-		data[i] = toCell(value.(*Hbase.TCell))
-	}
-
-	return data
-}
-
-func fromMapStr(data map[string]string) thrift.TMap {
-
-	var m thrift.TMap
-	if data != nil {
-		m = thrift.NewTMap(thrift.STRING, thrift.STRING, len(data))
-		for k, v := range data {
-			m.Set(Hbase.Text(k), Hbase.Text(v))
+	if scan.FilterString == "" {
+		return &Hbase.TScan{
+			StartRow:     Hbase.Text(scan.StartRow),
+			StopRow:      Hbase.Text(scan.StopRow),
+			Timestamp:    scan.Timestamp,
+			Columns:      toHbaseTextList(scan.Columns),
+			Caching:      scan.Caching,
+			FilterString: nil,
 		}
 	}
 
-	return m
+	return &Hbase.TScan{
+		StartRow:     Hbase.Text(scan.StartRow),
+		StopRow:      Hbase.Text(scan.StopRow),
+		Timestamp:    scan.Timestamp,
+		Columns:      toHbaseTextList(scan.Columns),
+		Caching:      scan.Caching,
+		FilterString: Hbase.Text(scan.FilterString),
+	}
+
 }
 
-func toRowResult(hbaseRow *Hbase.TRowResult) *TRowResult {
-	columns := make(map[string]*TCell)
+// /**
+//  * TCell - Used to transport a cell value (byte[]) and the timestamp it was
+//  * stored with together as a result for get and getRow methods. This promotes
+//  * the timestamp of a cell to a first-class value, making it easy to take
+//  * note of temporal data. Cell is used all the way from HStore up to HTable.
+//  * 
+//  * Attributes:
+//  *  - Value
+//  *  - Timestamp
+//  */
+// type TCell struct {
+// 	Value     []byte "value"     // 1
+// 	Timestamp int64  "timestamp" // 2
+// }
 
-	keys := hbaseRow.Columns.Keys()
-	l := hbaseRow.Columns.Len()
-	for i := 0; i < l; i++ {
-		key := keys[i]
-		value, ok := hbaseRow.Columns.Get(key)
+// /**
+//  * An IOError exception signals that an error occurred communicating
+//  * to the Hbase master or an Hbase region server.  Also used to return
+//  * more general Hbase error conditions.
+//  * 
+//  * Attributes:
+//  *  - Message
+//  */
+// type IOError struct {
+// 	Message string "message" // 1
+// }
 
-		if !ok {
-			continue
-		}
-		columns[key.(string)] = toCell(value.(*Hbase.TCell))
-	}
+// /**
+//  * An IllegalArgument exception indicates an illegal or invalid
+//  * argument was passed into a procedure.
+//  * 
+//  * Attributes:
+//  *  - Message
+//  */
+// type IllegalArgument struct {
+// 	Message string "message" // 1
+// }
 
-	row := &TRowResult{
-		Row:     string(hbaseRow.Row),
-		Columns: columns,
-	}
-	return row
-}
+// /**
+//  * An AlreadyExists exceptions signals that a table with the specified
+//  * name already exists
+//  * 
+//  * Attributes:
+//  *  - Message
+//  */
+// type AlreadyExists struct {
+// 	Message string "message" // 1
+// }
 
-func toListRowResult(list thrift.TList) []*TRowResult {
-	if list == nil {
-		return nil
-	}
-
-	l := list.Len()
-	data := make([]*TRowResult, l)
-
-	for i := 0; i < l; i++ {
-		value := list.At(i)
-		data[i] = toRowResult(value.(*Hbase.TRowResult))
-	}
-
-	return data
-}
+// func (t *AlreadyExists) String() string {
+// 	if t == nil {
+// 		return "<nil>"
+// 	}
+// 	return t.Message
+// }
 
 func name() {
 	fmt.Println("...")

@@ -1,14 +1,13 @@
-goh
+Overview
 ===
 
 golang client of hbase (via thrift)
 
-this project is suspend, thrift4go has some bugs, need to fix them first, or figure out another approach.
 
 Install
 ===
 
-The official thrift package is out of date, need install [thrift4go](https://github.com/pomack/thrift4go) first,
+The official thrift package is out of date, need install [thrift4go](https://github.com/apesternikov/thrift4go) first,
 then
 
 	go get github.com/sdming/goh
@@ -16,9 +15,9 @@ then
 Usage
 ===
 
-	host, port := "192.168.17.129", "9090"
+	address := "192.168.17.129:9090"
 	
-	client, err := goh.NewTcpClient(host, port, goh.TBinaryProtocol, false)
+	client, err := goh.NewTcpClient(address, goh.TBinaryProtocol, false)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -37,7 +36,7 @@ Usage
 	fmt.Println(client.Compact(table))
 	
 
-\demo\client.go for more example	
+\demo\client.go for all api example	
 
 Files
 ===
@@ -57,11 +56,29 @@ Files
 Start/Stop thrift 
 ===
 
+	#start
 	./bin/hbase-daemon.sh start thrift
 
+	#set parameter
+	./bin/hbase-daemon.sh start thrift –threadpool -m 200 -w 500
+
+	#stop
 	./bin/hbase-daemon.sh stop thrift
 
+	#set HEAPSIZE (conf/hbase-env.sh)
+	export HBASE_HEAPSIZE=1000MB
 
+Issues
+===
+* https://github.com/pomack/thrift4go/pull/61
+* TScan doesn't work if FilterString is not empty string
+
+Changes
+===
+* 1 kick off  
+* 2 change thrift package from pomack/thrift4go to apesternikov/thrift4go  
+
+golang client of hbase (via thrift)
 
 Links
 ===
@@ -70,27 +87,10 @@ Links
 * http://hbase.apache.org/book/thrift.html
 * http://hbase.apache.org/apidocs/org/apache/hadoop/hbase/thrift/package-summary.html
 * https://github.com/pomack/thrift4go
+* https://github.com/apesternikov/thrift4go
 * https://github.com/samuel/go-thrift
 
 
-
-Protocol
-===
-
-TBinaryProtocol  	
-TCompactProtocol  	
-TJSONProtocol 
-TSimpleJSONProtocol
-TDebugProtocoal  
-
-Transport 
-===
-
-TSocket  
-TFramedTransport   
-TFileTransport   
-TMemoryTransport   
-TZlibTransport 
 
 License
 ===

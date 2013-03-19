@@ -6,7 +6,7 @@
 package goh
 
 import (
-	"fmt"
+	"bytes"
 	"github.com/sdming/goh/Hbase"
 )
 
@@ -14,64 +14,66 @@ import (
 HbaseError
 */
 type HbaseError struct {
-	IOErr  *IOError         // IOError
-	ArgErr *IllegalArgument // IllegalArgument
-	Err    error            // error
+	IOErr  *Hbase.IOError         // IOError
+	ArgErr *Hbase.IllegalArgument // IllegalArgument
+	Err    error                  // error
 
 }
 
-func newHbaseError(ioError *Hbase.IOError, argError *Hbase.IllegalArgument, err error) *HbaseError {
-	var io *IOError
-
-	if ioError != nil {
-		io = &IOError{
-			Message: ioError.Message,
-		}
-	}
-
-	var arg *IllegalArgument
-	if argError != nil {
-		arg = &IllegalArgument{
-			Message: argError.Message,
-		}
-	}
-
-	hError := &HbaseError{
+func newHbaseError(io *Hbase.IOError, arg *Hbase.IllegalArgument, err error) *HbaseError {
+	return &HbaseError{
 		IOErr:  io,
 		ArgErr: arg,
 		Err:    err,
 	}
-	return hError
 }
 
 /*
 String
 */
-func (hError *HbaseError) String() string {
-	if hError == nil {
+func (e *HbaseError) String() string {
+	if e == nil {
 		return "<nil>"
 	}
 
-	return fmt.Sprintf("IOError:%v; ArgError:%v; Error:%v;", hError.IOErr, hError.ArgErr, hError.Err)
+	var b bytes.Buffer
+	if e.IOErr != nil {
+		b.WriteString("IOError:")
+		b.WriteString(e.IOErr.Message)
+		b.WriteString(";")
+	}
+
+	if e.ArgErr != nil {
+		b.WriteString("ArgumentError:")
+		b.WriteString(e.ArgErr.Message)
+		b.WriteString(";")
+	}
+
+	if e.Err != nil {
+		b.WriteString("Error:")
+		b.WriteString(e.Err.Error())
+		b.WriteString(";")
+	}
+	return b.String()
 }
 
 /*
 Error
 */
-func (hError *HbaseError) Error() string {
-	return hError.String()
+func (e *HbaseError) Error() string {
+	return e.String()
 }
 
-func checkHbaseError(ioError *Hbase.IOError, err error) error {
-	if ioError != nil || err != nil {
-		return newHbaseError(ioError, nil, err)
+func checkHbaseError(io *Hbase.IOError, err error) error {
+	if io != nil || err != nil {
+		return newHbaseError(io, nil, err)
 	}
 	return nil
 }
 
-func checkHbaseArgError(ioError *Hbase.IOError, argError *Hbase.IllegalArgument, err error) error {
-	if ioError != nil || argError != nil || err != nil {
-		return newHbaseError(ioError, argError, err)
+func checkHbaseArgError(io *Hbase.IOError, arg *Hbase.IllegalArgument, err error) error {
+	if io != nil || arg != nil || err != nil {
+		return newHbaseError(io, arg, err)
 	}
 	return nil
 }

@@ -8,8 +8,7 @@ package goh
 import (
 	"errors"
 	"fmt"
-	_ "github.com/sdming/goh/Hbase"
-	"thrift"
+	"github.com/sdming/goh/thrift" // will replace it later
 )
 
 /*
@@ -17,7 +16,7 @@ state
 */
 const (
 	stateDefault = iota // default
-	stateOpen           // opened
+	stateOpen           // open
 )
 
 /*
@@ -46,11 +45,13 @@ const (
 /*
 Server
 */
+/*
 const (
 	TNonblockingServer = iota
 	TSimpleServer
 	TThreadPoolServer
 )
+*/
 
 func newProtocolFactory(protocol int) (thrift.TProtocolFactory, error) {
 	switch protocol {
